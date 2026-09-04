@@ -111,7 +111,7 @@
 
         // 챙
         if (g.side) {
-          ell(ctx, -0.7, cy - hR * 0.36, hR * 1.72, hR * 0.34);
+          ell(ctx, -0.7, cy - hR * 0.46, hR * 1.72, hR * 0.32);
           ink(ctx, hatD, LW);
         } else {
           ell(ctx, 0, cy - hR * 0.36, hR * 1.86, hR * 0.46);
@@ -151,7 +151,7 @@
       },
       front: function (g) {
         var ctx = g.ctx, P = g.P, hR = g.hR, cy = g.headCY, LW = g.LW;
-        var ox = g.side ? -1.5 : 0;
+        var ox = g.side ? -1.0 : 0;
         // 머리 전체를 감싼 후드 천
         ell(ctx, ox, cy - 0.5, hR * 1.22, hR * 1.30);
         ink(ctx, P.top, LW);
@@ -165,7 +165,7 @@
 
         if (!g.back) {
           // 얼굴 구멍 (후드가 볼까지 감싸므로 좁게)
-          var fx = g.side ? hR * 0.52 : 0, fy = cy + hR * 0.22;
+          var fx = g.side ? hR * 0.30 : 0, fy = cy + hR * 0.22;
           ell(ctx, fx, fy, hR * 0.74, hR * 0.84);
           ink(ctx, P.skin, LW * 0.85);
           // 구멍 위쪽으로 보이는 앞머리
@@ -484,8 +484,8 @@
       leg(-sw * 2.7, 0.5, shade(P.bottom, 0.68));   // 뒤쪽 다리는 어둡게
       leg(sw * 2.7, 0, P.bottom);
     } else {
-      leg(-S.legGap, Math.max(0, sw) * 1.8, P.bottom);
-      leg(S.legGap, Math.max(0, -sw) * 1.8, P.bottom);
+      leg(-S.legGap - sw * 0.5, Math.max(0, sw) * 2.1, P.bottom);
+      leg(S.legGap - sw * 0.5, Math.max(0, -sw) * 2.1, P.bottom);
     }
 
     /* 3. 뒤쪽 팔 (옆모습에서만 별도) */
@@ -523,8 +523,8 @@
     if (side) {
       handPos = arm(1.4, sw * 0.62, P.top);
     } else {
-      arm(-(bw + 0.95), sw * 0.30, sleeveLit);
-      handPos = arm(bw + 0.95, -sw * 0.30, sleeveLit);
+      arm(-(bw + 0.95), sw * 0.42, sleeveLit);
+      handPos = arm(bw + 0.95, -sw * 0.42, sleeveLit);
     }
     function hand(pos, col) {
       ell(ctx, pos[0], pos[1], 1.5, 1.45);
@@ -534,7 +534,7 @@
       hand([-1.2 - 5.0 * Math.sin(-sw * 0.62), shY + 0.6 + 5.0 * Math.cos(-sw * 0.62)], shade(P.skin, 0.8));
       hand(handPos, skinHand);
     } else {
-      hand([-(bw + 0.95) - 5.0 * Math.sin(sw * 0.30), shY + 0.6 + 5.0 * Math.cos(sw * 0.30)], skinHand);
+      hand([-(bw + 0.95) - 5.0 * Math.sin(sw * 0.42), shY + 0.6 + 5.0 * Math.cos(sw * 0.42)], skinHand);
       hand(handPos, skinHand);
     }
 

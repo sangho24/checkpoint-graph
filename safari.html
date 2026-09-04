@@ -802,7 +802,7 @@ const seedNodes = [...RX].filter(([, o]) => (WGT[o.r] || 0) > 0)
 const player = {
   x: seedNodes.reduce((a, n) => a + n.x, 0) / seedNodes.length,
   y: seedNodes.reduce((a, n) => a + n.y, 0) / seedNodes.length,
-  dx: 0, dy: 1, dir: "down", walk: 0
+  dx: 0, dy: 1, dir: "down", walk: 0, walkDist: 0
 };
 const cam = { x: player.x, y: player.y };
 const G = { agree: 0, judged: 0, recalcs: 0, encounter: null, phase: "intro", cooldown: new Set() };
@@ -1235,9 +1235,12 @@ function step(){
       player.dx = vx / m; player.dy = vy / m;
       player.dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? "right" : "left")
                                                : (vy > 0 ? "down" : "up");
-      player.walk = (player.walk + 0.055) % 1;
+      player.walkDist += SPEED;                 // 위상을 프레임이 아니라 이동 거리에 묶는다
+      player.walk = reduceMotion ? 0 : (player.walkDist / 22) % 1;
       player.x = Math.max(BOUND.x0, Math.min(BOUND.x1, player.x));
       player.y = Math.max(BOUND.y0, Math.min(BOUND.y1, player.y));
+    } else {
+      player.walk = 0;                          // 멈추면 선 자세로
     }
     // 조우 판정
     for (const n of ALL) {
