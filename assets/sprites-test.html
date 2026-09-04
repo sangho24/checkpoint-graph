@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CG_SPRITES 테스트 하니스</title>
+<style>
+  :root{ --ground:#0A0E1C; --lamp:#FFE9A8; --beacon:#35E0C2; --caught:#F0B429; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--ground); color:#D8DEEE;
+    font:13px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    padding:18px 20px 40px;
+  }
+  h1{ font-size:15px; letter-spacing:.02em; margin:0 0 4px; color:var(--lamp); font-weight:600; }
+  .sub{ font-size:11px; color:#6C7794; margin:0 0 16px; }
+  h2{ font-size:12px; color:#8FA0C4; margin:22px 0 8px; font-weight:600;
+      border-top:1px solid #1B2337; padding-top:10px; }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; }
+  .card{ background:#0D1223; border:1px solid #1B2337; border-radius:10px; padding:10px 12px 12px; }
+  .card .nm{ font-size:12px; font-weight:600; color:#E8EDF9; }
+  .card .bl{ font-size:10.5px; color:#7A87A8; margin-top:1px; }
+  .card .tr{ font-size:10.5px; color:var(--beacon); margin-top:5px;
+             border:1px solid rgba(53,224,194,.3); border-radius:99px;
+             padding:2px 7px; display:inline-block; }
+  .dirs{ font-size:10px; color:#5C6684; display:flex; gap:0; margin-top:6px; }
+  .dirs span{ width:56px; text-align:center; }
+  canvas{ display:block; image-rendering:auto; }
+  .swatches{ display:flex; gap:3px; margin-top:6px; }
+  .swatches i{ width:13px; height:13px; border-radius:3px; border:1px solid #00000055; }
+</style>
+</head>
+<body>
+<h1>CG_SPRITES 테스트 하니스</h1>
+<p class="sub">배경 #0A0E1C · 걷기 애니메이션 4방향 · 초상 · 개발용</p>
+
+<h2>걷기 스프라이트 (scale 2, 4방향 · down / up / left / right)</h2>
+<div class="row" id="walkers"></div>
+
+<h2>필드 실제 크기 (scale 1)</h2>
+<div class="row" id="walkers1"></div>
+
+<h2>선택 화면 초상</h2>
+<div class="row" id="portraits"></div>
+
+<script src="./sprites.js"></script>
+<script>
+const DIRS = ["down", "up", "left", "right"];
+const CH = CG_SPRITES.CHARACTERS;
+const anim = [];
+
+function mkCanvas(w, h, parent){
+  const c = document.createElement("canvas");
+  const dpr = window.devicePixelRatio || 1;
+  c.width = w * dpr; c.height = h * dpr;
+  c.style.width = w + "px"; c.style.height = h + "px";
+  const ctx = c.getContext("2d");
+  ctx.scale(dpr, dpr);
+  parent.appendChild(c);
+  return { c, ctx, w, h };
+}
+
+function card(parent, ch){
+  const d = document.createElement("div");
+  d.className = "card";
+  parent.appendChild(d);
+  return d;
+}
+
+function meta(d, ch){
+  d.insertAdjacentHTML("beforeend",
+    `<div class="nm">${ch.name}</div>
+     <div class="bl">${ch.blurb}</div>
+     <div class="tr">${ch.trait.label}</div>
+     <div class="swatches">
+       ${["skin","hair","top","bottom","accent"].map(k =>
+         `<i style="background:${ch.palette[k]}"></i>`).join("")}
+     </div>`);
+}
+
+/* ── 걷기 (scale 2) ── */
+const wrap = document.getElementById("walkers");
+for (const ch of CH){
+  const d = card(wrap, ch);
+  const cell = 66, H = 84;
+  const { ctx } = mkCanvas(cell * 4, H, d);
+  d.insertAdjacentHTML("beforeend",
+    `<div class="dirs">${DIRS.map(x=>`<span style="width:${cell}px">${x}</span>`).join("")}</div>`);
+  meta(d, ch);
+  anim.push(t => {
+    ctx.clearRect(0, 0, cell*4, H);
+    DIRS.forEach((dir, i) => {
+      CG_SPRITES.drawWalker(ctx, cell*i + cell/2, H/2 - 4, {
+        dir, phase: (t/0.62) % 1, scale: 2, palette: ch.palette
+      });
+    });
+  });
+}
+
+/* ── 걷기 (scale 1, 실제 필드 크기) ── */
+const wrap1 = document.getElementById("walkers1");
+for (const ch of CH){
+  const d = card(wrap1, ch);
+  const cell = 36, H = 44;
+  const { ctx } = mkCanvas(cell * 4, H, d);
+  d.insertAdjacentHTML("beforeend", `<div class="nm" style="font-size:11px">${ch.name}</div>`);
+  anim.push(t => {
+    ctx.clearRect(0, 0, cell*4, H);
+    DIRS.forEach((dir, i) => {
+      CG_SPRITES.drawWalker(ctx, cell*i + cell/2, H/2 - 2, {
+        dir, phase: (t/0.62) % 1, scale: 1, palette: ch.palette
+      });
+    });
+  });
+}
+
+/* ── 초상 ── */
+const pw = document.getElementById("portraits");
+for (const ch of CH){
+  const d = card(pw, ch);
+  const W = 150, H = 140;
+  const { ctx } = mkCanvas(W, H, d);
+  CG_SPRITES.drawPortrait(ctx, W/2, H/2 + 2, { palette: ch.palette, dir: "down" });
+  meta(d, ch);
+}
+
+let t0 = performance.now();
+function loop(now){
+  const t = (now - t0) / 1000;
+  for (const f of anim) f(t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

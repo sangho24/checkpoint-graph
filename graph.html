@@ -1,72 +1,75 @@
 <title>Checkpoint Graph</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root {
-    --bg: #EFF1F5;
+    color-scheme: light;
+    --bg: #F3F0E9;
     --panel: #FFFFFF;
-    --panel-2: #F6F8FB;
-    --stage: #E6EAF1;
-    --ink: #131620;
-    --ink-2: #4E5666;
-    --ink-3: #868FA3;
-    --line: #D8DDE7;
-    --line-2: #C2CAD8;
-    --gold: #B07708;
-    --slate: #64748F;
-    --teal: #0C8C7C;
-    --indigo: #4B54C6;
-    --rose: #B04A64;
-    --warn: #B4520E;
-    --edge: rgba(80,94,120,.28);
-    --edge-hot: rgba(12,140,124,.85);
-    --shadow: 0 1px 2px rgba(19,22,32,.06), 0 6px 18px rgba(19,22,32,.05);
+    --panel-2: #FAF8F3;
+    --stage: #EBE7DE;
+    --ink: #16150F;
+    --ink-2: #59554B;
+    --ink-3: #8C8678;
+    --line: #E4DED2;
+    --line-2: #D2CABA;
+    --gold: #A97406;
+    --slate: #6E7789;
+    --teal: #2B5FE3;
+    --indigo: #6B4FD8;
+    --rose: #B4485F;
+    --warn: #A85A12;
+    --edge: rgba(92,86,74,.30);
+    --edge-hot: rgba(43,95,227,.85);
+    --shadow: 0 1px 2px rgba(22,21,15,.05), 0 6px 18px rgba(22,21,15,.05);
     --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --sans: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0D0F14;
-      --panel: #14171F;
-      --panel-2: #191D26;
-      --stage: #090B10;
-      --ink: #E7EAF1;
-      --ink-2: #A2AAB9;
-      --ink-3: #6E7788;
-      --line: #232833;
-      --line-2: #2F3542;
-      --gold: #DCA43C;
-      --slate: #8494B5;
-      --teal: #2FC3AC;
-      --indigo: #7E88F0;
-      --rose: #DD7F96;
-      --warn: #E0894A;
-      --edge: rgba(150,168,200,.22);
-      --edge-hot: rgba(47,195,172,.9);
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #0D0F14;
-    --panel: #14171F;
-    --panel-2: #191D26;
-    --stage: #090B10;
-    --ink: #E7EAF1;
-    --ink-2: #A2AAB9;
-    --ink-3: #6E7788;
-    --line: #232833;
-    --line-2: #2F3542;
-    --gold: #DCA43C;
-    --slate: #8494B5;
-    --teal: #2FC3AC;
-    --indigo: #7E88F0;
-    --rose: #DD7F96;
-    --warn: #E0894A;
-    --edge: rgba(150,168,200,.22);
-    --edge-hot: rgba(47,195,172,.9);
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
-  }
+
+/* ══ 사이트 셸 (모든 페이지 공통) ══════════════════════ */
+:root { --cg-nav-w: 232px; --cg-paper:#F3F0E9; --cg-card:#FFFFFF; --cg-card2:#FAF8F3;
+  --cg-ink:#16150F; --cg-ink2:#59554B; --cg-ink3:#8C8678; --cg-line:#E4DED2;
+  --cg-line2:#D2CABA; --cg-blue:#2B5FE3; --cg-blue2:#1E47B4; --cg-wash:#E9EEFC;
+  --cg-sans:"Gothic A1",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  --cg-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; }
+.cg-nav {
+  position: fixed; inset: 0 auto 0 0; width: var(--cg-nav-w); z-index: 60;
+  background: var(--cg-card); border-right: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; padding: 20px 14px 16px;
+  font-family: var(--cg-sans); color: var(--cg-ink);
+}
+.cg-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; padding: 0 6px 18px; color: inherit; }
+.cg-brand .cg-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--cg-blue); flex: none; position: relative; }
+.cg-brand .cg-mark::before, .cg-brand .cg-mark::after { content: ""; position: absolute; border-radius: 50%; background: #fff; }
+.cg-brand .cg-mark::before { width: 8px; height: 8px; left: 6px; top: 6px; }
+.cg-brand .cg-mark::after { width: 5px; height: 5px; right: 6px; bottom: 7px; opacity: .8; }
+.cg-brand b { font-size: 14px; font-weight: 800; letter-spacing: -.02em; display: block; line-height: 1.3; }
+.cg-brand i { font-style: normal; font-size: 10.5px; color: var(--cg-ink3); font-family: var(--cg-mono); }
+.cg-menu { display: flex; flex-direction: column; gap: 2px; }
+.cg-menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+  text-decoration: none; font-size: 13.5px; font-weight: 500; color: var(--cg-ink2); }
+.cg-menu a:hover { background: var(--cg-card2); color: var(--cg-ink); }
+.cg-menu a[aria-current="page"] { background: var(--cg-wash); color: var(--cg-blue2); font-weight: 700; }
+.cg-menu svg { flex: none; width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.cg-menu .cg-sub { margin-left: auto; font-family: var(--cg-mono); font-size: 9.5px; color: var(--cg-ink3); }
+.cg-menu a[aria-current="page"] .cg-sub { color: var(--cg-blue); }
+.cg-foot { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; gap: 5px; font-family: var(--cg-mono); font-size: 10.5px; color: var(--cg-ink3); }
+.cg-foot a { color: var(--cg-ink3); text-decoration: none; }
+.cg-foot a:hover { color: var(--cg-blue); }
+.cg-shift { margin-left: var(--cg-nav-w); }
+body { word-break: keep-all; }   /* 한글은 단어 단위로 끊는다 */
+@media (max-width: 900px) {
+  .cg-nav { position: static; width: auto; flex-direction: row; align-items: center;
+    border-right: 0; border-bottom: 1px solid var(--cg-line); padding: 10px 14px; gap: 14px; }
+  .cg-brand { padding: 0; }
+  .cg-brand .cg-bn { display: none; }
+  .cg-menu { flex-direction: row; gap: 4px; }
+  .cg-menu .cg-sub { display: none; }
+  .cg-foot { display: none; }
+  .cg-shift { margin-left: 0; }
+}
 
   * { box-sizing: border-box; }
   body {
@@ -360,11 +363,27 @@
   }
 </style>
 
-<div class="app">
+<aside class="cg-nav">
+  <a class="cg-brand" href="./index.html">
+    <span class="cg-mark"></span>
+    <span class="cg-bn"><b>Checkpoint Graph</b><i>연구자용 Second Brain</i></span>
+  </a>
+  <div class="cg-menu">
+    <a href="./index.html"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg><span>홈</span></a>
+    <a href="./graph.html" aria-current="page"><svg viewBox="0 0 24 24"><circle cx="6" cy="8" r="2.6"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="15" cy="17.5" r="2.6"/><path d="M8.4 9.2l4.6 6.6M8 7.2l7.8-.5"/></svg><span>그래프 뷰</span><span class="cg-sub">ANALYST</span></a>
+    <a href="./safari.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6.5 20v-3.2A5.5 5.5 0 0 1 12 11.3a5.5 5.5 0 0 1 5.5 5.5V20"/></svg><span>논문 사파리</span><span class="cg-sub">GAME</span></a>
+  </div>
+  <div class="cg-foot">
+    <a href="https://github.com/sangho24/checkpoint-graph">GitHub 레포 ↗</a>
+    <span>프로토타입 · 2026-09</span>
+  </div>
+</aside>
+
+<div class="app cg-shift">
   <div class="bar">
     <div class="brand">
-      <h1>Checkpoint Graph</h1>
-      <span class="tag">prototype</span>
+      <h1>그래프 뷰</h1>
+      <span class="tag">analyst</span>
     </div>
     <div class="claim">읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려준다</div>
     <div class="spring"></div>
@@ -393,6 +412,12 @@
       </div>
 
       <div class="blk">
+        <h2>시드 반감기</h2>
+        <div class="seg row3" id="halflife"></div>
+        <p style="margin:7px 0 0;font-size:11px;color:var(--ink-3);line-height:1.45" id="hlNote"></p>
+      </div>
+
+      <div class="blk">
         <h2>피인용수 순위와 겹침</h2>
         <div class="overlap">
           <div class="row"><span style="color:var(--ink-2)">상위 10개 중복</span><b class="num" id="ovNum">0/10</b></div>
@@ -409,6 +434,7 @@
           <div><dt>내 것</dt><dd id="sMine" style="color:var(--gold)">0</dd></div>
           <div><dt>고립</dt><dd id="sIso" style="color:var(--rose)">0</dd></div>
         </dl>
+        <p style="margin:7px 0 0;font-size:11px;color:var(--ink-3);line-height:1.45" id="histNote"></p>
       </div>
 
       <div class="blk">
@@ -638,14 +664,53 @@ dsv3: dsv2 mixtral switch gqa rope flash expertchoice chinchilla
 dsr1: dsv3 ppo cot instructgpt gsm8k
 `;
 
-// 가정한 읽음 이력 (효율적 LLM 서빙 + MoE 관심 연구자)
-const SEED_HISTORY = [
-  ["attention","liked"], ["chinchilla","read"], ["switch","liked"], ["rope","read"],
-  ["gqa","read"], ["flash","liked"], ["llama2","read"], ["vllm","liked"],
-  ["specdec","read"], ["mixtral","liked"], ["dsv2","liked"], ["lora","read"],
-  ["ddpm","skipped"], ["clip","skipped"],
-  ["a-kipply","liked"], ["a-scale","read"]
+/* mock 독서 이력. data/reading-history.json 과 같은 내용이다.
+   실제 기록이 아니라 백테스트 설계 검증용 가짜 데이터다.
+   fetch() 는 file:// 에서 CORS 로 막히므로 HTML 에 <script> 로 인라인해서 쓴다.
+   형식: [node_id, read_at, reaction, source] */
+const READING_HISTORY = [
+  ["attention", "2026-04-02T21:38:00+09:00", "liked", "zotero"],
+  ["moe", "2026-04-02T22:55:00+09:00", "read", "browser_history"],
+  ["switch", "2026-04-06T22:12:00+09:00", "liked", "zotero"],
+  ["gshard", "2026-04-09T20:47:00+09:00", "read", "browser_history"],
+  ["expertchoice", "2026-04-11T14:22:00+09:00", "read", "zotero"],
+  ["mod", "2026-04-11T16:08:00+09:00", "read", "browser_history"],
+  ["ddpm", "2026-04-11T17:44:00+09:00", "skipped", "browser_history"],
+  ["mixtral", "2026-04-14T21:26:00+09:00", "liked", "zotero"],
+  ["dsv2", "2026-04-19T15:10:00+09:00", "read", "zotero"],
+  ["dsv3", "2026-04-23T22:31:00+09:00", "liked", "zotero"],
+  ["a-kipply", "2026-04-28T21:16:00+09:00", "read", "browser_history"],
+  ["mqa", "2026-05-03T13:52:00+09:00", "skipped", "browser_history"],
+  ["gqa", "2026-05-06T22:20:00+09:00", "read", "zotero"],
+  ["flash", "2026-05-07T21:03:00+09:00", "liked", "zotero"],
+  ["flash2", "2026-05-12T23:11:00+09:00", "read", "browser_history"],
+  ["rope", "2026-05-18T22:26:00+09:00", "read", "browser_history"],
+  ["vllm", "2026-05-23T13:40:00+09:00", "liked", "zotero"],
+  ["specdec", "2026-05-23T15:15:00+09:00", "read", "browser_history"],
+  ["medusa", "2026-05-23T16:52:00+09:00", "read", "browser_history"],
+  ["streaming", "2026-05-23T20:30:00+09:00", "read", "browser_history"],
+  ["ring", "2026-05-28T22:05:00+09:00", "read", "manual"],
+  ["clip", "2026-06-03T21:48:00+09:00", "skipped", "browser_history"],
+  ["mistral", "2026-06-09T20:36:00+09:00", "read", "browser_history"],
+  ["llama2", "2026-06-13T14:12:00+09:00", "read", "zotero"],
+  ["chinchilla", "2026-06-18T22:24:00+09:00", "liked", "zotero"],
+  ["scaling", "2026-06-24T21:57:00+09:00", "skipped", "browser_history"],
+  ["lora", "2026-06-30T20:52:00+09:00", "read", "browser_history"],
+  ["qlora", "2026-07-03T22:41:00+09:00", "read", "zotero"],
+  ["a-scale", "2026-07-09T21:15:00+09:00", "liked", "browser_history"],
+  ["megatron", "2026-07-11T14:26:00+09:00", "read", "manual"],
+  ["zero", "2026-07-12T16:03:00+09:00", "read", "zotero"],
+  ["whisper", "2026-07-18T15:37:00+09:00", "skipped", "browser_history"],
+  ["llama3", "2026-07-25T13:52:00+09:00", "read", "browser_history"],
+  ["qwen2", "2026-08-02T15:44:00+09:00", "read", "browser_history"],
+  ["ldm", "2026-08-09T16:58:00+09:00", "skipped", "browser_history"],
+  ["mamba", "2026-08-17T21:12:00+09:00", "read", "manual"],
+  ["dsr1", "2026-08-26T22:34:00+09:00", "liked", "zotero"],
+  ["a-weng", "2026-09-03T22:09:00+09:00", "read", "browser_history"],
 ];
+
+/* 총 38개 엔트리. 기간: 2026-04-02 ~ 2026-09-03 (Asia/Seoul).
+   dwell_min 등 나머지 필드는 data/reading-history.json 을 참조. */
 
 const TOPICS = {
   arch:["구조","#4C7DF0"], moe:["MoE","#D2691E"], eff:["효율·서빙","#0C9C8A"],
@@ -728,7 +793,8 @@ const ISOLATED = [...N.values()].filter(n => ADJ.get(n.id).length === 0);
    ───────────────────────────────────────────────────────── */
 const state = {
   reactions: new Map(),   // id -> {r, t}
-  tclock: 0,
+  sessionStart: Date.now(),
+  halfLife: 90,        // 시드 가중치 반감기(일). 0 이면 감쇠 없음
   lens: "nbr",
   method: "ppr",
   hubexp: 0.8,
@@ -742,8 +808,10 @@ const state = {
 };
 function seedState(){
   state.reactions.clear();
-  state.tclock = 0;
-  SEED_HISTORY.forEach(([id,r]) => state.reactions.set(id,{r, t: state.tclock++}));
+  state.sessionStart = Date.now();
+  READING_HISTORY.forEach(([id, at, r]) => {
+    if (N.has(id)) state.reactions.set(id, { r, at: Date.parse(at), src: "history" });
+  });
   state.sessionActs = 0; state.recalcs = 0; state.selected = null; state.hotPath = null;
 }
 seedState();
@@ -758,7 +826,8 @@ function seedVector(){
   for (const [id, o] of state.reactions) {
     const w = W[o.r] || 0;
     if (!w) continue;
-    const decay = Math.pow(0.94, state.tclock - 1 - o.t);   // 최근성 감쇠
+    const days = Math.max(0, (Date.now() - o.at) / 86400000);
+    const decay = state.halfLife ? Math.pow(0.5, days / state.halfLife) : 1;
     const v = w * decay;
     s[id] = (s[id] || 0) + v;
     norm += Math.abs(v);
@@ -968,8 +1037,7 @@ function shortName(n){
 const fmt = v => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + "k" : String(v);
 
 function react(id, act){
-  if (act === "later") { state.reactions.set(id, { r: "later", t: state.tclock++ }); }
-  else state.reactions.set(id, { r: act, t: state.tclock++ });
+  state.reactions.set(id, { r: act, at: Date.now(), src: "session" });
   state.sessionActs++; state.recalcs++;
   const dot = $("#loopdot");
   dot.classList.remove("pulse"); void dot.offsetWidth; dot.classList.add("pulse");
@@ -1045,7 +1113,7 @@ function renderDoc(){
 }
 
 function renderReport(){
-  const acts = [...state.reactions].filter(([, o]) => o.t >= SEED_HISTORY.length);
+  const acts = [...state.reactions].filter(([, o]) => o.src === "session");
   const readThis = acts.filter(([, o]) => o.r === "read" || o.r === "liked");
   const mine = [...state.reactions].filter(([, o]) => (W[o.r] || 0) !== 0).length;
   const recs = currentRecs.slice(0, 5);
@@ -1091,6 +1159,14 @@ function renderRail(){
   $("#sEdges").textContent = EDGES.filter(e => vis.has(e.a) && vis.has(e.b)).length;
   $("#sMine").textContent = [...state.reactions].filter(([, o]) => (W[o.r] || 0) !== 0).length;
   $("#sIso").textContent = ISOLATED.length;
+  if (!renderRail.histSet) {
+    const ts = READING_HISTORY.map(h => Date.parse(h[1])).sort((a, b) => a - b);
+    const d = ms => new Date(ms).toISOString().slice(0, 10);
+    const oldest = Math.round((Date.now() - ts[0]) / 86400000);
+    $("#histNote").textContent =
+      `mock 독서 이력 ${READING_HISTORY.length}건 · ${d(ts[0])} ~ ${d(ts[ts.length - 1])} · 가장 오래된 것이 ${oldest}일 전`;
+    renderRail.histSet = true;
+  }
 
   const mine = rank(state.method, state.hubexp, 10).map(r => r.id);
   const base = rank("cites", false, 10).map(r => r.id);
@@ -1389,6 +1465,20 @@ document.querySelector(".tabs").onclick = e => {
 };
 
 /* 부팅 */
+const HALFLIVES = [[30, "30일"], [90, "90일"], [0, "감쇠 없음"]];
+function buildHalfLife(){
+  const el = $("#halflife");
+  el.innerHTML = HALFLIVES.map(([v, l]) => `<button data-v="${v}" aria-pressed="${state.halfLife === v}">${l}</button>`).join("");
+  el.onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.halfLife = +b.dataset.v; buildHalfLife(); layoutVisible(false); renderAll();
+  };
+  $("#hlNote").textContent = state.halfLife === 30
+    ? "가장 최근에 읽은 몇 편이 추천을 독식한다. 관심이 빠르게 옮겨다닐 때 맞다."
+    : state.halfLife === 90 ? "5개월치 이력에서 4월 독서가 약 30% 가중치로 남는다."
+    : "언제 읽었든 같은 무게. 오래된 관심이 계속 따라붙는다.";
+}
+
 const HUBS = [[0, "없음"], [0.5, "deg^0.5"], [0.8, "deg^0.8"]];
 function buildHub(){
   const el = $("#hubexp");
@@ -1405,6 +1495,7 @@ function buildHub(){
 buildSeg($("#lens"), LENSES, "lens");
 buildSeg($("#method"), METHODS, "method");
 buildHub();
+buildHalfLife();
 setTab("next");
 resize();
 layoutVisible(true);

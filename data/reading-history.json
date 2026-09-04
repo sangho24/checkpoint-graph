@@ -1,0 +1,312 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-04",
+  "note": "mock 데이터. 실제 독서 기록이 아니다. 백테스트 설계 검증과 프로토타입 시드용.",
+  "timezone": "Asia/Seoul",
+  "entries": [
+    {
+      "node_id": "attention",
+      "title": "Attention Is All You Need",
+      "read_at": "2026-04-02T21:38:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 46
+    },
+    {
+      "node_id": "moe",
+      "title": "Outrageously Large Neural Networks: The Sparsely-Gated MoE Layer",
+      "read_at": "2026-04-02T22:55:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 34
+    },
+    {
+      "node_id": "switch",
+      "title": "Switch Transformers: Scaling to Trillion Parameter Models",
+      "read_at": "2026-04-06T22:12:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 57
+    },
+    {
+      "node_id": "gshard",
+      "title": "GShard: Scaling Giant Models with Conditional Computation",
+      "read_at": "2026-04-09T20:47:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 39
+    },
+    {
+      "node_id": "expertchoice",
+      "title": "Mixture-of-Experts with Expert Choice Routing",
+      "read_at": "2026-04-11T14:22:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 33
+    },
+    {
+      "node_id": "mod",
+      "title": "Mixture-of-Depths: Dynamically Allocating Compute",
+      "read_at": "2026-04-11T16:08:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 25
+    },
+    {
+      "node_id": "ddpm",
+      "title": "Denoising Diffusion Probabilistic Models",
+      "read_at": "2026-04-11T17:44:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 3
+    },
+    {
+      "node_id": "mixtral",
+      "title": "Mixtral of Experts",
+      "read_at": "2026-04-14T21:26:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 49
+    },
+    {
+      "node_id": "dsv2",
+      "title": "DeepSeek-V2: A Strong, Economical, Efficient MoE Language Model",
+      "read_at": "2026-04-19T15:10:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 62
+    },
+    {
+      "node_id": "dsv3",
+      "title": "DeepSeek-V3 Technical Report",
+      "read_at": "2026-04-23T22:31:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 74
+    },
+    {
+      "node_id": "a-kipply",
+      "title": "Transformer Inference Arithmetic",
+      "read_at": "2026-04-28T21:16:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 28
+    },
+    {
+      "node_id": "mqa",
+      "title": "Fast Transformer Decoding: One Write-Head is All You Need",
+      "read_at": "2026-05-03T13:52:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 4
+    },
+    {
+      "node_id": "gqa",
+      "title": "GQA: Training Generalized Multi-Query Transformer Models",
+      "read_at": "2026-05-06T22:20:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 31
+    },
+    {
+      "node_id": "flash",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention",
+      "read_at": "2026-05-07T21:03:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 68
+    },
+    {
+      "node_id": "flash2",
+      "title": "FlashAttention-2: Faster Attention with Better Parallelism",
+      "read_at": "2026-05-12T23:11:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 45
+    },
+    {
+      "node_id": "rope",
+      "title": "RoFormer: Enhanced Transformer with Rotary Position Embedding",
+      "read_at": "2026-05-18T22:26:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 23
+    },
+    {
+      "node_id": "vllm",
+      "title": "Efficient Memory Management for LLM Serving with PagedAttention",
+      "read_at": "2026-05-23T13:40:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 59
+    },
+    {
+      "node_id": "specdec",
+      "title": "Fast Inference from Transformers via Speculative Decoding",
+      "read_at": "2026-05-23T15:15:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 36
+    },
+    {
+      "node_id": "medusa",
+      "title": "Medusa: Simple LLM Inference Acceleration Framework",
+      "read_at": "2026-05-23T16:52:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 28
+    },
+    {
+      "node_id": "streaming",
+      "title": "Efficient Streaming Language Models with Attention Sinks",
+      "read_at": "2026-05-23T20:30:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 22
+    },
+    {
+      "node_id": "ring",
+      "title": "Ring Attention with Blockwise Transformers",
+      "read_at": "2026-05-28T22:05:00+09:00",
+      "reaction": "read",
+      "source": "manual",
+      "dwell_min": 41
+    },
+    {
+      "node_id": "clip",
+      "title": "Learning Transferable Visual Models from Natural Language",
+      "read_at": "2026-06-03T21:48:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 2
+    },
+    {
+      "node_id": "mistral",
+      "title": "Mistral 7B",
+      "read_at": "2026-06-09T20:36:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 24
+    },
+    {
+      "node_id": "llama2",
+      "title": "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+      "read_at": "2026-06-13T14:12:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 47
+    },
+    {
+      "node_id": "chinchilla",
+      "title": "Training Compute-Optimal Large Language Models",
+      "read_at": "2026-06-18T22:24:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 53
+    },
+    {
+      "node_id": "scaling",
+      "title": "Scaling Laws for Neural Language Models",
+      "read_at": "2026-06-24T21:57:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 4
+    },
+    {
+      "node_id": "lora",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "read_at": "2026-06-30T20:52:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 27
+    },
+    {
+      "node_id": "qlora",
+      "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+      "read_at": "2026-07-03T22:41:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 32
+    },
+    {
+      "node_id": "a-scale",
+      "title": "How to Scale Your Model",
+      "read_at": "2026-07-09T21:15:00+09:00",
+      "reaction": "liked",
+      "source": "browser_history",
+      "dwell_min": 66
+    },
+    {
+      "node_id": "megatron",
+      "title": "Megatron-LM: Training Multi-Billion Parameter LMs",
+      "read_at": "2026-07-11T14:26:00+09:00",
+      "reaction": "read",
+      "source": "manual",
+      "dwell_min": 44
+    },
+    {
+      "node_id": "zero",
+      "title": "ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+      "read_at": "2026-07-12T16:03:00+09:00",
+      "reaction": "read",
+      "source": "zotero",
+      "dwell_min": 35
+    },
+    {
+      "node_id": "whisper",
+      "title": "Robust Speech Recognition via Large-Scale Weak Supervision",
+      "read_at": "2026-07-18T15:37:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 3
+    },
+    {
+      "node_id": "llama3",
+      "title": "The Llama 3 Herd of Models",
+      "read_at": "2026-07-25T13:52:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 51
+    },
+    {
+      "node_id": "qwen2",
+      "title": "Qwen2 Technical Report",
+      "read_at": "2026-08-02T15:44:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 29
+    },
+    {
+      "node_id": "ldm",
+      "title": "High-Resolution Image Synthesis with Latent Diffusion Models",
+      "read_at": "2026-08-09T16:58:00+09:00",
+      "reaction": "skipped",
+      "source": "browser_history",
+      "dwell_min": 2
+    },
+    {
+      "node_id": "mamba",
+      "title": "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
+      "read_at": "2026-08-17T21:12:00+09:00",
+      "reaction": "read",
+      "source": "manual",
+      "dwell_min": 40
+    },
+    {
+      "node_id": "dsr1",
+      "title": "DeepSeek-R1: Incentivizing Reasoning Capability via RL",
+      "read_at": "2026-08-26T22:34:00+09:00",
+      "reaction": "liked",
+      "source": "zotero",
+      "dwell_min": 71
+    },
+    {
+      "node_id": "a-weng",
+      "title": "Attention? Attention!",
+      "read_at": "2026-09-03T22:09:00+09:00",
+      "reaction": "read",
+      "source": "browser_history",
+      "dwell_min": 20
+    }
+  ]
+}
