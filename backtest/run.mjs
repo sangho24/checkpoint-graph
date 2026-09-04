@@ -16,7 +16,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CACHE_DIR } from "./data.mjs";
 import {
-  graphHand, graphOpenAlex, censor, makeFolds, candidatePool,
+  graphHand, graphOpenAlex, graphSemanticScholar, censor, makeFolds, candidatePool,
   rankPPR, rankCites, rankRecency, rankRefFreq,
   mean, stdev, quantile
 } from "./engine.mjs";
@@ -152,6 +152,7 @@ function printCondition(r) {
 
 const gHand = graphHand();
 const gOA = graphOpenAlex();
+const gS2 = graphSemanticScholar();
 
 const conditions = [
   {
@@ -165,6 +166,11 @@ const conditions = [
     note: "참고문헌 데이터가 2022년 이후 거의 비어 있어 그래프가 붕괴해 있다. 도달률 상한이 낮아 방법 비교용으로 쓸 수 없다."
   },
   {
+    label: "S · Semantic Scholar 실제 인용 그래프 · 읽은시각 타임라인",
+    g: gS2, mode: "date", timeline: "read",
+    note: "Semantic Scholar 의 참고문헌으로 만든 실제 인용 그래프. 시간 검열은 실제 publication_date 를 쓴다. 커버리지·참고문헌 밀도·도달률은 coverage.mjs 를 보라."
+  },
+  {
     label: "B' · 손으로 만든 그래프 · 출판일 타임라인 (검열 민감도 확인용)",
     g: gHand, mode: "year", timeline: "pubdate",
     note: "읽은 시각을 그 논문의 출판일로 바꿔 '나올 때마다 읽는 연구자'를 흉내낸 합성 조건. 컷오프가 정답의 출판일이라 최근성 베이스라인은 정답을 항상 1위로 둔다 - 최근성 행은 무효다."
@@ -174,44 +180,51 @@ const conditions = [
 const all = conditions.map(runCondition);
 for (const r of all) printCondition(r);
 
-/* 주 조건 요약: 최고 PPR vs 최고 베이스라인 */
-say("");
-say("═".repeat(96));
-say("요약 - 주 조건(B) 에서 PPR 최고 조합 vs 베이스라인");
-say("═".repeat(96));
+/* 조건 요약: 최고 PPR vs 최고 베이스라인, 폴드별 승패 두 기준 */
+function summarize(r, title) {
+  say("");
+  say("═".repeat(96));
+  say(`요약 - ${title} 에서 PPR 최고 조합 vs 베이스라인`);
+  say("═".repeat(96));
+  const bestPPR = r.rows.filter(x => x.family === "PPR").sort((a, b) => b.mrr - a.mrr)[0];
+  const bestBase = r.rows.filter(x => x.family === "baseline").sort((a, b) => b.mrr - a.mrr)[0];
+  say(`PPR 최고    : ${bestPPR.label}  MRR ${bestPPR.mrr.toFixed(3)}  R@10 ${bestPPR.r10.toFixed(3)}`);
+  say(`베이스라인 최고: ${bestBase.label}  MRR ${bestBase.mrr.toFixed(3)}  R@10 ${bestBase.r10.toFixed(3)}`);
+  const diff = bestPPR.mrr - bestBase.mrr;
+  say(`차이 (MRR)  : ${diff >= 0 ? "+" : ""}${diff.toFixed(3)}  → ${diff > 0 ? "PPR 우위" : diff < 0 ? "베이스라인 우위" : "동률"}`);
+
+  /* 폴드별 부호 검정용 승패 (PPR 최고 vs 베이스라인 최고) */
+  let win = 0, lose = 0, tie = 0;
+  for (const f of r.foldInfo) {
+    const a = f.ranks[bestPPR.key], b = f.ranks[bestBase.key];
+    if (a == null && b == null) { tie++; continue; }
+    if (a == null) { lose++; continue; }
+    if (b == null) { win++; continue; }
+    if (a < b) win++; else if (a > b) lose++; else tie++;
+  }
+  say(`폴드별 승패 : PPR 승 ${win} · 패 ${lose} · 무 ${tie} (총 ${r.folds}폴드)`);
+
+  /* 더 엄격한 비교: 폴드마다 베이스라인 3종 중 그 폴드에서 가장 잘한 것과 붙인다.
+     "총 MRR 이 가장 높은 베이스라인 하나"와 붙이는 것보다 정직한 기준선이다. */
+  const baseKeys = r.rows.filter(x => x.family === "baseline").map(x => x.key);
+  let win2 = 0, lose2 = 0, tie2 = 0;
+  for (const f of r.foldInfo) {
+    const a = f.ranks[bestPPR.key];
+    const bs = baseKeys.map(k => f.ranks[k]).filter(v => v != null);
+    const b = bs.length ? Math.min(...bs) : null;
+    if (a == null && b == null) { tie2++; continue; }
+    if (a == null) { lose2++; continue; }
+    if (b == null) { win2++; continue; }
+    if (a < b) win2++; else if (a > b) lose2++; else tie2++;
+  }
+  say(`폴드별 승패 (베이스라인 3종 중 그 폴드 최선과 비교): PPR 승 ${win2} · 패 ${lose2} · 무 ${tie2}`);
+  return { bestPPR, bestBase, win, lose, tie, win2, lose2, tie2 };
+}
+
 const main = all[0];
-const bestPPR = main.rows.filter(r => r.family === "PPR").sort((a, b) => b.mrr - a.mrr)[0];
-const bestBase = main.rows.filter(r => r.family === "baseline").sort((a, b) => b.mrr - a.mrr)[0];
-say(`PPR 최고    : ${bestPPR.label}  MRR ${bestPPR.mrr.toFixed(3)}  R@10 ${bestPPR.r10.toFixed(3)}`);
-say(`베이스라인 최고: ${bestBase.label}  MRR ${bestBase.mrr.toFixed(3)}  R@10 ${bestBase.r10.toFixed(3)}`);
-const diff = bestPPR.mrr - bestBase.mrr;
-say(`차이 (MRR)  : ${diff >= 0 ? "+" : ""}${diff.toFixed(3)}  → ${diff > 0 ? "PPR 우위" : diff < 0 ? "베이스라인 우위" : "동률"}`);
-
-/* 폴드별 부호 검정용 승패 (PPR 최고 vs 베이스라인 최고) */
-let win = 0, lose = 0, tie = 0;
-for (const f of main.foldInfo) {
-  const a = f.ranks[bestPPR.key], b = f.ranks[bestBase.key];
-  if (a == null && b == null) { tie++; continue; }
-  if (a == null) { lose++; continue; }
-  if (b == null) { win++; continue; }
-  if (a < b) win++; else if (a > b) lose++; else tie++;
-}
-say(`폴드별 승패 : PPR 승 ${win} · 패 ${lose} · 무 ${tie} (총 ${main.folds}폴드)`);
-
-/* 더 엄격한 비교: 폴드마다 베이스라인 3종 중 그 폴드에서 가장 잘한 것과 붙인다.
-   "총 MRR 이 가장 높은 베이스라인 하나"와 붙이는 것보다 정직한 기준선이다. */
-const baseKeys = main.rows.filter(r => r.family === "baseline").map(r => r.key);
-let win2 = 0, lose2 = 0, tie2 = 0;
-for (const f of main.foldInfo) {
-  const a = f.ranks[bestPPR.key];
-  const bs = baseKeys.map(k => f.ranks[k]).filter(v => v != null);
-  const b = bs.length ? Math.min(...bs) : null;
-  if (a == null && b == null) { tie2++; continue; }
-  if (a == null) { lose2++; continue; }
-  if (b == null) { win2++; continue; }
-  if (a < b) win2++; else if (a > b) lose2++; else tie2++;
-}
-say(`폴드별 승패 (베이스라인 3종 중 그 폴드 최선과 비교): PPR 승 ${win2} · 패 ${lose2} · 무 ${tie2}`);
+const { bestPPR, bestBase } = summarize(main, "주 조건(B)");
+const s2cond = all.find(r => r.label.startsWith("S ·"));
+if (s2cond) summarize(s2cond, "조건 S (Semantic Scholar)");
 
 /* 스킵 가중치 민감도: skipped = -1 (기본) vs 0 (스킵을 그냥 무시) */
 say("");

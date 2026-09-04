@@ -4,6 +4,58 @@
     "resolved": 76,
     "strict": 75,
     "arxiv_confirmed": 72,
+    "title_only": 68,
+    "title_year": 67,
+    "conflicts": [
+      {
+        "id": "bert",
+        "f1": 0,
+        "ours": "BERT: Pre-training of Deep Bidirectional Transformers",
+        "theirs": "AI-Assisted Pipeline for Dynamic Generation of Trustworthy Health Supplement Content at Scale"
+      },
+      {
+        "id": "cot",
+        "f1": 0,
+        "ours": "Chain-of-Thought Prompting Elicits Reasoning in LLMs",
+        "theirs": "BNAI, NO-TOKEN, and MIND-UNITY: Pillars of a Systemic Revolution in Artificial Intelligence"
+      },
+      {
+        "id": "react",
+        "f1": 0,
+        "ours": "ReAct: Synergizing Reasoning and Acting in Language Models",
+        "theirs": "Distributing Accountability, Not Capability: Phase Separation and the LLM Workflow Quadrant in Autonomous AI Agent Architectures"
+      },
+      {
+        "id": "cai",
+        "f1": 0,
+        "ours": "Constitutional AI: Harmlessness from AI Feedback",
+        "theirs": "Affective Coherence Monitoring for Transformer-Based Language Models"
+      },
+      {
+        "id": "lora",
+        "f1": 0.133,
+        "ours": "LoRA: Low-Rank Adaptation of Large Language Models",
+        "theirs": "LoRA Fine-Tuning of a 3B Code LLM for Algorithmic Efficiency"
+      },
+      {
+        "id": "ppo",
+        "f1": 0.143,
+        "ours": "Proximal Policy Optimization Algorithms",
+        "theirs": "Diagnosing Non-Intermittent Anomalies in Reinforcement Learning Policy Executions (Short Paper)"
+      },
+      {
+        "id": "bigbench",
+        "f1": 0.462,
+        "ours": "Beyond the Imitation Game (BIG-bench)",
+        "theirs": "Beyond the Imitation Game: Quantifying and extrapolating the capabilities of language models"
+      },
+      {
+        "id": "dpo",
+        "f1": 0.545,
+        "ours": "Direct Preference Optimization",
+        "theirs": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model"
+      }
+    ],
     "failures": [
       {
         "id": "gpt2",
@@ -18,9 +70,10 @@
       {
         "id": "attention",
         "ours": 2017,
-        "oa": 2025
+        "theirs": 2025
       }
-    ]
+    ],
+    "date_null": []
   },
   "ref_density": {
     "non_empty": 32,
@@ -76,11 +129,351 @@
         "n": 10,
         "k": 0
       }
+    },
+    "pre_cut": {
+      "n": 34,
+      "k": 31
+    },
+    "post_cut": {
+      "n": 42,
+      "k": 1
+    },
+    "cut_year": 2022,
+    "truncated": []
+  },
+  "sources": {
+    "openalex": {
+      "coverage": {
+        "total": 78,
+        "resolved": 76,
+        "strict": 75,
+        "arxiv_confirmed": 72,
+        "title_only": 68,
+        "title_year": 67,
+        "conflicts": [
+          {
+            "id": "bert",
+            "f1": 0,
+            "ours": "BERT: Pre-training of Deep Bidirectional Transformers",
+            "theirs": "AI-Assisted Pipeline for Dynamic Generation of Trustworthy Health Supplement Content at Scale"
+          },
+          {
+            "id": "cot",
+            "f1": 0,
+            "ours": "Chain-of-Thought Prompting Elicits Reasoning in LLMs",
+            "theirs": "BNAI, NO-TOKEN, and MIND-UNITY: Pillars of a Systemic Revolution in Artificial Intelligence"
+          },
+          {
+            "id": "react",
+            "f1": 0,
+            "ours": "ReAct: Synergizing Reasoning and Acting in Language Models",
+            "theirs": "Distributing Accountability, Not Capability: Phase Separation and the LLM Workflow Quadrant in Autonomous AI Agent Architectures"
+          },
+          {
+            "id": "cai",
+            "f1": 0,
+            "ours": "Constitutional AI: Harmlessness from AI Feedback",
+            "theirs": "Affective Coherence Monitoring for Transformer-Based Language Models"
+          },
+          {
+            "id": "lora",
+            "f1": 0.133,
+            "ours": "LoRA: Low-Rank Adaptation of Large Language Models",
+            "theirs": "LoRA Fine-Tuning of a 3B Code LLM for Algorithmic Efficiency"
+          },
+          {
+            "id": "ppo",
+            "f1": 0.143,
+            "ours": "Proximal Policy Optimization Algorithms",
+            "theirs": "Diagnosing Non-Intermittent Anomalies in Reinforcement Learning Policy Executions (Short Paper)"
+          },
+          {
+            "id": "bigbench",
+            "f1": 0.462,
+            "ours": "Beyond the Imitation Game (BIG-bench)",
+            "theirs": "Beyond the Imitation Game: Quantifying and extrapolating the capabilities of language models"
+          },
+          {
+            "id": "dpo",
+            "f1": 0.545,
+            "ours": "Direct Preference Optimization",
+            "theirs": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model"
+          }
+        ],
+        "failures": [
+          {
+            "id": "gpt2",
+            "reason": "제목 검색 결과 0건"
+          },
+          {
+            "id": "dsr1",
+            "reason": "제목 검색 결과 0건"
+          }
+        ],
+        "year_mismatch": [
+          {
+            "id": "attention",
+            "ours": 2017,
+            "theirs": 2025
+          }
+        ],
+        "date_null": []
+      },
+      "ref_density": {
+        "non_empty": 32,
+        "of": 76,
+        "median_all": 0,
+        "median_non_empty": 41,
+        "by_year": {
+          "1997": {
+            "n": 1,
+            "k": 1
+          },
+          "2014": {
+            "n": 3,
+            "k": 3
+          },
+          "2015": {
+            "n": 1,
+            "k": 1
+          },
+          "2016": {
+            "n": 1,
+            "k": 1
+          },
+          "2017": {
+            "n": 3,
+            "k": 2
+          },
+          "2018": {
+            "n": 2,
+            "k": 2
+          },
+          "2019": {
+            "n": 4,
+            "k": 4
+          },
+          "2020": {
+            "n": 10,
+            "k": 9
+          },
+          "2021": {
+            "n": 9,
+            "k": 8
+          },
+          "2022": {
+            "n": 11,
+            "k": 1
+          },
+          "2023": {
+            "n": 21,
+            "k": 0
+          },
+          "2024": {
+            "n": 10,
+            "k": 0
+          }
+        },
+        "pre_cut": {
+          "n": 34,
+          "k": 31
+        },
+        "post_cut": {
+          "n": 42,
+          "k": 1
+        },
+        "cut_year": 2022,
+        "truncated": []
+      },
+      "graph": {
+        "nodes": 76,
+        "edges": 56,
+        "avgDeg": 1.4736842105263157,
+        "isolated": 50,
+        "historyConnected": 9,
+        "historyDisconnected": [
+          "moe",
+          "expertchoice",
+          "mod",
+          "ddpm",
+          "mixtral",
+          "dsv2",
+          "dsv3",
+          "a-kipply",
+          "gqa",
+          "flash",
+          "flash2",
+          "rope",
+          "vllm",
+          "specdec",
+          "medusa",
+          "streaming",
+          "ring",
+          "mistral",
+          "llama2",
+          "chinchilla",
+          "qlora",
+          "a-scale",
+          "whisper",
+          "llama3",
+          "qwen2",
+          "ldm",
+          "mamba",
+          "dsr1",
+          "a-weng"
+        ],
+        "edgeBy": {
+          "work_id": 56,
+          "arxiv": 0
+        }
+      }
+    },
+    "s2": {
+      "coverage": {
+        "total": 78,
+        "resolved": 78,
+        "strict": 78,
+        "arxiv_confirmed": 76,
+        "title_only": 75,
+        "title_year": 75,
+        "conflicts": [
+          {
+            "id": "dsr1",
+            "f1": 0.429,
+            "ours": "DeepSeek-R1: Incentivizing Reasoning Capability via RL",
+            "theirs": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning"
+          },
+          {
+            "id": "bigbench",
+            "f1": 0.462,
+            "ours": "Beyond the Imitation Game (BIG-bench)",
+            "theirs": "Beyond the Imitation Game: Quantifying and extrapolating the capabilities of language models"
+          },
+          {
+            "id": "dpo",
+            "f1": 0.545,
+            "ours": "Direct Preference Optimization",
+            "theirs": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model"
+          }
+        ],
+        "failures": [],
+        "year_mismatch": [],
+        "date_null": [
+          "bert",
+          "gpt2"
+        ]
+      },
+      "ref_density": {
+        "non_empty": 71,
+        "of": 78,
+        "median_all": 49.5,
+        "median_non_empty": 53,
+        "by_year": {
+          "1997": {
+            "n": 1,
+            "k": 0
+          },
+          "2014": {
+            "n": 3,
+            "k": 3
+          },
+          "2015": {
+            "n": 1,
+            "k": 1
+          },
+          "2016": {
+            "n": 1,
+            "k": 1
+          },
+          "2017": {
+            "n": 3,
+            "k": 3
+          },
+          "2018": {
+            "n": 2,
+            "k": 2
+          },
+          "2019": {
+            "n": 5,
+            "k": 4
+          },
+          "2020": {
+            "n": 10,
+            "k": 10
+          },
+          "2021": {
+            "n": 9,
+            "k": 9
+          },
+          "2022": {
+            "n": 11,
+            "k": 10
+          },
+          "2023": {
+            "n": 21,
+            "k": 19
+          },
+          "2024": {
+            "n": 10,
+            "k": 8
+          },
+          "2025": {
+            "n": 1,
+            "k": 1
+          }
+        },
+        "pre_cut": {
+          "n": 35,
+          "k": 33
+        },
+        "post_cut": {
+          "n": 43,
+          "k": 38
+        },
+        "cut_year": 2022,
+        "truncated": [
+          "lstm",
+          "gpt2"
+        ]
+      },
+      "graph": {
+        "nodes": 78,
+        "edges": 485,
+        "avgDeg": 12.435897435897436,
+        "isolated": 2,
+        "historyConnected": 33,
+        "historyDisconnected": [
+          "dsv3",
+          "a-kipply",
+          "a-scale",
+          "mamba",
+          "a-weng"
+        ],
+        "edgeBy": {
+          "work_id": 485,
+          "arxiv": 0
+        }
+      }
     }
+  },
+  "hand_graph": {
+    "nodes": 89,
+    "edges": 274,
+    "avgDeg": 6.157303370786517,
+    "isolated": 3,
+    "historyConnected": 35,
+    "historyDisconnected": [
+      "a-kipply",
+      "a-scale",
+      "a-weng"
+    ],
+    "edgeBy": null
   },
   "reach": [
     {
+      "key": "B",
       "label": "B  손그래프 · 읽은시각 타임라인",
+      "source": "hand",
       "folds": 28,
       "censored_out": 0,
       "not_in_graph": 0,
@@ -89,10 +482,17 @@
       "hop3": 25,
       "pool_median": 63.5,
       "pool_min": 51,
-      "pool_max": 76
+      "pool_max": 76,
+      "missing": [
+        "a-kipply",
+        "a-scale",
+        "a-weng"
+      ]
     },
     {
+      "key": "B'",
       "label": "B' 손그래프 · 출판일 타임라인",
+      "source": "hand",
       "folds": 28,
       "censored_out": 0,
       "not_in_graph": 0,
@@ -101,10 +501,16 @@
       "hop3": 26,
       "pool_median": 45.5,
       "pool_min": 23,
-      "pool_max": 57
+      "pool_max": 57,
+      "missing": [
+        "a-kipply",
+        "a-scale"
+      ]
     },
     {
+      "key": "A",
       "label": "A  OpenAlex · 읽은시각 타임라인",
+      "source": "openalex",
       "folds": 28,
       "censored_out": 0,
       "not_in_graph": 4,
@@ -113,10 +519,36 @@
       "hop3": 6,
       "pool_median": 21,
       "pool_min": 17,
-      "pool_max": 23
+      "pool_max": 23,
+      "missing": [
+        "a-kipply",
+        "gqa",
+        "flash",
+        "flash2",
+        "rope",
+        "vllm",
+        "specdec",
+        "medusa",
+        "streaming",
+        "ring",
+        "mistral",
+        "llama2",
+        "chinchilla",
+        "qlora",
+        "a-scale",
+        "whisper",
+        "llama3",
+        "qwen2",
+        "ldm",
+        "mamba",
+        "dsr1",
+        "a-weng"
+      ]
     },
     {
+      "key": "A'",
       "label": "A' OpenAlex · 출판일 타임라인",
+      "source": "openalex",
       "folds": 28,
       "censored_out": 0,
       "not_in_graph": 4,
@@ -125,7 +557,77 @@
       "hop3": 2,
       "pool_median": 17,
       "pool_min": 13,
-      "pool_max": 18
+      "pool_max": 18,
+      "missing": [
+        "ldm",
+        "expertchoice",
+        "chinchilla",
+        "flash",
+        "specdec",
+        "whisper",
+        "gqa",
+        "qlora",
+        "flash2",
+        "llama2",
+        "vllm",
+        "streaming",
+        "ring",
+        "mistral",
+        "mamba",
+        "mixtral",
+        "medusa",
+        "mod",
+        "dsv2",
+        "qwen2",
+        "dsv3",
+        "llama3",
+        "a-kipply",
+        "a-scale",
+        "dsr1",
+        "a-weng"
+      ]
+    },
+    {
+      "key": "S",
+      "label": "S  Semantic Scholar · 읽은시각 타임라인",
+      "source": "s2",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 3,
+      "hop1": 23,
+      "hop2": 24,
+      "hop3": 24,
+      "pool_median": 54.5,
+      "pool_min": 43,
+      "pool_max": 67,
+      "missing": [
+        "a-kipply",
+        "a-scale",
+        "mamba",
+        "a-weng"
+      ]
+    },
+    {
+      "key": "S'",
+      "label": "S' Semantic Scholar · 출판일 타임라인",
+      "source": "s2",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 3,
+      "hop1": 22,
+      "hop2": 22,
+      "hop3": 22,
+      "pool_median": 41,
+      "pool_min": 19,
+      "pool_max": 44,
+      "missing": [
+        "mamba",
+        "llama3",
+        "dsv3",
+        "a-kipply",
+        "a-scale",
+        "a-weng"
+      ]
     }
   ]
 }

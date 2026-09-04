@@ -51,32 +51,63 @@ export function graphHand() {
   return { name: "hand", ...makeGraph(nodes, edges) };
 }
 
-/* ── 조건 A: OpenAlex 실제 인용 그래프 ──────────────────────────
-   해소된 work 만 노드로 쓰고, referenced_works 중 우리 78편 안에 있는 것만 엣지로 남긴다. */
-export function graphOpenAlex() {
-  const path = join(CACHE_DIR, "openalex-works.json");
+/* ── 실제 인용 원천 캐시에서 그래프를 만든다 (조건 A: OpenAlex, 조건 S: Semantic Scholar) ──
+   해소된 work 만 노드로 쓰고, 참고문헌 중 우리 78편 안에 있는 것만 엣지로 남긴다.
+   엣지 매핑 순서:
+     1) 참조 work id(paperId) 가 우리 노드의 work id 와 같다
+     2) 그렇지 않으면 참조의 arXiv id 가 우리 노드의 query_arxiv 와 같다
+        (Semantic Scholar 는 같은 논문에 학회판/arXiv판 레코드가 따로 있을 수 있어 2번이 필요하다)
+   어느 경로로 몇 개가 붙었는지 g.meta.edge_by 에 남긴다. */
+export function graphFromCache({ file, name }) {
+  const path = join(CACHE_DIR, file);
   if (!existsSync(path)) return null;
   const cache = JSON.parse(readFileSync(path, "utf8"));
+  if (cache.partial) return null;                       // 수집이 끝나지 않은 캐시는 쓰지 않는다
   const resolved = cache.works.filter(w => w.resolved && w.work);
-  const workToNode = new Map();          // OpenAlex work id -> 우리 node_id
+  const workToNode = new Map();          // 원천 work id -> 우리 node_id
+  const arxivToNode = new Map();         // arXiv id (소문자) -> 우리 node_id
   const nodes = new Map();
   for (const w of resolved) {
     workToNode.set(w.work.id, w.node_id);
+    if (w.query_arxiv) arxivToNode.set(String(w.query_arxiv).toLowerCase(), w.node_id);
     nodes.set(w.node_id, {
       id: w.node_id, kind: "paper",
       year: w.work.publication_year,
-      date: Date.parse(w.work.publication_date),
+      date: w.work.publication_date ? Date.parse(w.work.publication_date) : null,
       cites: w.work.cited_by_count,
       title: w.work.display_name
     });
   }
   const edges = [];
-  for (const w of resolved)
-    for (const ref of w.work.referenced_works)
-      if (workToNode.has(ref)) edges.push({ from: w.node_id, to: workToNode.get(ref), type: "cites" });
-  const g = { name: "openalex", ...makeGraph(nodes, edges) };
-  g.meta = { resolved: resolved.length, total: cache.works.length, cache };
+  const edgeBy = { work_id: 0, arxiv: 0 };
+  for (const w of resolved) {
+    const hit = new Set();                               // 같은 참조가 두 경로로 중복 매핑되지 않게
+    for (const ref of (w.work.referenced_works || [])) {
+      const to = workToNode.get(ref);
+      if (to && to !== w.node_id && !hit.has(to)) { hit.add(to); edgeBy.work_id++; }   // 자기루프·중복은 세지 않는다
+    }
+    // 2순위: arXiv id 경로. references[] 원본이 있으면 그것을, 없으면 referenced_arxiv 를 본다
+    const refArxiv = (w.work.references || []).map(r => r.arxiv).concat(w.work.referenced_arxiv || []);
+    for (const a of refArxiv) {
+      if (!a) continue;
+      const to = arxivToNode.get(String(a).toLowerCase());
+      if (to && !hit.has(to)) { hit.add(to); edgeBy.arxiv++; }
+    }
+    for (const to of hit) edges.push({ from: w.node_id, to, type: "cites" });
+  }
+  const g = { name, ...makeGraph(nodes, edges) };
+  g.meta = { resolved: resolved.length, total: cache.works.length, cache, edge_by: edgeBy };
   return g;
+}
+
+/* ── 조건 A: OpenAlex 실제 인용 그래프 ── */
+export function graphOpenAlex() {
+  return graphFromCache({ file: "openalex-works.json", name: "openalex" });
+}
+
+/* ── 조건 S: Semantic Scholar 실제 인용 그래프 ── */
+export function graphSemanticScholar() {
+  return graphFromCache({ file: "semanticscholar-works.json", name: "s2" });
 }
 
 /* ── 시간 검열 ──────────────────────────────────────────────────

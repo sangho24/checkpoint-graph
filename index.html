@@ -884,35 +884,42 @@ footer a:hover { color: var(--blue); }
 
   <section class="chapter">
     <div class="k">데이터 원천</div>
-    <h2>OpenAlex 로는 이 제품을 만들 수 없다</h2>
+    <h2>OpenAlex 는 못 쓰고, Semantic Scholar 는 쓸 수 있다</h2>
     <p>
-      프로토타입은 손으로 만든 인용 그래프를 쓴다. 실제 서비스로 가려면 인용 데이터를 어딘가에서 받아와야 하고,
-      1순위 후보는 CC0 인 OpenAlex 였다. <b>78편을 실제로 조회해 봤더니 쓸 수 없었다.</b>
+      프로토타입은 손으로 만든 인용 그래프를 쓴다. 실제 서비스로 가려면 인용 데이터를 어딘가에서 받아와야 한다.
+      같은 78편을 두 원천에서 <b>같은 절차(커버리지 → 참고문헌 밀도 → 도달률)</b>로 쟀다.
     </p>
     <div class="scroll">
       <table class="tbl">
-        <thead><tr><th>측정</th><th>결과</th><th>뜻</th></tr></thead>
+        <thead><tr><th>측정</th><th>OpenAlex</th><th>Semantic Scholar</th><th>뜻</th></tr></thead>
         <tbody>
-          <tr><td>논문 해소</td><td class="n">76/78 · <b>85.9%</b></td><td>id 는 대체로 찾힌다. 다만 제목까지 맞는 것만 세면 85.9% 다</td></tr>
-          <tr><td>참고문헌이 있는 논문</td><td class="n"><b>42.1%</b> · 중앙값 0</td><td>절반 이상이 참고문헌 목록 자체가 비어 있다</td></tr>
-          <tr><td>2021년 이하</td><td class="n">90.9%</td><td>옛 논문은 멀쩡하다</td></tr>
-          <tr><td>2022년 이후</td><td class="n"><b>4.7%</b></td><td><b>2023년 21편, 2024년 9편은 전부 0건이다</b></td></tr>
-          <tr><td>도달률 (OpenAlex)</td><td class="n"><b>21.4%</b></td><td>정답이 시드 3홉 안에 아예 없다. 랭킹 이전의 문제다</td></tr>
-          <tr><td>도달률 (손 그래프)</td><td class="n">89.3%</td><td>같은 이력, 같은 절차. 차이는 그래프뿐이다</td></tr>
+          <tr><td>논문 해소 (제목·연도까지 맞는 것)</td><td class="n">67/78 · 85.9%</td><td class="n"><b>75/78 · 96.2%</b></td><td>둘 다 id 는 찾는다. 제목이 딴 논문인 레코드는 OpenAlex 6편, Semantic Scholar 0편</td></tr>
+          <tr><td>참고문헌이 있는 논문</td><td class="n">42.1% · 중앙값 0</td><td class="n"><b>91.0%</b> · 중앙값 49.5</td><td>절반이 비어 있느냐, 거의 다 있느냐</td></tr>
+          <tr><td>2022년 이후 참고문헌 보유율</td><td class="n"><b>2.4%</b></td><td class="n"><b>88.4%</b></td><td>OpenAlex 는 2023년 21편·2024년 10편이 전부 0건. Semantic Scholar 에는 절벽이 없다</td></tr>
+          <tr><td>독서 이력 38건 중 그래프에 붙는 것</td><td class="n">9</td><td class="n"><b>33</b></td><td>읽은 MoE·서빙 논문이 고립점이냐 아니냐</td></tr>
+          <tr><td>도달률 (정답이 시드 3홉 안)</td><td class="n"><b>21.4%</b></td><td class="n"><b>85.7%</b></td><td>랭킹 알고리즘의 천장. 손 그래프는 89.3% 였다</td></tr>
         </tbody>
       </table>
     </div>
     <p style="margin-top:16px">
-      2022년을 경계로 절벽이 있다. 하필 <b>사람들이 실제로 읽는 영역이 통째로 비어 있는 것</b>이라,
-      독서 이력 38건 중 그래프에 붙는 것이 9건뿐이었다. 읽은 MoE·서빙 논문은 전부 고립점이 된다.
+      Semantic Scholar 는 손 그래프 엣지 266개 중 192개(72%)를 실제로 확인해 주고, 손 그래프에 없는 엣지 293개를 더 갖고 있다.
+      남은 구멍은 <b>대형 테크 리포트 5편(GPT-4, Llama 3, DeepSeek-V3, Mamba, BIG-bench)의 참고문헌이 0건</b>이라는 것과,
+      키 없이는 429 가 잦아 78편에 약 20분이 걸린다는 것이다.
     </p>
     <div class="note" style="margin-top:18px">
-      <p><b>메타데이터도 필드별로 신뢰도가 다르다.</b>
-         arXiv DOI 로 정확히 조회되는데 제목이 전혀 다른 논문인 레코드가 76편 중 8편 있었다.
-         예를 들어 <code>10.48550/arxiv.2201.11903</code> 은 Chain-of-Thought 논문인데,
-         OpenAlex 가 돌려주는 제목은 관계없는 다른 글이다. 날짜와 피인용수는 맞다.</p>
-      <p>추천 카드에 OpenAlex 제목을 그대로 띄우면 <b>약 8% 가 오표기된다.</b>
-         제목과 날짜는 arXiv 를 원천으로 삼아야 한다.</p>
+      <p><b>그런데 실제 그래프 위에서는 PPR 의 우위가 사라진다.</b>
+         같은 이력, 같은 코드로 그래프만 Semantic Scholar 것으로 바꾸면 PPR 최고 조합의 MRR 이 0.158 에서 <b>0.087</b> 로 떨어지고,
+         최근성 베이스라인(0.107)에 진다. 폴드별로는 15승 10패가 <b>10승 14패</b>로 뒤집힌다.</p>
+      <p>허브 보정 방향과 "피인용수 순은 무작위보다 나쁘다"는 살아남았다. "PPR 이 낫다"는 죽었다.
+         원인이 그래프 밀도(평균 차수 6.2 → 12.4)인지, 일 단위 날짜를 얻은 최근성의 이득인지,
+         손 그래프와 mock 이력이 같이 설계된 순환 논증이 풀린 것인지는 이 데이터로 가릴 수 없다.</p>
+    </div>
+    <div class="note" style="margin-top:18px">
+      <p><b>손 그래프 도달률 89.3% 는 믿으면 안 된다.</b>
+         mock 독서 이력을 그래프 노드 목록에서 골라 만들어서 "읽을 논문이 수집 범위 안에 있는가"가 설계상 항상 참이다.
+         Semantic Scholar 의 85.7% 도 같은 이력 위에서 잰 것이라 이 편향을 물려받는다. 실제 상한은 아직 모른다.</p>
+      <p>메타데이터는 어느 쪽이든 제목·날짜를 arXiv 원본으로 삼아야 한다. OpenAlex 는 arXiv DOI 가 맞는데 제목이 딴 논문인 레코드가 6편,
+         Semantic Scholar 는 학술지 게재판 제목으로 바뀐 것(DeepSeek-R1)이 있었다.</p>
     </div>
   </section>
 
@@ -946,9 +953,9 @@ footer a:hover { color: var(--blue); }
           <b>실제 날짜가 붙은 독서 기록이 없으면 누수의 크기를 알 수 없다.</b></li>
       <li><b>28폴드로는 판정이 안 된다.</b> 평균 차이는 있는데 폴드별 승패가 12승 13패로 뒤집힌다.
           독서 이력이 100건쯤 쌓여야 이 크기의 차이를 지탱한다</li>
-      <li><b>인용 데이터 원천이 없다.</b> OpenAlex 는 위에서 본 대로 못 쓴다.
-          Semantic Scholar 나 arXiv 인용 파싱을 같은 방식으로 재보기 전에는
-          손으로 만든 그래프에서 못 벗어난다</li>
+      <li><b>실제 그래프에서 PPR 이 이긴다는 근거가 없다.</b> 원천은 Semantic Scholar 로 확보됐지만,
+          그 그래프 위에서는 PPR 이 최근성 베이스라인에 진다. 손 그래프로 정한 파라미터도
+          실제 그래프에서 다시 정해야 한다. 다음 병목은 랭킹이 아니라 <b>실제 독서 이력</b>이다</li>
     </ol>
     <p style="margin-top:16px;font-size:13px;color:var(--ink-3)">
       백테스트 코드와 원본 수치는 레포의 <code>backtest/</code> 에 있다.
@@ -958,6 +965,7 @@ footer a:hover { color: var(--blue); }
   <footer>
     <span>© 2026 sangho24 · All rights reserved</span>
     <a href="https://github.com/sangho24/checkpoint-graph">GitHub</a>
+    <a href="https://api.semanticscholar.org/api-docs/">Semantic Scholar API</a>
     <a href="https://docs.openalex.org">OpenAlex (CC0)</a>
     <a href="https://info.arxiv.org/help/api">arXiv API</a>
   </footer>
