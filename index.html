@@ -224,6 +224,78 @@ h1 {
 .keyed li b { color: var(--ink); font-weight: 700; }
 .keyed li .mk { margin-top: 3px; }
 
+/* ══ 백테스트 막대 비교 ═══════════════════════════════════ */
+.chart { margin: 0 0 18px; }
+.chart .legend {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  font-size: 12px; color: var(--ink-2); margin-bottom: 14px;
+}
+.chart .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart .legend i { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.chart .legend i.ppr { background: #2B5FE3; }
+.chart .legend i.base { background: #A97406; }
+.chart .legend i.rand { width: 14px; height: 0; border-top: 2px dashed var(--ink-3); border-radius: 0; }
+
+.plot { position: relative; }
+.plot .ref {
+  position: absolute; top: -4px; bottom: 17px;
+  left: calc(148px + (100% - 196px) * 0.3722);
+  border-left: 2px dashed var(--ink-3); pointer-events: none;
+}
+.plot .ref b {
+  position: absolute; top: -2px; left: 7px; white-space: nowrap;
+  font-family: var(--mono); font-size: 10px; font-weight: 400; color: var(--ink-3);
+}
+.row {
+  display: grid; grid-template-columns: 148px 1fr 48px;
+  align-items: center; gap: 0; padding: 3px 0; position: relative;
+}
+.row:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 5px; }
+.row .lb { font-size: 12.5px; color: var(--ink-2); padding-right: 12px; }
+.row.best .lb { color: var(--ink); font-weight: 700; }
+.row .tr { height: 17px; position: relative; }
+.row .tr i {
+  display: block; height: 100%; border-radius: 0 4px 4px 0;
+  background: #2B5FE3; transition: filter .15s;
+}
+.row .tr i.base { background: #A97406; }
+.row .v {
+  font-family: var(--mono); font-size: 12px; text-align: right;
+  font-variant-numeric: tabular-nums; color: var(--ink-2);
+}
+.row.best .v { color: var(--ink); font-weight: 500; }
+.row:hover .tr i, .row:focus-visible .tr i { filter: brightness(1.12); }
+.row::after {
+  content: attr(data-tip); position: absolute; left: 150px; top: -30px; z-index: 4;
+  background: var(--ink); color: var(--paper); padding: 5px 9px; border-radius: 6px;
+  font-family: var(--mono); font-size: 10.5px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .12s;
+}
+.row:hover::after, .row:focus-visible::after { opacity: 1; }
+.plot .axis {
+  display: flex; justify-content: space-between; margin: 6px 148px 0 148px;
+  padding-right: 48px; font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+}
+@media (max-width: 620px) {
+  .row { grid-template-columns: 108px 1fr 44px; }
+  .plot .ref { left: calc(108px + (100% - 152px) * 0.3722); }
+  .plot .axis { margin: 6px 108px 0 108px; padding-right: 44px; }
+  .row .lb { font-size: 11.5px; }
+}
+
+.verdict {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden; margin-top: 20px;
+}
+@media (max-width: 620px) { .verdict { grid-template-columns: 1fr; } }
+.verdict > div { background: var(--card); padding: 13px 15px; }
+.verdict dt { margin: 0 0 3px; font-size: 11.5px; color: var(--ink-3); }
+.verdict dd { margin: 0; font-family: var(--mono); font-size: 19px; letter-spacing: -.02em; }
+.verdict dd small { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); display: block; margin-top: 3px; line-height: 1.5; letter-spacing: 0; }
+.verdict dd.ok { color: var(--blue-2); }
+.verdict dd.no { color: #A8331F; }
+
 /* ══ 챕터 ══════════════════════════════════════════════ */
 .chapter { padding: 44px 0; border-top: 1px solid var(--line); }
 .chapter > .k {
@@ -585,6 +657,97 @@ footer a:hover { color: var(--blue); }
     </p>
   </section>
 
+<section class="chapter">
+    <div class="k">검증</div>
+    <h2>PPR 은 베이스라인을 이겼는가</h2>
+    <p>
+      독서 이력을 읽은 시각 순으로 세우고, <b>앞의 것들만 시드로 주고 바로 다음에 읽은 한 편을 맞히게 했다.</b>
+      이걸 시작점을 옮겨가며 28번 반복한다(롤링 오리진). 각 시점에서
+      그때까지 나오지 않은 논문은 그래프에서 지운다(시간 검열).
+      후보 풀은 모든 방법에 동일하고 중앙값 63.5개다.
+    </p>
+
+    <figure class="chart">
+      <div class="legend">
+        <span><i class="ppr"></i>PPR</span>
+        <span><i class="base"></i>베이스라인</span>
+        <span><i class="rand"></i>무작위로 섞었을 때 기대치</span>
+      </div>
+      <div class="plot">
+        <div class="ref"><b>0.067</b></div>
+        <div class="row best" tabindex="0" data-tip="R@10 0.393 · 순위 중앙 12위">
+          <span class="lb">PPR deg^0.8 · 90일</span>
+          <span class="tr"><i style="width:87.8%"></i></span><span class="v">0.158</span></div>
+        <div class="row" tabindex="0" data-tip="R@10 0.464 (최고) · 순위 중앙 10위">
+          <span class="lb">PPR deg^0.8 · 30일</span>
+          <span class="tr"><i style="width:80.6%"></i></span><span class="v">0.145</span></div>
+        <div class="row" tabindex="0" data-tip="R@10 0.393 · 순위 중앙 12위">
+          <span class="lb">PPR deg^0.5 · 30일</span>
+          <span class="tr"><i style="width:78.3%"></i></span><span class="v">0.141</span></div>
+        <div class="row" tabindex="0" data-tip="R@10 0.286 · 베이스라인 중 최고">
+          <span class="lb">참고문헌 최빈</span>
+          <span class="tr"><i class="base" style="width:55.0%"></i></span><span class="v">0.099</span></div>
+        <div class="row" tabindex="0" data-tip="R@10 0.143 · 순위 중앙 29위">
+          <span class="lb">최근성 순</span>
+          <span class="tr"><i class="base" style="width:48.9%"></i></span><span class="v">0.088</span></div>
+        <div class="row" tabindex="0" data-tip="R@10 0.071 · 무작위보다 나쁘다">
+          <span class="lb">피인용수 순</span>
+          <span class="tr"><i class="base" style="width:18.9%"></i></span><span class="v">0.034</span></div>
+        <div class="axis"><span>0</span><span>0.05</span><span>0.10</span><span>0.15</span></div>
+      </div>
+      <figcaption style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:10px">
+        MRR · 손으로 만든 인용 그래프 · 28폴드 · 노드 89개
+      </figcaption>
+    </figure>
+
+    <dl class="verdict">
+      <div><dt>평균으로는</dt><dd class="ok">1.6배<small>최고 베이스라인 대비. 무작위 대비로는 2.4배</small></dd></div>
+      <div><dt>폴드별 승패로는</dt><dd class="no">12승 13패<small>폴드마다 최선 베이스라인과 붙이면 오히려 진다. 28폴드로는 이 크기의 차이를 판정할 수 없다</small></dd></div>
+      <div><dt>확실한 것</dt><dd class="ok">0.034 &lt; 0.067<small>피인용수 순 정렬은 무작위로 섞는 것보다 나쁘다. "유명한 것부터"는 반생산적이다</small></dd></div>
+    </dl>
+
+    <p style="margin-top:20px">
+      <b>그래서 결론은 "PPR 이 이겼다"가 아니다.</b> 평균은 앞서지만 폴드별로 보면 갈린다.
+      다만 두 가지는 분명해졌다. 허브 보정은 반감기보다 훨씬 크게 움직이고(지수를 0에서 0.8로 올리면 +0.046,
+      반감기는 ±0.001), <b>피인용수 기반 추천은 안 하느니만 못하다.</b>
+      스킵에 준 -1 가중치도 근거가 없었다. 0으로 두는 편이 오히려 낫다(0.164 대 0.158).
+    </p>
+  </section>
+
+  <section class="chapter">
+    <div class="k">데이터 원천</div>
+    <h2>OpenAlex 로는 이 제품을 만들 수 없다</h2>
+    <p>
+      프로토타입은 손으로 만든 인용 그래프를 쓴다. 실제 서비스로 가려면 인용 데이터를 어딘가에서 받아와야 하고,
+      1순위 후보는 CC0 인 OpenAlex 였다. <b>78편을 실제로 조회해 봤더니 쓸 수 없었다.</b>
+    </p>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>측정</th><th>결과</th><th>뜻</th></tr></thead>
+        <tbody>
+          <tr><td>논문 해소</td><td class="n">76/78 · <b>85.9%</b></td><td>id 는 대체로 찾힌다. 다만 제목까지 맞는 것만 세면 85.9% 다</td></tr>
+          <tr><td>참고문헌이 있는 논문</td><td class="n"><b>42.1%</b> · 중앙값 0</td><td>절반 이상이 참고문헌 목록 자체가 비어 있다</td></tr>
+          <tr><td>2021년 이하</td><td class="n">90.9%</td><td>옛 논문은 멀쩡하다</td></tr>
+          <tr><td>2022년 이후</td><td class="n"><b>4.7%</b></td><td><b>2023년 21편, 2024년 9편은 전부 0건이다</b></td></tr>
+          <tr><td>도달률 (OpenAlex)</td><td class="n"><b>21.4%</b></td><td>정답이 시드 3홉 안에 아예 없다. 랭킹 이전의 문제다</td></tr>
+          <tr><td>도달률 (손 그래프)</td><td class="n">89.3%</td><td>같은 이력, 같은 절차. 차이는 그래프뿐이다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:16px">
+      2022년을 경계로 절벽이 있다. 하필 <b>사람들이 실제로 읽는 영역이 통째로 비어 있는 것</b>이라,
+      독서 이력 38건 중 그래프에 붙는 것이 9건뿐이었다. 읽은 MoE·서빙 논문은 전부 고립점이 된다.
+    </p>
+    <div class="note" style="margin-top:18px">
+      <p><b>메타데이터도 필드별로 신뢰도가 다르다.</b>
+         arXiv DOI 로 정확히 조회되는데 제목이 전혀 다른 논문인 레코드가 76편 중 8편 있었다.
+         예를 들어 <code>10.48550/arxiv.2201.11903</code> 은 Chain-of-Thought 논문인데,
+         OpenAlex 가 돌려주는 제목은 관계없는 다른 글이다. 날짜와 피인용수는 맞다.</p>
+      <p>추천 카드에 OpenAlex 제목을 그대로 띄우면 <b>약 8% 가 오표기된다.</b>
+         제목과 날짜는 arXiv 를 원천으로 삼아야 한다.</p>
+    </div>
+  </section>
+
   <section class="chapter">
     <div class="k">지금 들어있는 것</div>
     <h2>실제 논문과 실제 인용 관계</h2>
@@ -608,14 +771,20 @@ footer a:hover { color: var(--blue); }
       <p>따라서 두 화면은 <b>"PPR 이 다른 답을 내는가"</b>까지만 답한다.
          <b>"그 답이 더 맞는가"</b>는 별개 문제다.</p>
     </div>
-    <p style="margin-top:18px">제대로 판정하려면 시간 검열된 롤링 오리진 백테스트가 필요하다.</p>
+    <p style="margin-top:18px">백테스트는 돌렸다. 그래도 남는 구멍이 셋이다.</p>
     <ol class="steps">
-      <li><b>커버리지</b> — 내 읽음 목록 중 OpenAlex 에 존재하는 비율. 블로그는 대부분 없다</li>
-      <li><b>도달률 (상한)</b> — <code>publication_date &gt; T</code> 인 work 를 전부 드롭한 그래프에서,
-          홀드아웃이 시드 2~3홉 안에 있는 비율. <b>이게 낮으면 랭킹은 볼 필요도 없다</b></li>
-      <li><b>랭킹</b> — 도달 가능한 것들 중 PPR 이 베이스라인을 이기는가.
-          표본이 작으므로 한 번 자르지 말고 롤링 오리진으로 20폴드를 굴린다</li>
+      <li><b>시점 누수는 아직 못 쟀다.</b> mock 이력이 2026년이고 논문은 전부 2025년 이하라,
+          검열이 매 폴드에서 노드를 0개 제거한다. 검열 코드는 동작하지만
+          <b>실제 날짜가 붙은 독서 기록이 없으면 누수의 크기를 알 수 없다.</b></li>
+      <li><b>28폴드로는 판정이 안 된다.</b> 평균 차이는 있는데 폴드별 승패가 12승 13패로 뒤집힌다.
+          독서 이력이 100건쯤 쌓여야 이 크기의 차이를 지탱한다</li>
+      <li><b>인용 데이터 원천이 없다.</b> OpenAlex 는 위에서 본 대로 못 쓴다.
+          Semantic Scholar 나 arXiv 인용 파싱을 같은 방식으로 재보기 전에는
+          손으로 만든 그래프에서 못 벗어난다</li>
     </ol>
+    <p style="margin-top:16px;font-size:13px;color:var(--ink-3)">
+      백테스트 코드와 원본 수치는 레포의 <code>backtest/</code> 에 있다.
+      재현하려면 <code>node backtest/run.mjs</code>.</p>
   </section>
 
   <footer>

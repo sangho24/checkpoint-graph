@@ -1,0 +1,131 @@
+{
+  "coverage": {
+    "total": 78,
+    "resolved": 76,
+    "strict": 75,
+    "arxiv_confirmed": 72,
+    "failures": [
+      {
+        "id": "gpt2",
+        "reason": "제목 검색 결과 0건"
+      },
+      {
+        "id": "dsr1",
+        "reason": "제목 검색 결과 0건"
+      }
+    ],
+    "year_mismatch": [
+      {
+        "id": "attention",
+        "ours": 2017,
+        "oa": 2025
+      }
+    ]
+  },
+  "ref_density": {
+    "non_empty": 32,
+    "of": 76,
+    "median_all": 0,
+    "median_non_empty": 41,
+    "by_year": {
+      "1997": {
+        "n": 1,
+        "k": 1
+      },
+      "2014": {
+        "n": 3,
+        "k": 3
+      },
+      "2015": {
+        "n": 1,
+        "k": 1
+      },
+      "2016": {
+        "n": 1,
+        "k": 1
+      },
+      "2017": {
+        "n": 3,
+        "k": 2
+      },
+      "2018": {
+        "n": 2,
+        "k": 2
+      },
+      "2019": {
+        "n": 4,
+        "k": 4
+      },
+      "2020": {
+        "n": 10,
+        "k": 9
+      },
+      "2021": {
+        "n": 9,
+        "k": 8
+      },
+      "2022": {
+        "n": 11,
+        "k": 1
+      },
+      "2023": {
+        "n": 21,
+        "k": 0
+      },
+      "2024": {
+        "n": 10,
+        "k": 0
+      }
+    }
+  },
+  "reach": [
+    {
+      "label": "B  손그래프 · 읽은시각 타임라인",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 0,
+      "hop1": 25,
+      "hop2": 25,
+      "hop3": 25,
+      "pool_median": 63.5,
+      "pool_min": 51,
+      "pool_max": 76
+    },
+    {
+      "label": "B' 손그래프 · 출판일 타임라인",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 0,
+      "hop1": 26,
+      "hop2": 26,
+      "hop3": 26,
+      "pool_median": 45.5,
+      "pool_min": 23,
+      "pool_max": 57
+    },
+    {
+      "label": "A  OpenAlex · 읽은시각 타임라인",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 4,
+      "hop1": 5,
+      "hop2": 6,
+      "hop3": 6,
+      "pool_median": 21,
+      "pool_min": 17,
+      "pool_max": 23
+    },
+    {
+      "label": "A' OpenAlex · 출판일 타임라인",
+      "folds": 28,
+      "censored_out": 0,
+      "not_in_graph": 4,
+      "hop1": 2,
+      "hop2": 2,
+      "hop3": 2,
+      "pool_median": 17,
+      "pool_min": 13,
+      "pool_max": 18
+    }
+  ]
+}
