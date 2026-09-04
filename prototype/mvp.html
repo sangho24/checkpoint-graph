@@ -1,0 +1,1414 @@
+<title>Checkpoint Graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #EFF1F5;
+    --panel: #FFFFFF;
+    --panel-2: #F6F8FB;
+    --stage: #E6EAF1;
+    --ink: #131620;
+    --ink-2: #4E5666;
+    --ink-3: #868FA3;
+    --line: #D8DDE7;
+    --line-2: #C2CAD8;
+    --gold: #B07708;
+    --slate: #64748F;
+    --teal: #0C8C7C;
+    --indigo: #4B54C6;
+    --rose: #B04A64;
+    --warn: #B4520E;
+    --edge: rgba(80,94,120,.28);
+    --edge-hot: rgba(12,140,124,.85);
+    --shadow: 0 1px 2px rgba(19,22,32,.06), 0 6px 18px rgba(19,22,32,.05);
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D0F14;
+      --panel: #14171F;
+      --panel-2: #191D26;
+      --stage: #090B10;
+      --ink: #E7EAF1;
+      --ink-2: #A2AAB9;
+      --ink-3: #6E7788;
+      --line: #232833;
+      --line-2: #2F3542;
+      --gold: #DCA43C;
+      --slate: #8494B5;
+      --teal: #2FC3AC;
+      --indigo: #7E88F0;
+      --rose: #DD7F96;
+      --warn: #E0894A;
+      --edge: rgba(150,168,200,.22);
+      --edge-hot: rgba(47,195,172,.9);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D0F14;
+    --panel: #14171F;
+    --panel-2: #191D26;
+    --stage: #090B10;
+    --ink: #E7EAF1;
+    --ink-2: #A2AAB9;
+    --ink-3: #6E7788;
+    --line: #232833;
+    --line-2: #2F3542;
+    --gold: #DCA43C;
+    --slate: #8494B5;
+    --teal: #2FC3AC;
+    --indigo: #7E88F0;
+    --rose: #DD7F96;
+    --warn: #E0894A;
+    --edge: rgba(150,168,200,.22);
+    --edge-hot: rgba(47,195,172,.9);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ── shell ───────────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100dvh;
+    min-height: 620px;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 16px;
+    height: 52px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.015em;
+  }
+  .brand .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+  .bar .claim {
+    color: var(--ink-2);
+    font-size: 12px;
+    border-left: 1px solid var(--line);
+    padding-left: 18px;
+  }
+  .bar .spring { flex: 1; }
+  .loopmeter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .loopmeter .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+  }
+  .loopmeter .dot.pulse { animation: pulse .7s ease-out; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 var(--edge-hot); }
+    100% { box-shadow: 0 0 0 9px rgba(12,140,124,0); }
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 258px minmax(0,1fr) 382px;
+    min-height: 0;
+  }
+
+  aside, .stage { min-height: 0; min-width: 0; }
+  .rail {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    padding: 14px 14px 22px;
+  }
+  .side {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 0;
+  }
+
+  /* ── rail blocks ─────────────────────────────────────── */
+  .blk { margin-bottom: 20px; }
+  .blk > h2 {
+    margin: 0 0 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .seg { display: flex; flex-direction: column; gap: 2px; }
+  .seg button {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--ink-2);
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .seg button:hover { background: var(--panel-2); color: var(--ink); }
+  .seg button[aria-pressed="true"] {
+    background: var(--panel-2);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: inset 2px 0 0 var(--teal);
+  }
+  .seg button .k { margin-left: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+  .seg button[aria-pressed="true"] .k { color: var(--teal); }
+
+  .seg.row3 { flex-direction: row; gap: 3px; }
+  .seg.row3 button {
+    justify-content: center;
+    border: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+    padding: 5px 0;
+  }
+  .seg.row3 button[aria-pressed="true"] { box-shadow: inset 0 -2px 0 var(--teal); border-color: var(--line-2); }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .stats div { background: var(--panel); padding: 7px 9px; }
+  .stats dt { font-size: 10.5px; color: var(--ink-3); margin: 0; }
+  .stats dd { margin: 1px 0 0; font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+
+  .legend { display: flex; flex-direction: column; gap: 5px; }
+  .legend span { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-2); }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  .overlap { border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; background: var(--panel-2); }
+  .overlap .row { display: flex; justify-content: space-between; align-items: baseline; }
+  .overlap .row b { font-family: var(--mono); font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+  .overlap .track { height: 5px; border-radius: 3px; background: var(--line); margin-top: 7px; overflow: hidden; }
+  .overlap .fill { height: 100%; background: var(--warn); border-radius: 3px; transition: width .3s ease; }
+  .overlap p { margin: 7px 0 0; font-size: 11px; color: var(--ink-3); line-height: 1.45; }
+
+  .caveat { border-top: 1px solid var(--line); padding-top: 12px; }
+  .caveat p { margin: 0 0 7px; font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+  .caveat p b { color: var(--ink-2); font-weight: 600; }
+
+  /* ── stage ───────────────────────────────────────────── */
+  .stage { position: relative; background: var(--stage); overflow: hidden; }
+  .stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  .stage canvas.grabbing { cursor: grabbing; }
+  .stagehint {
+    position: absolute; left: 12px; bottom: 11px;
+    font-size: 10.5px; color: var(--ink-3);
+    font-family: var(--mono);
+    pointer-events: none;
+  }
+  .zoomer { position: absolute; right: 12px; bottom: 11px; display: flex; gap: 4px; }
+  .zoomer button {
+    width: 26px; height: 26px;
+    background: var(--panel); color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: 5px;
+    font: 500 13px var(--mono); cursor: pointer; padding: 0;
+  }
+  .zoomer button:hover { color: var(--ink); border-color: var(--line-2); }
+  .tip {
+    position: absolute; pointer-events: none;
+    background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line-2); border-radius: 5px;
+    padding: 5px 8px; font-size: 11.5px; max-width: 260px;
+    box-shadow: var(--shadow); opacity: 0; transition: opacity .12s;
+  }
+  .tip.on { opacity: 1; }
+  .tip .m { display: block; font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 2px; }
+
+  /* ── side panel ──────────────────────────────────────── */
+  .tabs { display: flex; border-bottom: 1px solid var(--line); padding: 0 6px; }
+  .tabs button {
+    padding: 12px 10px 10px; font: inherit; font-size: 12px;
+    background: none; border: 0; border-bottom: 2px solid transparent;
+    color: var(--ink-3); cursor: pointer;
+  }
+  .tabs button:hover { color: var(--ink-2); }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--teal); font-weight: 500; }
+  .tabs .count { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-left: 4px; }
+  .pane { overflow-y: auto; padding: 12px; }
+  .pane[hidden] { display: none !important; }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--panel);
+    padding: 10px 11px;
+    margin-bottom: 8px;
+    cursor: default;
+    transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: var(--line-2); }
+  .card.hot { border-color: var(--teal); }
+  .card .top { display: flex; gap: 8px; align-items: baseline; }
+  .card .rank {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--teal); flex: none; width: 17px;
+  }
+  .card h3 { margin: 0; font-size: 12.5px; font-weight: 600; line-height: 1.35; letter-spacing: -.005em; }
+  .card .meta {
+    display: flex; flex-wrap: wrap; gap: 4px 10px;
+    margin: 5px 0 0 25px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .card .meta .topic { color: var(--ink-2); }
+  .why {
+    margin: 8px 0 0 25px; padding: 7px 8px;
+    background: var(--panel-2); border-radius: 5px;
+    font-size: 11.5px; line-height: 1.5; color: var(--ink-2);
+  }
+  .why .lab { font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); display: block; margin-bottom: 3px; }
+  .why em { font-style: normal; color: var(--gold); font-weight: 600; }
+  .why strong { color: var(--ink); font-weight: 600; }
+  .why .conn { color: var(--ink-3); display: block; margin-top: 2px; }
+  .acts { display: flex; gap: 5px; margin: 9px 0 0 25px; }
+  .acts button {
+    flex: 1; padding: 5px 0; font: inherit; font-size: 11px;
+    background: var(--panel-2); color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: 5px; cursor: pointer;
+  }
+  .acts button:hover { border-color: var(--line-2); color: var(--ink); }
+  .acts button.pri:hover { border-color: var(--teal); color: var(--teal); }
+  .acts button.neg:hover { border-color: var(--rose); color: var(--rose); }
+
+  .empty { color: var(--ink-3); font-size: 12px; padding: 24px 8px; text-align: center; }
+
+  /* doc pane */
+  .doc h3 { margin: 0 0 3px; font-size: 15px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+  .doc .sub { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-bottom: 12px; }
+  .depth { border-left: 2px solid var(--line); padding: 0 0 0 11px; margin: 0 0 12px; }
+  .depth h4 {
+    margin: 0 0 3px; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  }
+  .depth p { margin: 0 0 10px; font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+  .nbr { display: flex; flex-wrap: wrap; gap: 4px; }
+  .nbr button {
+    font: inherit; font-size: 11px; padding: 3px 7px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 4px; color: var(--ink-2); cursor: pointer;
+  }
+  .nbr button:hover { border-color: var(--line-2); color: var(--ink); }
+  .state-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+    text-transform: uppercase; padding: 2px 6px; border-radius: 3px;
+    border: 1px solid currentColor;
+  }
+
+  /* report */
+  .report { font-size: 12px; }
+  .report .head {
+    display: flex; align-items: center; gap: 8px;
+    padding-bottom: 9px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+  }
+  .report .head .av { width: 22px; height: 22px; border-radius: 5px; background: var(--indigo); flex: none; }
+  .report .head b { font-size: 12.5px; }
+  .report .head span { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .report section { margin-bottom: 14px; }
+  .report h4 { margin: 0 0 5px; font-size: 12px; font-weight: 600; }
+  .report ul { margin: 0; padding-left: 16px; }
+  .report li { color: var(--ink-2); margin-bottom: 3px; line-height: 1.5; }
+  .report .growth { display: flex; gap: 14px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .report .growth span b { font-size: 16px; }
+  .report .growth span { display: block; font-size: 10px; color: var(--ink-3); }
+
+  :focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; border-radius: 4px; }
+
+  @media (max-width: 1080px) {
+    main { grid-template-columns: 1fr; grid-template-rows: 300px auto auto; }
+    .app { height: auto; }
+    .rail { border-right: 0; border-bottom: 1px solid var(--line); order: 2; }
+    .stage { order: 1; }
+    .side { border-left: 0; border-top: 1px solid var(--line); order: 3; }
+    .pane { max-height: none; }
+  }
+</style>
+
+<div class="app">
+  <div class="bar">
+    <div class="brand">
+      <h1>Checkpoint Graph</h1>
+      <span class="tag">prototype</span>
+    </div>
+    <div class="claim">읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려준다</div>
+    <div class="spring"></div>
+    <div class="loopmeter">
+      <i class="dot" id="loopdot"></i>
+      <span>반응 <b class="num" id="mReact">0</b>건 · 재계산 <b class="num" id="mRecalc">0</b>회</span>
+    </div>
+  </div>
+
+  <main>
+    <aside class="rail">
+      <div class="blk">
+        <h2>렌즈</h2>
+        <div class="seg" id="lens"></div>
+      </div>
+
+      <div class="blk">
+        <h2>랭킹 방법</h2>
+        <div class="seg" id="method"></div>
+      </div>
+
+      <div class="blk">
+        <h2>허브 보정 (degree 정규화)</h2>
+        <div class="seg row3" id="hubexp"></div>
+        <p style="margin:7px 0 0;font-size:11px;color:var(--ink-3);line-height:1.45" id="hubNote"></p>
+      </div>
+
+      <div class="blk">
+        <h2>피인용수 순위와 겹침</h2>
+        <div class="overlap">
+          <div class="row"><span style="color:var(--ink-2)">상위 10개 중복</span><b class="num" id="ovNum">0/10</b></div>
+          <div class="track"><i class="fill" id="ovFill" style="width:0%"></i></div>
+          <p id="ovNote"></p>
+        </div>
+      </div>
+
+      <div class="blk">
+        <h2>그래프</h2>
+        <dl class="stats">
+          <div><dt>노드</dt><dd id="sNodes">0</dd></div>
+          <div><dt>엣지</dt><dd id="sEdges">0</dd></div>
+          <div><dt>내 것</dt><dd id="sMine" style="color:var(--gold)">0</dd></div>
+          <div><dt>고립</dt><dd id="sIso" style="color:var(--rose)">0</dd></div>
+        </dl>
+      </div>
+
+      <div class="blk">
+        <h2>범례</h2>
+        <div class="legend">
+          <span><i style="background:var(--gold)"></i>내가 읽음 · 좋아요</span>
+          <span><i style="background:var(--teal)"></i>추천</span>
+          <span><i style="background:var(--slate)"></i>외부 논문</span>
+          <span><i style="background:var(--indigo)"></i>모델 릴리스</span>
+          <span><i style="background:var(--rose)"></i>아티클 (인용 그래프 없음)</span>
+        </div>
+      </div>
+
+      <div class="blk caveat">
+        <p><b>이 프로토타입이 답하는 것</b><br>PPR 결과가 피인용수 순위와 실제로 다른가. "왜" 경로가 납득되는가. 반응 한 번에 목록이 바뀌는가.</p>
+        <p><b>답하지 못하는 것</b><br>읽음 이력은 가정한 시드다. 인용 그래프는 오늘 시점 스냅샷이라 시점 누수가 있다. 진짜 판정은 시간 검열된 롤링 오리진 백테스트에서 나온다.</p>
+        <button id="reset" style="margin-top:4px;width:100%;padding:6px;font:inherit;font-size:11px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--ink-2);cursor:pointer">시드 상태로 되돌리기</button>
+      </div>
+    </aside>
+
+    <div class="stage" id="stage">
+      <canvas id="cv"></canvas>
+      <div class="stagehint">드래그 = 이동 · 휠 = 확대 · 노드 클릭 = 문서</div>
+      <div class="zoomer">
+        <button id="zin" title="확대">+</button>
+        <button id="zout" title="축소">−</button>
+        <button id="zfit" title="맞춤" style="width:auto;padding:0 7px;font-size:10px">FIT</button>
+        <button id="zshake" title="재배치">⟳</button>
+      </div>
+      <div class="tip" id="tip"></div>
+    </div>
+
+    <aside class="side">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="next" aria-selected="true">다음에 읽을 것<span class="count" id="cNext">8</span></button>
+        <button role="tab" data-tab="doc" aria-selected="false">문서</button>
+        <button role="tab" data-tab="report" aria-selected="false">주간 리포트</button>
+      </div>
+      <div class="pane" id="pane-next"></div>
+      <div class="pane" id="pane-doc" hidden></div>
+      <div class="pane" id="pane-report" hidden></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ─────────────────────────────────────────────────────────
+   데이터: 실제 논문 · 실제 인용 관계
+   초록 본문은 저장하지 않는다(기획안 6절). 메타 + 자체 한 줄만.
+   ───────────────────────────────────────────────────────── */
+
+// [id, 제목, 연도, arXiv id, 대략 피인용수, 토픽]
+const PAPERS = [
+  ["lstm","Long Short-Term Memory",1997,"","110000","arch"],
+  ["seq2seq","Sequence to Sequence Learning with Neural Networks",2014,"1409.3215","28000","arch"],
+  ["bahdanau","Neural Machine Translation by Jointly Learning to Align and Translate",2014,"1409.0473","38000","arch"],
+  ["adam","Adam: A Method for Stochastic Optimization",2014,"1412.6980","190000","opt"],
+  ["resnet","Deep Residual Learning for Image Recognition",2015,"1512.03385","240000","vis"],
+  ["layernorm","Layer Normalization",2016,"1607.06450","12000","arch"],
+  ["moe","Outrageously Large Neural Networks: The Sparsely-Gated MoE Layer",2017,"1701.06538","3100","moe"],
+  ["attention","Attention Is All You Need",2017,"1706.03762","135000","arch"],
+  ["ppo","Proximal Policy Optimization Algorithms",2017,"1707.06347","23000","align"],
+  ["gpipe","GPipe: Efficient Training of Giant Neural Networks",2018,"1811.06965","1600","sys"],
+  ["bert","BERT: Pre-training of Deep Bidirectional Transformers",2018,"1810.04805","115000","arch"],
+  ["gpt2","Language Models are Unsupervised Multitask Learners",2019,"","14000","arch"],
+  ["megatron","Megatron-LM: Training Multi-Billion Parameter LMs",2019,"1909.08053","2600","sys"],
+  ["zero","ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",2019,"1910.02054","1800","sys"],
+  ["t5","Exploring the Limits of Transfer Learning (T5)",2019,"1910.10683","19000","arch"],
+  ["mqa","Fast Transformer Decoding: One Write-Head is All You Need",2019,"1911.02150","520","eff"],
+  ["scaling","Scaling Laws for Neural Language Models",2020,"2001.08361","3400","scale"],
+  ["dpr","Dense Passage Retrieval for Open-Domain QA",2020,"2004.04906","4200","rag"],
+  ["colbert","ColBERT: Efficient Passage Search over BERT",2020,"2004.12832","1600","rag"],
+  ["rag","Retrieval-Augmented Generation for Knowledge-Intensive NLP",2020,"2005.11401","5600","rag"],
+  ["gpt3","Language Models are Few-Shot Learners",2020,"2005.14165","38000","arch"],
+  ["ddpm","Denoising Diffusion Probabilistic Models",2020,"2006.11239","16000","vis"],
+  ["gshard","GShard: Scaling Giant Models with Conditional Computation",2020,"2006.16668","1100","moe"],
+  ["rlhfsum","Learning to Summarize from Human Feedback",2020,"2009.01325","3100","align"],
+  ["mmlu","Measuring Massive Multitask Language Understanding",2020,"2009.03300","4300","eval"],
+  ["vit","An Image is Worth 16x16 Words (ViT)",2020,"2010.11929","44000","vis"],
+  ["switch","Switch Transformers: Scaling to Trillion Parameter Models",2021,"2101.03961","2200","moe"],
+  ["clip","Learning Transferable Visual Models from Natural Language",2021,"2103.00020","28000","vis"],
+  ["rope","RoFormer: Enhanced Transformer with Rotary Position Embedding",2021,"2104.09864","2600","arch"],
+  ["lora","LoRA: Low-Rank Adaptation of Large Language Models",2021,"2106.09685","9800","eff"],
+  ["humaneval","Evaluating Large Language Models Trained on Code",2021,"2107.03374","6100","eval"],
+  ["alibi","Train Short, Test Long: Attention with Linear Biases",2021,"2108.12409","1100","arch"],
+  ["gsm8k","Training Verifiers to Solve Math Word Problems",2021,"2110.14168","2900","eval"],
+  ["s4","Efficiently Modeling Long Sequences with Structured State Spaces",2021,"2111.00396","1900","ssm"],
+  ["ldm","High-Resolution Image Synthesis with Latent Diffusion Models",2021,"2112.10752","19000","vis"],
+  ["cot","Chain-of-Thought Prompting Elicits Reasoning in LLMs",2022,"2201.11903","10000","reason"],
+  ["instructgpt","Training Language Models to Follow Instructions with Human Feedback",2022,"2203.02155","11000","align"],
+  ["selfcons","Self-Consistency Improves Chain of Thought Reasoning",2022,"2203.11171","3200","reason"],
+  ["chinchilla","Training Compute-Optimal Large Language Models",2022,"2203.15556","3500","scale"],
+  ["flash","FlashAttention: Fast and Memory-Efficient Exact Attention",2022,"2205.14135","2900","eff"],
+  ["bigbench","Beyond the Imitation Game (BIG-bench)",2022,"2206.04615","1500","eval"],
+  ["expertchoice","Mixture-of-Experts with Expert Choice Routing",2022,"2202.09368","420","moe"],
+  ["react","ReAct: Synergizing Reasoning and Acting in Language Models",2022,"2210.03629","3600","reason"],
+  ["specdec","Fast Inference from Transformers via Speculative Decoding",2022,"2211.17192","830","eff"],
+  ["whisper","Robust Speech Recognition via Large-Scale Weak Supervision",2022,"2212.04356","3400","vis"],
+  ["cai","Constitutional AI: Harmlessness from AI Feedback",2022,"2212.08073","1900","align"],
+  ["llama","LLaMA: Open and Efficient Foundation Language Models",2023,"2302.13971","12000","arch"],
+  ["toolformer","Toolformer: Language Models Can Teach Themselves to Use Tools",2023,"2302.04761","1500","reason"],
+  ["hyena","Hyena Hierarchy: Towards Larger Convolutional Language Models",2023,"2302.10866","560","ssm"],
+  ["gpt4","GPT-4 Technical Report",2023,"2303.08774","9500","arch"],
+  ["lion","Symbolic Discovery of Optimization Algorithms (Lion)",2023,"2302.06675","640","opt"],
+  ["starcoder","StarCoder: May the Source Be With You",2023,"2305.06161","880","arch"],
+  ["lima","LIMA: Less Is More for Alignment",2023,"2305.11206","1100","align"],
+  ["gqa","GQA: Training Generalized Multi-Query Transformer Models",2023,"2305.13245","900","eff"],
+  ["rwkv","RWKV: Reinventing RNNs for the Transformer Era",2023,"2305.13048","560","ssm"],
+  ["qlora","QLoRA: Efficient Finetuning of Quantized LLMs",2023,"2305.14314","3100","eff"],
+  ["sophia","Sophia: A Scalable Stochastic Second-order Optimizer",2023,"2305.14342","280","opt"],
+  ["dpo","Direct Preference Optimization",2023,"2305.18290","4200","align"],
+  ["phi","Textbooks Are All You Need",2023,"2306.11644","900","arch"],
+  ["flash2","FlashAttention-2: Faster Attention with Better Parallelism",2023,"2307.08691","1300","eff"],
+  ["llama2","Llama 2: Open Foundation and Fine-Tuned Chat Models",2023,"2307.09288","13000","arch"],
+  ["yarn","YaRN: Efficient Context Window Extension of LLMs",2023,"2309.00071","560","arch"],
+  ["vllm","Efficient Memory Management for LLM Serving with PagedAttention",2023,"2309.06180","1500","eff"],
+  ["streaming","Efficient Streaming Language Models with Attention Sinks",2023,"2309.17453","760","eff"],
+  ["mistral","Mistral 7B",2023,"2310.06825","2600","arch"],
+  ["ring","Ring Attention with Blockwise Transformers",2023,"2310.01889","400","eff"],
+  ["mamba","Mamba: Linear-Time Sequence Modeling with Selective State Spaces",2023,"2312.00752","2400","ssm"],
+  ["mixtral","Mixtral of Experts",2024,"2401.04088","1600","moe"],
+  ["medusa","Medusa: Simple LLM Inference Acceleration Framework",2024,"2401.10774","390","eff"],
+  ["olmo","OLMo: Accelerating the Science of Language Models",2024,"2402.00838","560","arch"],
+  ["gemma","Gemma: Open Models Based on Gemini Research",2024,"2403.08295","1200","arch"],
+  ["mod","Mixture-of-Depths: Dynamically Allocating Compute",2024,"2404.02258","230","moe"],
+  ["dsv2","DeepSeek-V2: A Strong, Economical, Efficient MoE Language Model",2024,"2405.04434","640","moe"],
+  ["qwen2","Qwen2 Technical Report",2024,"2407.10671","1100","arch"],
+  ["llama3","The Llama 3 Herd of Models",2024,"2407.21783","3200","arch"],
+  ["tulu","Tulu 3: Pushing Frontiers in Open Language Model Post-Training",2024,"2411.15124","310","align"],
+  ["dsv3","DeepSeek-V3 Technical Report",2024,"2412.19437","1400","moe"],
+  ["dsr1","DeepSeek-R1: Incentivizing Reasoning Capability via RL",2025,"2501.12948","2100","reason"]
+];
+
+// 모델 릴리스 노드 (기획안: tracker.json 을 외부 소스로 소비)
+const MODELS = [
+  ["m-dsv3","DeepSeek-V3","dsv3","MIT"],
+  ["m-dsr1","DeepSeek-R1","dsr1","MIT"],
+  ["m-mixtral","Mixtral 8x7B","mixtral","Apache-2.0"],
+  ["m-llama3","Llama 3.1 405B","llama3","Llama Community"],
+  ["m-qwen2","Qwen2.5 72B","qwen2","Apache-2.0"],
+  ["m-mistral","Mistral 7B","mistral","Apache-2.0"],
+  ["m-gemma","Gemma 2 27B","gemma","Gemma Terms"],
+  ["m-olmo","OLMo 2 13B","olmo","Apache-2.0"]
+];
+
+// 아티클: 인용 그래프에 붙지 않는다. 의도적으로 고립 노드로 남긴다.
+const ARTICLES = [
+  ["a-kipply","Transformer Inference Arithmetic","kipply.github.io",2022],
+  ["a-scale","How to Scale Your Model","jax-ml.github.io",2025],
+  ["a-weng","Attention? Attention!","lilianweng.github.io",2018]
+];
+
+// from: 이 논문이 인용하는 논문들
+const CITE_SRC = `
+attention: bahdanau seq2seq lstm adam layernorm
+bert: attention seq2seq adam
+gpt2: attention bert layernorm
+t5: attention bert adam
+megatron: attention bert gpt2 adam
+zero: megatron adam gpipe
+gpipe: resnet seq2seq
+mqa: attention
+scaling: attention gpt2 adam
+gpt3: attention bert gpt2 scaling t5
+mmlu: gpt3 bert t5
+dpr: bert attention
+colbert: bert dpr attention
+rag: dpr bert t5 attention
+ddpm: resnet adam
+moe: lstm adam
+gshard: attention moe t5
+switch: moe gshard attention t5 adam
+expertchoice: switch gshard moe attention
+vit: attention resnet bert
+clip: vit attention resnet bert
+ldm: ddpm clip vit attention
+rope: attention bert
+alibi: attention rope
+lora: attention bert gpt3 adam
+humaneval: gpt3 attention
+gsm8k: gpt3 t5
+s4: attention lstm
+hyena: s4 attention gpt2
+rwkv: attention lstm s4
+mamba: s4 attention hyena rwkv
+chinchilla: scaling gpt3 attention t5
+cot: gpt3 t5 gsm8k
+selfcons: cot gpt3 gsm8k
+react: cot gpt3 selfcons
+toolformer: gpt3 cot
+rlhfsum: ppo gpt2
+instructgpt: gpt3 ppo rlhfsum t5
+cai: instructgpt rlhfsum ppo
+dpo: instructgpt ppo rlhfsum gpt3
+lima: llama instructgpt gpt3
+flash: attention bert gpt3 megatron
+flash2: flash attention megatron
+gqa: mqa attention t5 flash
+bigbench: gpt3 t5 mmlu bert
+specdec: attention t5 gpt3
+whisper: attention clip gpt2
+gpt4: gpt3 instructgpt mmlu humaneval bigbench chinchilla
+llama: attention rope scaling chinchilla gpt3 adam t5
+llama2: llama attention rope gqa instructgpt ppo flash
+mistral: llama llama2 flash gqa attention rope
+starcoder: humaneval llama attention flash
+phi: gpt3 humaneval gpt4
+qlora: lora llama attention gpt3
+lion: adam vit resnet
+sophia: adam gpt2 chinchilla
+yarn: rope alibi llama flash
+vllm: attention flash gpt3 megatron llama
+streaming: attention rope alibi flash llama2
+ring: flash attention megatron
+mixtral: mistral switch moe gshard llama2 attention
+medusa: specdec vllm llama2 flash
+olmo: llama2 attention t5 adam
+gemma: llama2 attention rope gqa
+mod: switch moe expertchoice attention
+dsv2: switch gshard llama2 attention rope gqa mqa
+qwen2: llama2 attention rope gqa dpo yarn
+llama3: llama2 rope gqa flash2 chinchilla scaling dpo
+tulu: dpo instructgpt llama2 llama3
+dsv3: dsv2 mixtral switch gqa rope flash expertchoice chinchilla
+dsr1: dsv3 ppo cot instructgpt gsm8k
+`;
+
+// 가정한 읽음 이력 (효율적 LLM 서빙 + MoE 관심 연구자)
+const SEED_HISTORY = [
+  ["attention","liked"], ["chinchilla","read"], ["switch","liked"], ["rope","read"],
+  ["gqa","read"], ["flash","liked"], ["llama2","read"], ["vllm","liked"],
+  ["specdec","read"], ["mixtral","liked"], ["dsv2","liked"], ["lora","read"],
+  ["ddpm","skipped"], ["clip","skipped"],
+  ["a-kipply","liked"], ["a-scale","read"]
+];
+
+const TOPICS = {
+  arch:["구조","#4C7DF0"], moe:["MoE","#D2691E"], eff:["효율·서빙","#0C9C8A"],
+  align:["정렬·RLHF","#B08010"], reason:["추론","#7B5BD6"], rag:["검색증강","#0E8FA8"],
+  sys:["분산학습","#8A6FA8"], ssm:["상태공간","#C04A78"], vis:["비전·멀티모달","#3FA05A"],
+  eval:["평가","#9AA13C"], opt:["최적화","#CC5544"], scale:["스케일링","#5E6B8C"]
+};
+
+// 자체 한 줄 요약 (원문 초록이 아니다)
+const GIST = {
+  dsv3:"MLA 와 보조손실 없는 로드밸런싱으로 671B MoE 를 2.8M H800시간에 학습했다고 보고한 리포트",
+  moe:"조건부 계산을 처음 대규모로 실증한 논문. 이후 모든 MoE 라우팅의 출발점",
+  gshard:"MoE 를 수백 대 가속기로 샤딩하는 컴파일러·병렬화 규약을 제시",
+  flash2:"FlashAttention 의 작업 분할을 다시 짜 A100 에서 2배 가까운 처리량",
+  expertchoice:"토큰이 전문가를 고르는 대신 전문가가 토큰을 고른다. 로드밸런싱 손실이 사라진다",
+  medusa:"드래프트 모델 없이 여러 헤드로 동시 예측해 디코딩을 가속",
+  mqa:"KV 캐시를 헤드 하나로 줄이는 아이디어. GQA 와 MLA 의 조상",
+  streaming:"어텐션 싱크를 남기면 슬라이딩 윈도로도 무한 스트리밍이 된다",
+  ring:"시퀀스를 링 토폴로지로 돌려 컨텍스트를 장비 수만큼 늘린다",
+  mistral:"슬라이딩 윈도 어텐션과 GQA 로 7B 급에서 효율을 끌어올린 모델",
+  mod:"레이어마다 토큰의 일부만 계산해 깊이 방향으로 연산을 배분",
+  dsr1:"순수 RL 만으로 추론 능력이 창발하는지 검증한 리포트",
+  llama3:"405B 까지의 밀집 모델 학습 레시피와 데이터 파이프라인 전체 공개",
+  yarn:"RoPE 보간을 개선해 적은 추가 학습으로 컨텍스트를 확장",
+  qlora:"4비트 양자화 위에서 LoRA 를 얹어 단일 GPU 파인튜닝을 가능하게",
+  scaling:"모델·데이터·연산의 멱법칙 관계를 최초로 정리",
+  dpo:"보상 모델 없이 선호쌍만으로 정책을 직접 최적화",
+  megatron:"텐서 병렬화로 트랜스포머를 여러 GPU 에 쪼개는 표준 방식",
+  zero:"옵티마이저 상태·그래디언트·파라미터를 분할해 메모리 중복을 제거",
+  mamba:"선택적 상태공간으로 어텐션 없이 선형 시간 시퀀스 모델링",
+  gpt3:"175B 로 파인튜닝 없이 few-shot 이 된다는 것을 보인 리포트",
+  t5:"모든 NLP 과제를 text-to-text 하나로 통일한 인코더-디코더",
+  bert:"양방향 마스크 언어모델 사전학습. 인코더 계열의 기준점",
+  llama:"공개 데이터만으로 학습한 밀집 모델. 오픈 생태계의 출발선",
+  mixtral:"8x7B 희소 MoE. 토큰당 두 전문가만 활성화",
+  dsv2:"MLA 로 KV 캐시를 압축한 236B MoE",
+  vllm:"KV 캐시를 OS 페이징처럼 관리해 서빙 처리량을 끌어올림",
+  flash:"타일링과 재계산으로 어텐션의 HBM 왕복을 없앤 정확 어텐션",
+  switch:"전문가 하나만 라우팅하는 단순화로 MoE 학습을 안정화",
+  gqa:"MQA 와 MHA 사이. 헤드를 그룹으로 묶어 품질과 KV 크기를 절충",
+  specdec:"작은 드래프트 모델이 앞서 쓰고 큰 모델이 한 번에 검증",
+  lora:"저랭크 행렬만 학습해 파인튜닝 비용을 수백분의 일로",
+  chinchilla:"주어진 연산에서 모델과 토큰을 함께 키워야 한다는 재보정"
+};
+
+/* ─────────────────────────────────────────────────────────
+   그래프 구축
+   ───────────────────────────────────────────────────────── */
+const N = new Map();      // id -> node
+const OUT = new Map();    // id -> [cited ids]      (인용)
+const IN  = new Map();    // id -> [citing ids]     (피인용)
+const ADJ = new Map();    // id -> [ids]            (무방향, PPR 용)
+
+function addNode(n){ N.set(n.id,n); OUT.set(n.id,[]); IN.set(n.id,[]); ADJ.set(n.id,[]); }
+
+for (const [id,title,year,arxiv,cites,topic] of PAPERS)
+  addNode({id,title,year,arxiv,cites:+cites,topic,kind:"paper",x:0,y:0,vx:0,vy:0});
+for (const [id,name,paper,license] of MODELS)
+  addNode({id,title:name,year:null,arxiv:"",cites:0,topic:"model",kind:"model",paper,license,x:0,y:0,vx:0,vy:0});
+for (const [id,title,host,year] of ARTICLES)
+  addNode({id,title,year,arxiv:"",cites:0,topic:"article",kind:"article",host,x:0,y:0,vx:0,vy:0});
+
+const EDGES = [];
+function link(a,b,type){
+  if(!N.has(a)||!N.has(b)) return;
+  EDGES.push({a,b,type});
+  if(type==="cites"){ OUT.get(a).push(b); IN.get(b).push(a); }
+  ADJ.get(a).push(b); ADJ.get(b).push(a);
+}
+for (const line of CITE_SRC.trim().split("\n")) {
+  const [from, rest] = line.split(":");
+  for (const to of rest.trim().split(/\s+/)) link(from.trim(), to, "cites");
+}
+for (const [id,,paper] of MODELS) link(id, paper, "describes");
+
+const ISOLATED = [...N.values()].filter(n => ADJ.get(n.id).length === 0);
+
+/* ─────────────────────────────────────────────────────────
+   상태
+   ───────────────────────────────────────────────────────── */
+const state = {
+  reactions: new Map(),   // id -> {r, t}
+  tclock: 0,
+  lens: "nbr",
+  method: "ppr",
+  hubexp: 0.8,
+  tab: "next",
+  selected: null,
+  hover: null,
+  hotPath: null,
+  recalcs: 0,
+  sessionActs: 0,
+  zoom: 1, panX: 0, panY: 0
+};
+function seedState(){
+  state.reactions.clear();
+  state.tclock = 0;
+  SEED_HISTORY.forEach(([id,r]) => state.reactions.set(id,{r, t: state.tclock++}));
+  state.sessionActs = 0; state.recalcs = 0; state.selected = null; state.hotPath = null;
+}
+seedState();
+
+/* ─────────────────────────────────────────────────────────
+   랭킹
+   ───────────────────────────────────────────────────────── */
+const W = { liked: 2, read: 1, skipped: -1, later: 0 };
+
+function seedVector(){
+  const s = {}; let norm = 0;
+  for (const [id, o] of state.reactions) {
+    const w = W[o.r] || 0;
+    if (!w) continue;
+    const decay = Math.pow(0.94, state.tclock - 1 - o.t);   // 최근성 감쇠
+    const v = w * decay;
+    s[id] = (s[id] || 0) + v;
+    norm += Math.abs(v);
+  }
+  if (norm > 0) for (const k in s) s[k] /= norm;
+  return s;
+}
+
+function personalizedPageRank(){
+  const s = seedVector();
+  const d = 0.85;
+  let p = Object.assign({}, s);
+  for (let it = 0; it < 45; it++) {
+    const nx = {};
+    for (const id in p) {
+      const nb = ADJ.get(id);
+      if (!nb || nb.length === 0) continue;
+      const share = (p[id] * d) / nb.length;
+      for (const m of nb) nx[m] = (nx[m] || 0) + share;
+    }
+    for (const id in s) nx[id] = (nx[id] || 0) + (1 - d) * s[id];
+    p = nx;
+  }
+  return p;
+}
+
+function coCitationScore(){
+  // 시드들이 인용한 논문을 센다 = "참고문헌 최빈" 베이스라인
+  const c = {};
+  for (const [id, o] of state.reactions) {
+    if ((W[o.r] || 0) <= 0) continue;
+    for (const t of OUT.get(id) || []) c[t] = (c[t] || 0) + 1;
+    for (const t of IN.get(id) || []) c[t] = (c[t] || 0) + 0.5;  // 피인용은 절반 가중
+  }
+  return c;
+}
+
+function scores(method, hubexp){
+  let raw;
+  if (method === "ppr") raw = personalizedPageRank();
+  else if (method === "cocite") raw = coCitationScore();
+  else if (method === "cites") { raw = {}; for (const n of N.values()) raw[n.id] = n.cites; }
+  else if (method === "recent") { raw = {}; for (const n of N.values()) raw[n.id] = n.year ? (n.year - 1990) : 0; }
+  if (hubexp > 0 && (method === "ppr" || method === "cocite")) {
+    const fixed = {};
+    for (const id in raw) {
+      const deg = (ADJ.get(id) || []).length;
+      fixed[id] = raw[id] / Math.pow(Math.max(deg, 1), hubexp);
+    }
+    raw = fixed;
+  }
+  return raw;
+}
+
+function rank(method, hubexp, k){
+  const sc = scores(method, hubexp);
+  return Object.keys(sc)
+    .filter(id => N.has(id) && !state.reactions.has(id) && sc[id] > 0)
+    .sort((a, b) => sc[b] - sc[a] || N.get(b).cites - N.get(a).cites)
+    .slice(0, k)
+    .map(id => ({ id, score: sc[id] }));
+}
+
+/* 왜: 양의 시드에서 후보까지 최단 경로 (무방향 BFS) */
+function whyPath(target){
+  const starts = [...state.reactions].filter(([, o]) => (W[o.r] || 0) > 0).map(([id]) => id);
+  if (!starts.length) return null;
+  const prev = new Map(), seen = new Set(starts);
+  let frontier = starts.slice();
+  for (let hop = 0; hop < 4 && frontier.length; hop++) {
+    const next = [];
+    for (const cur of frontier) {
+      for (const nb of ADJ.get(cur) || []) {
+        if (seen.has(nb)) continue;
+        seen.add(nb); prev.set(nb, cur); next.push(nb);
+        if (nb === target) {
+          const path = [target];
+          let c = target;
+          while (prev.has(c)) { c = prev.get(c); path.unshift(c); }
+          return path;
+        }
+      }
+    }
+    frontier = next;
+  }
+  return null;
+}
+
+function connector(a, b){
+  if (N.get(b).kind === "model") return "↳ 이 논문을 쓰는 모델";
+  if (N.get(a).kind === "model") return "↳ 이 모델이 근거로 삼는";
+  if ((OUT.get(b) || []).includes(a)) return "↳ 이 논문을 인용한";
+  if ((OUT.get(a) || []).includes(b)) return "↳ 이 논문이 인용한";
+  return "↳ 이 논문과 이어진";
+}
+
+/* ─────────────────────────────────────────────────────────
+   렌더링: 사이드 패널
+   ───────────────────────────────────────────────────────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+const LENSES = [
+  ["mine","내가 읽은 것만"],
+  ["rec","읽은 것 + 추천"],
+  ["nbr","+ 인용 이웃 1홉"],
+  ["topic","토픽별 (전체)"],
+  ["all","전체 그래프"]
+];
+const METHODS = [
+  ["ppr","Personalized PageRank"],
+  ["cocite","참고문헌 최빈"],
+  ["cites","피인용수"],
+  ["recent","최근성"]
+];
+
+function buildSeg(el, items, key){
+  el.innerHTML = items.map(([v, label]) =>
+    `<button data-v="${v}" aria-pressed="${state[key] === v}">${label}<span class="k">${
+      key === "lens" ? "" : ""
+    }</span></button>`).join("");
+  el.onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state[key] = b.dataset.v;
+    buildSeg(el, items, key);
+    if (key === "lens") { layoutVisible(true); }
+    renderAll();
+  };
+}
+
+let currentRecs = [];
+
+function renderNext(){
+  currentRecs = rank(state.method, state.hubexp, 8);
+  const seedCount = [...state.reactions].filter(([, o]) => (W[o.r] || 0) > 0).length;
+  const heading = seedCount < 5 ? "탐색" : "추천";
+  const el = $("#pane-next");
+  if (!currentRecs.length) { el.innerHTML = `<p class="empty">시드가 없다. 문서를 읽음으로 표시하면 여기에 목록이 생긴다.</p>`; return; }
+
+  el.innerHTML = currentRecs.map((r, i) => {
+    const n = N.get(r.id);
+    const path = whyPath(r.id);
+    const [tname, tcolor] = TOPICS[n.topic] || [n.kind === "model" ? "모델" : "아티클", "#888"];
+    let why;
+    if (!path || path.length < 2) {
+      why = `<span class="lab">왜</span>그래프상 경로가 없다. 근거 없이 추천하지 않는다.`;
+    } else {
+      const chain = path.map((id, j) => {
+        const short = esc(shortName(N.get(id)));
+        if (j === 0) return `<em>읽은 ${short}</em>`;
+        const tail = j === path.length - 1 ? `<strong>${short}</strong>` : short;
+        return `<span class="conn">${connector(path[j - 1], id)}</span> ${tail}`;
+      }).join(" ");
+      why = `<span class="lab">왜 · ${path.length - 1}홉</span>${chain}`;
+    }
+    return `<article class="card" data-id="${r.id}">
+      <div class="top"><span class="rank">${String(i + 1).padStart(2, "0")}</span>
+        <h3>${esc(n.title)}</h3></div>
+      <div class="meta">
+        <span class="topic" style="color:${tcolor}">${tname}</span>
+        ${n.year ? `<span>${n.year}</span>` : ""}
+        ${n.arxiv ? `<span>arXiv:${n.arxiv}</span>` : ""}
+        ${n.cites ? `<span>피인용 ${fmt(n.cites)}</span>` : ""}
+        <span>score ${r.score.toExponential(1)}</span>
+      </div>
+      <div class="why">${why}</div>
+      <div class="acts">
+        <button class="pri" data-act="read">읽음</button>
+        <button class="pri" data-act="liked">좋아요</button>
+        <button class="neg" data-act="skipped">스킵</button>
+        <button data-act="later">나중에</button>
+      </div>
+    </article>`;
+  }).join("");
+
+  el.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("mouseenter", () => {
+      state.hotPath = whyPath(card.dataset.id);
+      card.classList.add("hot");
+    });
+    card.addEventListener("mouseleave", () => {
+      state.hotPath = null; card.classList.remove("hot");
+    });
+    card.querySelector("h3").style.cursor = "pointer";
+    card.querySelector("h3").addEventListener("click", () => selectNode(card.dataset.id));
+    card.querySelectorAll(".acts button").forEach(b => {
+      b.addEventListener("click", () => react(card.dataset.id, b.dataset.act));
+    });
+  });
+  $("#cNext").textContent = currentRecs.length;
+  $$tabLabel(heading);
+}
+function $$tabLabel(word){
+  document.querySelector('[data-tab="next"]').childNodes[0].nodeValue =
+    word === "탐색" ? "탐색 (시드 부족)" : "다음에 읽을 것";
+}
+
+function shortName(n){
+  if (n.kind === "model") return n.title;
+  if (n.kind === "article") return n.title;
+  const t = n.title;
+  const cut = t.indexOf(":");
+  let s = cut > 3 ? t.slice(0, cut) : t;
+  if (s.length > 34) s = s.slice(0, 33) + "…";
+  return s;
+}
+const fmt = v => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + "k" : String(v);
+
+function react(id, act){
+  if (act === "later") { state.reactions.set(id, { r: "later", t: state.tclock++ }); }
+  else state.reactions.set(id, { r: act, t: state.tclock++ });
+  state.sessionActs++; state.recalcs++;
+  const dot = $("#loopdot");
+  dot.classList.remove("pulse"); void dot.offsetWidth; dot.classList.add("pulse");
+  layoutVisible(false);
+  renderAll();
+}
+
+function selectNode(id){
+  state.selected = id;
+  setTab("doc");
+  renderDoc();
+}
+
+function renderDoc(){
+  const el = $("#pane-doc");
+  const id = state.selected;
+  if (!id) { el.innerHTML = `<p class="empty">그래프에서 노드를 클릭하거나 추천 제목을 누르면 문서가 열린다.</p>`; return; }
+  const n = N.get(id);
+  const rx = state.reactions.get(id);
+  const [tname, tcolor] = TOPICS[n.topic] || [n.kind === "model" ? "모델 릴리스" : "아티클", "var(--ink-3)"];
+  const cited = (OUT.get(id) || []).map(x => N.get(x));
+  const citing = (IN.get(id) || []).map(x => N.get(x));
+  const models = MODELS.filter(m => m[2] === id);
+  const gist = GIST[id];
+  const chipColor = rx ? (rx.r === "skipped" ? "var(--rose)" : rx.r === "later" ? "var(--ink-3)" : "var(--gold)") : "var(--teal)";
+  const chipText = rx ? { read: "읽음", liked: "좋아요", skipped: "스킵", later: "나중에" }[rx.r] : "추천 후보";
+
+  el.innerHTML = `<div class="doc">
+    <h3>${esc(n.title)}</h3>
+    <div class="sub">
+      ${n.arxiv ? `arXiv:${n.arxiv} · ` : ""}${n.year || ""}${n.host ? " · " + esc(n.host) : ""}
+      ${n.cites ? " · 피인용 " + fmt(n.cites) : ""}${n.license ? " · " + esc(n.license) : ""}
+    </div>
+    <p style="margin:0 0 12px"><span class="state-chip" style="color:${chipColor}">${chipText}</span>
+      <span class="state-chip" style="color:${tcolor};margin-left:4px">${tname}</span></p>
+
+    <div class="depth">
+      <h4>한 줄</h4>
+      <p>${gist ? esc(gist) : "자체 요약 미생성. 근거가 확보되기 전에는 만들지 않는다 (기획안 7절 원칙 2)."}</p>
+      <h4>핵심 기여</h4>
+      <p style="color:var(--ink-3)">LLM 생성 슬롯. 코드 게이트 통과 시에만 채운다.</p>
+      <h4>가이드 리딩</h4>
+      <p style="color:var(--ink-3)">3단계 깊이 중 마지막. W4 이후.</p>
+    </div>
+
+    ${models.length ? `<div style="margin-bottom:12px">
+      <h4 style="margin:0 0 5px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500">이 논문을 쓰는 모델</h4>
+      <div class="nbr">${models.map(m => `<button data-go="${m[0]}" style="color:var(--indigo)">${esc(m[1])}</button>`).join("")}</div>
+    </div>` : ""}
+
+    ${cited.length ? `<div style="margin-bottom:12px">
+      <h4 style="margin:0 0 5px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500">인용 (${cited.length})</h4>
+      <div class="nbr">${cited.map(x => `<button data-go="${x.id}">${esc(shortName(x))}</button>`).join("")}</div>
+    </div>` : ""}
+
+    ${citing.length ? `<div style="margin-bottom:12px">
+      <h4 style="margin:0 0 5px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500">피인용 (${citing.length})</h4>
+      <div class="nbr">${citing.map(x => `<button data-go="${x.id}">${esc(shortName(x))}</button>`).join("")}</div>
+    </div>` : ""}
+
+    ${!cited.length && !citing.length && !models.length ? `<p style="font-size:11.5px;color:var(--rose);line-height:1.5;border:1px solid var(--line);border-radius:6px;padding:9px">이 노드는 인용 그래프에 붙지 않는다. 아티클은 개념(concept) 노드가 생기는 W5 이후에야 연결된다. 지금은 고립점이다.</p>` : ""}
+
+    <div class="acts" style="margin-left:0">
+      <button class="pri" data-act="read">읽음</button>
+      <button class="pri" data-act="liked">좋아요</button>
+      <button class="neg" data-act="skipped">스킵</button>
+      <button data-act="later">나중에</button>
+    </div>
+  </div>`;
+
+  el.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => selectNode(b.dataset.go)));
+  el.querySelectorAll(".acts button").forEach(b => b.addEventListener("click", () => { react(id, b.dataset.act); renderDoc(); }));
+}
+
+function renderReport(){
+  const acts = [...state.reactions].filter(([, o]) => o.t >= SEED_HISTORY.length);
+  const readThis = acts.filter(([, o]) => o.r === "read" || o.r === "liked");
+  const mine = [...state.reactions].filter(([, o]) => (W[o.r] || 0) !== 0).length;
+  const recs = currentRecs.slice(0, 5);
+  $("#pane-report").innerHTML = `<div class="report">
+    <div class="head"><i class="av"></i><b>Checkpoint Graph</b><span>#reading · 매주 월요일 09:00</span></div>
+
+    <section>
+      <h4>이번 주에 읽은 것 (${readThis.length})</h4>
+      ${readThis.length ? `<ul>${readThis.map(([id, o]) =>
+        `<li>${esc(shortName(N.get(id)))} <span class="num" style="color:var(--ink-3)">${o.r === "liked" ? "♥" : "✓"}</span></li>`).join("")}</ul>`
+        : `<p style="color:var(--ink-3);margin:0">아직 없다. 추천 카드에서 반응하면 여기에 쌓인다.</p>`}
+    </section>
+
+    <section>
+      <h4>그래프가 자란 부분</h4>
+      <div class="growth">
+        <span><b>${mine}</b>내 노드</span>
+        <span><b>${state.recalcs}</b>재계산</span>
+        <span><b>${ISOLATED.length}</b>고립</span>
+      </div>
+    </section>
+
+    <section>
+      <h4>다음 주 추천 5개</h4>
+      <ul>${recs.map(r => {
+        const p = whyPath(r.id);
+        const reason = p && p.length >= 2
+          ? `읽은 ${esc(shortName(N.get(p[0])))}에서 ${p.length - 1}홉`
+          : "경로 없음";
+        return `<li><b style="color:var(--ink)">${esc(shortName(N.get(r.id)))}</b> <span style="color:var(--ink-3)">— ${reason}</span></li>`;
+      }).join("")}</ul>
+    </section>
+
+    <p style="font-size:11px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:9px;margin:0">
+      hit rate 는 다음 주에 이 5개 중 몇 개를 실제로 읽었는지로 잰다. LLM 이 품질을 판정하지 않는다.
+    </p>
+  </div>`;
+}
+
+function renderRail(){
+  const vis = visibleSet();
+  $("#sNodes").textContent = vis.size;
+  $("#sEdges").textContent = EDGES.filter(e => vis.has(e.a) && vis.has(e.b)).length;
+  $("#sMine").textContent = [...state.reactions].filter(([, o]) => (W[o.r] || 0) !== 0).length;
+  $("#sIso").textContent = ISOLATED.length;
+
+  const mine = rank(state.method, state.hubexp, 10).map(r => r.id);
+  const base = rank("cites", false, 10).map(r => r.id);
+  const overlap = mine.filter(id => base.includes(id)).length;
+  $("#ovNum").textContent = overlap + "/10";
+  $("#ovFill").style.width = (overlap * 10) + "%";
+  $("#ovNote").textContent = state.method === "cites"
+    ? "지금은 베이스라인 자기 자신을 보고 있다."
+    : overlap >= 7 ? "겹침이 높다. 이 방법은 피인용수 순위와 사실상 같은 것을 내놓는다. 그래프 계산을 할 이유가 없다."
+    : overlap >= 4 ? "절반쯤 겹친다. 차별점이 실제 독서를 예측하는지는 백테스트로만 갈린다."
+    : "겹침이 낮다. 개인화가 순위를 실제로 바꾸고 있다. 다만 바뀐 쪽이 더 맞는지는 별개 문제다.";
+}
+
+function renderAll(){
+  $("#mReact").textContent = state.sessionActs;
+  $("#mRecalc").textContent = state.recalcs;
+  renderNext();
+  renderRail();
+  if (state.tab === "doc") renderDoc();
+  if (state.tab === "report") renderReport();
+}
+
+function setTab(t){
+  state.tab = t;
+  document.querySelectorAll('[role="tab"]').forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  ["next", "doc", "report"].forEach(k => { $("#pane-" + k).hidden = (k !== t); });
+  if (t === "doc") renderDoc();
+  if (t === "report") renderReport();
+}
+
+/* ─────────────────────────────────────────────────────────
+   가시 집합 (렌즈)
+   ───────────────────────────────────────────────────────── */
+function visibleSet(){
+  const mine = new Set([...state.reactions.keys()]);
+  if (state.lens === "mine") return mine;
+  const recs = new Set(rank(state.method, state.hubexp, 12).map(r => r.id));
+  const rec = new Set([...mine, ...recs]);
+  if (state.lens === "rec") return rec;
+  if (state.lens === "nbr") {
+    const out = new Set(rec);
+    for (const id of rec) for (const nb of ADJ.get(id) || []) out.add(nb);
+    return out;
+  }
+  return new Set(N.keys());
+}
+
+/* ─────────────────────────────────────────────────────────
+   캔버스 · 포스 레이아웃
+   ───────────────────────────────────────────────────────── */
+const cv = $("#cv"), ctx = cv.getContext("2d");
+let VIS = [], VEDGES = [], DPR = 1, Wd = 800, Hd = 600;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function resize(){
+  const r = $("#stage").getBoundingClientRect();
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  Wd = Math.max(r.width, 10); Hd = Math.max(r.height, 10);
+  cv.width = Wd * DPR; cv.height = Hd * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+let scoreCache = {}, maxScore = 1, recSet = new Set();
+
+function layoutVisible(refit){
+  const vs = visibleSet();
+  scoreCache = scores(state.method, state.hubexp);
+  recSet = new Set(rank(state.method, state.hubexp, 8).map(r => r.id));
+  maxScore = Math.max(1e-9, ...[...vs].map(id => scoreCache[id] || 0));
+
+  const fresh = [];
+  for (const id of vs) {
+    const n = N.get(id);
+    if (!n.placed) {
+      const a = Math.random() * Math.PI * 2, rr = 120 + Math.random() * 180;
+      n.x = Math.cos(a) * rr; n.y = Math.sin(a) * rr; n.placed = true;
+    }
+    fresh.push(n);
+  }
+  VIS = fresh;
+  VEDGES = EDGES.filter(e => vs.has(e.a) && vs.has(e.b)).map(e => ({ a: N.get(e.a), b: N.get(e.b), type: e.type }));
+  for (let i = 0; i < (refit ? 260 : 90); i++) tick();
+  if (refit) fit();
+  reheat(refit ? 0.5 : 0.35);
+}
+
+function tick(heat = 1){
+  const k = 78;
+  for (let i = 0; i < VIS.length; i++) {
+    const a = VIS[i];
+    a.vx *= 0.85; a.vy *= 0.85;
+    for (let j = i + 1; j < VIS.length; j++) {
+      const b = VIS[j];
+      let dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+      if (d2 < 0.5) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d2 = 0.5; }
+      if (d2 > 250000) continue;
+      const d = Math.sqrt(d2), f = ((k * k) / d2) * heat;
+      a.vx += (dx / d) * f; a.vy += (dy / d) * f;
+      b.vx -= (dx / d) * f; b.vy -= (dy / d) * f;
+    }
+  }
+  for (const e of VEDGES) {
+    const a = e.a, b = e.b;
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+    const f = ((d * d) / (k * 26)) * heat;
+    a.vx += (dx / d) * f; a.vy += (dy / d) * f;
+    b.vx -= (dx / d) * f; b.vy -= (dy / d) * f;
+  }
+  for (const n of VIS) {
+    if (n === dragging) continue;
+    n.vx -= n.x * 0.016 * heat; n.vy -= n.y * 0.016 * heat;
+    n.x += Math.max(-14, Math.min(14, n.vx));
+    n.y += Math.max(-14, Math.min(14, n.vy));
+  }
+}
+
+function fit(){
+  if (!VIS.length) return;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const n of VIS) { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x); y1 = Math.max(y1, n.y); }
+  const pad = 70;
+  const z = Math.min((Wd - pad * 2) / Math.max(x1 - x0, 1), (Hd - pad * 2) / Math.max(y1 - y0, 1));
+  state.zoom = Math.max(0.25, Math.min(2.2, z));
+  state.panX = -((x0 + x1) / 2) * state.zoom;
+  state.panY = -((y0 + y1) / 2) * state.zoom;
+}
+
+function nodeColor(n){
+  const rx = state.reactions.get(n.id);
+  if (state.lens === "topic" && n.kind === "paper") return (TOPICS[n.topic] || ["", "#888"])[1];
+  if (rx) {
+    if (rx.r === "skipped") return css("--ink-3");
+    if (rx.r === "later") return css("--slate");
+    return css("--gold");
+  }
+  if (recSet.has(n.id)) return css("--teal");
+  if (n.kind === "model") return css("--indigo");
+  if (n.kind === "article") return css("--rose");
+  return css("--slate");
+}
+function nodeRadius(n){
+  const s = (scoreCache[n.id] || 0) / maxScore;
+  const base = state.reactions.has(n.id) ? 6 : 3.6;
+  return base + Math.sqrt(Math.max(s, 0)) * 15;
+}
+
+function toScreen(n){
+  return [Wd / 2 + state.panX + n.x * state.zoom, Hd / 2 + state.panY + n.y * state.zoom];
+}
+
+function draw(){
+  ctx.clearRect(0, 0, Wd, Hd);
+  const hot = state.hotPath ? new Set(state.hotPath) : null;
+  const hotEdges = new Set();
+  if (state.hotPath) for (let i = 1; i < state.hotPath.length; i++)
+    hotEdges.add(state.hotPath[i - 1] + "|" + state.hotPath[i]).add(state.hotPath[i] + "|" + state.hotPath[i - 1]);
+
+  // edges
+  ctx.lineWidth = 1;
+  for (const e of VEDGES) {
+    const key = e.a.id + "|" + e.b.id;
+    const isHot = hotEdges.has(key);
+    const [ax, ay] = toScreen(e.a), [bx, by] = toScreen(e.b);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+    if (isHot) { ctx.strokeStyle = css("--edge-hot"); ctx.lineWidth = 2; }
+    else if (hot) { ctx.strokeStyle = css("--edge"); ctx.globalAlpha = 0.25; ctx.lineWidth = 1; }
+    else { ctx.strokeStyle = e.type === "describes" ? css("--indigo") : css("--edge"); ctx.globalAlpha = e.type === "describes" ? 0.4 : 1; ctx.lineWidth = 1; }
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
+
+  // nodes
+  const labelled = [];
+  for (const n of VIS) {
+    const [x, y] = toScreen(n);
+    const r = nodeRadius(n) * Math.min(1.4, Math.max(0.6, state.zoom));
+    const dim = hot && !hot.has(n.id);
+    ctx.globalAlpha = dim ? 0.22 : 1;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832);
+    ctx.fillStyle = nodeColor(n); ctx.fill();
+    if (state.selected === n.id || state.hover === n.id) {
+      ctx.lineWidth = 2; ctx.strokeStyle = css("--ink"); ctx.stroke();
+    } else if (state.reactions.has(n.id)) {
+      ctx.lineWidth = 1.5; ctx.strokeStyle = css("--stage"); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    let pri = -1;
+    if (n.id === state.selected || n.id === state.hover) pri = 3;
+    else if (hot && hot.has(n.id)) pri = 3;
+    else if (recSet.has(n.id)) pri = 2;
+    else if (state.reactions.has(n.id) && state.zoom > 0.75) pri = 1;
+    if (!dim && pri >= 0) labelled.push({ n, x, y, r, pri });
+  }
+
+  ctx.font = '500 10.5px "IBM Plex Sans KR", sans-serif';
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  labelled.sort((a, b) => b.pri - a.pri);
+  const boxes = [];
+  for (const L of labelled) {
+    const t = shortName(L.n);
+    const w = ctx.measureText(t).width;
+    const cx = Math.max(w / 2 + 5, Math.min(Wd - w / 2 - 5, L.x));
+    const bx = cx - w / 2 - 3, by = L.y + L.r + 3, bw = w + 6, bh = 14;
+    if (boxes.some(o => bx < o[0] + o[2] && bx + bw > o[0] && by < o[1] + o[3] && by + bh > o[1])) continue;
+    boxes.push([bx, by, bw, bh]);
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = css("--stage");
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = state.reactions.has(L.n.id) ? css("--gold") : recSet.has(L.n.id) ? css("--teal") : css("--ink-2");
+    ctx.fillText(t, cx, by + 1);
+  }
+}
+
+let raf, dragging = null, panning = false, last = null;
+let alpha = 0;                                  // 시뮬레이션 열량. 0 이면 레이아웃이 멈춘다
+const reheat = v => { alpha = Math.max(alpha, v); };
+function loop(){
+  if (!reduceMotion && alpha > 0.003) { tick(alpha); alpha *= 0.972; }
+  draw();
+  raf = requestAnimationFrame(loop);
+}
+
+/* 인터랙션 */
+function pick(px, py){
+  let best = null, bd = 1e9;
+  for (const n of VIS) {
+    const [x, y] = toScreen(n);
+    const d = Math.hypot(x - px, y - py);
+    const r = nodeRadius(n) * Math.min(1.4, Math.max(0.6, state.zoom)) + 5;
+    if (d < r && d < bd) { bd = d; best = n; }
+  }
+  return best;
+}
+cv.addEventListener("mousedown", e => {
+  const r = cv.getBoundingClientRect();
+  const n = pick(e.clientX - r.left, e.clientY - r.top);
+  if (n) { dragging = n; } else { panning = true; cv.classList.add("grabbing"); }
+  last = [e.clientX, e.clientY];
+});
+addEventListener("mousemove", e => {
+  const r = cv.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  if (dragging) {
+    dragging.x += (e.clientX - last[0]) / state.zoom;
+    dragging.y += (e.clientY - last[1]) / state.zoom;
+    dragging.vx = dragging.vy = 0;
+    reheat(0.25);
+    last = [e.clientX, e.clientY]; return;
+  }
+  if (panning) {
+    state.panX += e.clientX - last[0]; state.panY += e.clientY - last[1];
+    last = [e.clientX, e.clientY]; return;
+  }
+  if (px < 0 || py < 0 || px > Wd || py > Hd) { state.hover = null; $("#tip").classList.remove("on"); return; }
+  const n = pick(px, py);
+  state.hover = n ? n.id : null;
+  const tip = $("#tip");
+  if (n) {
+    const rx = state.reactions.get(n.id);
+    tip.innerHTML = `${esc(n.title)}<span class="m">${
+      n.arxiv ? "arXiv:" + n.arxiv + " · " : ""}${n.year || ""}${n.cites ? " · 피인용 " + fmt(n.cites) : ""}${
+      rx ? " · " + { read: "읽음", liked: "좋아요", skipped: "스킵", later: "나중에" }[rx.r] : recSet.has(n.id) ? " · 추천" : ""}</span>`;
+    tip.style.left = Math.min(px + 14, Wd - 250) + "px";
+    tip.style.top = (py + 14) + "px";
+    tip.classList.add("on");
+  } else tip.classList.remove("on");
+});
+addEventListener("mouseup", e => {
+  if (dragging && Math.abs(e.clientX - last[0]) < 3) { /* click-ish */ }
+  dragging = null; panning = false; cv.classList.remove("grabbing");
+});
+cv.addEventListener("click", e => {
+  const r = cv.getBoundingClientRect();
+  const n = pick(e.clientX - r.left, e.clientY - r.top);
+  if (n) selectNode(n.id);
+});
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+  const r = cv.getBoundingClientRect();
+  const mx = e.clientX - r.left - Wd / 2, my = e.clientY - r.top - Hd / 2;
+  state.panX = mx - (mx - state.panX) * f;
+  state.panY = my - (my - state.panY) * f;
+  state.zoom = Math.max(0.2, Math.min(4, state.zoom * f));
+}, { passive: false });
+
+$("#zin").onclick = () => { state.zoom = Math.min(4, state.zoom * 1.25); };
+$("#zout").onclick = () => { state.zoom = Math.max(0.2, state.zoom / 1.25); };
+$("#zfit").onclick = () => fit();
+$("#zshake").onclick = () => reheat(0.9);
+$("#reset").onclick = () => { seedState(); layoutVisible(true); renderAll(); setTab("next"); };
+document.querySelector(".tabs").onclick = e => {
+  const b = e.target.closest("[role=tab]"); if (b) setTab(b.dataset.tab);
+};
+
+/* 부팅 */
+const HUBS = [[0, "없음"], [0.5, "deg^0.5"], [0.8, "deg^0.8"]];
+function buildHub(){
+  const el = $("#hubexp");
+  el.innerHTML = HUBS.map(([v, l]) => `<button data-v="${v}" aria-pressed="${state.hubexp === v}">${l}</button>`).join("");
+  el.onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.hubexp = +b.dataset.v; buildHub(); layoutVisible(false); renderAll();
+  };
+  $("#hubNote").textContent = state.hubexp === 0
+    ? "보정 없음. PPR 질량이 피인용 많은 허브로 몰려 상위가 이미 아는 유명 논문으로 찬다."
+    : state.hubexp === 0.5 ? "약한 보정. 허브가 아직 상위에 남아 있다."
+    : "강한 보정. 시드에 특이적인 논문이 올라온다. 지수 하나가 순위를 뒤집는다는 것이 이 화면의 요점이다.";
+}
+buildSeg($("#lens"), LENSES, "lens");
+buildSeg($("#method"), METHODS, "method");
+buildHub();
+setTab("next");
+resize();
+layoutVisible(true);
+renderAll();
+new ResizeObserver(() => { resize(); }).observe($("#stage"));
+loop();
+</script>
