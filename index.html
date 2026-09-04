@@ -6,6 +6,16 @@
 <title>Checkpoint Graph</title>
 <meta name="description" content="내가 읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려주는 연구자용 Second Brain.">
 <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Checkpoint Graph">
+<meta property="og:title" content="Checkpoint Graph">
+<meta property="og:description" content="내가 읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려주는 연구자용 Second Brain.">
+<meta property="og:url" content="https://sangho24.github.io/checkpoint-graph/">
+<meta property="og:image" content="https://sangho24.github.io/checkpoint-graph/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Checkpoint Graph 의 인용 그래프와 한 줄 소개">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -956,6 +966,7 @@ footer a:hover { color: var(--blue); }
 </main>
 
 <script src="./assets/sprites.js"></script>
+<script src="./assets/preview-data.js"></script>
 <script>
 "use strict";
 /* ══════════════════════════════════════════════════════════
@@ -1477,55 +1488,98 @@ sizeHow();
 addEventListener("resize", () => { sizeHow(); if (RM) drawHow(performance.now()); });
 if (RM) drawHow(performance.now()); else requestAnimationFrame(drawHow);
 
-/* ── 카드 썸네일: 정적 미리보기 ────────────────────── */
-function thumb(id, kind){
-  const c = document.getElementById(id), g = c.getContext("2d");
+/* ── 벤토 미리보기: 실제 그래프 ─────────────────────────
+   assets/preview-data.js 는 safari.html 의 실제 그래프(노드 89 · 엣지 274)를
+   같은 포스 레이아웃으로 배치하고 실제 독서 이력으로 PPR 을 돌린 결과다.
+   난수로 그린 대용품이 아니다. 재생성은 node tools/build-preview.mjs.
+   ───────────────────────────────────────────────────────── */
+const PAPER_FILL = { 0:"#6E7789", 1:"#A97406", 2:"#B9B0A0", 3:"#2B5FE3", 4:"#6B4FD8", 5:"#B4485F" };
+const DARK_FILL  = { 0:"#5A6B93", 1:"#F0B429", 2:"#454E70", 3:"#35E0C2", 4:"#7C86F5", 5:"#E0788F" };
+
+function drawPreview(id, mode){
+  const c = document.getElementById(id);
+  if (!c || typeof CG_PREVIEW === "undefined") return;
+  const g = c.getContext("2d");
   const r = c.getBoundingClientRect();
   const d = Math.min(devicePixelRatio || 1, 2);
-  const w = Math.max(r.width, 200), h = Math.max(r.height, 100);
-  c.width = w * d; c.height = h * d; g.setTransform(d, 0, 0, d, 0, 0);
+  const W = Math.max(r.width, 160), H = Math.max(r.height, 90);
+  c.width = W * d; c.height = H * d; g.setTransform(d, 0, 0, d, 0, 0);
 
-  const pts = [];
-  let seed = kind === "graph" ? 7 : 21;
-  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
-  for (let i = 0; i < 26; i++) pts.push([18 + rnd() * (w - 36), 14 + rnd() * (h - 28), 2 + rnd() * 5]);
+  /* 정규화 좌표를 캔버스에 꽉 차게(cover) 매핑한다 */
+  const pad = 10;
+  const k = Math.max((W - pad * 2) / 1, (H - pad * 2) / CG_PREVIEW.aspect) * 1.02;
+  const ox = W / 2 - k / 2, oy = H / 2 - (k * CG_PREVIEW.aspect) / 2;
+  const X = v => ox + v * k, Y = v => oy + v * k * CG_PREVIEW.aspect;
 
-  if (kind === "graph") {
-    g.fillStyle = "#EDE9E0"; g.fillRect(0, 0, w, h);
-    g.strokeStyle = "rgba(90,84,72,.22)"; g.lineWidth = 1;
-    for (let i = 0; i < pts.length - 1; i += 1) {
-      const j = (i * 7 + 3) % pts.length;
-      g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[j][0], pts[j][1]); g.stroke();
+  const dark = mode === "dark";
+  g.fillStyle = dark ? "#0A0E1C" : "#EBE7DE";
+  g.fillRect(0, 0, W, H);
+
+  if (dark) {                                   /* 격자 */
+    g.strokeStyle = "#141C33"; g.lineWidth = 1; g.beginPath();
+    for (let x = 0; x < W; x += 26) { g.moveTo(x, 0); g.lineTo(x, H); }
+    for (let y = 0; y < H; y += 26) { g.moveTo(0, y); g.lineTo(W, y); }
+    g.stroke();
+  }
+
+  const P = CG_PREVIEW.player, LIGHT = dark ? Math.min(W, H) * 0.42 : 1e9;
+  const lit = n => {
+    if (!dark) return 1;
+    const dx = X(n[0]) - X(P[0]), dy = Y(n[1]) - Y(P[1]);
+    if (Math.hypot(dx, dy) < LIGHT) return 1;
+    return n[3] === 3 ? 0.8 : n[3] === 1 ? 0.3 : 0.12;
+  };
+
+  g.lineWidth = 1;                              /* 인용 엣지 */
+  for (const [a, b] of CG_PREVIEW.e) {
+    const na = CG_PREVIEW.n[a], nb = CG_PREVIEW.n[b];
+    const al = Math.min(lit(na), lit(nb)) * (dark ? 0.5 : 0.42);
+    if (al < 0.04) continue;
+    g.globalAlpha = al;
+    g.strokeStyle = dark ? "#263353" : "#5C564A";
+    g.beginPath(); g.moveTo(X(na[0]), Y(na[1])); g.lineTo(X(nb[0]), Y(nb[1])); g.stroke();
+  }
+  g.globalAlpha = 1;
+
+  for (const n of CG_PREVIEW.n) {               /* 노드. 크기는 PPR 점수다 */
+    const al = lit(n);
+    if (al < 0.05) continue;
+    const x = X(n[0]), y = Y(n[1]);
+    if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+    const rad = 2.1 + Math.sqrt(n[2]) * 7;
+    if (n[3] === 3) {                           /* 추천은 후광을 두른다 */
+      const gr = g.createRadialGradient(x, y, rad * 0.6, x, y, rad * 3.6);
+      gr.addColorStop(0, dark ? "rgba(53,224,194,.34)" : "rgba(43,95,227,.26)");
+      gr.addColorStop(1, dark ? "rgba(53,224,194,0)" : "rgba(43,95,227,0)");
+      g.fillStyle = gr;
+      g.beginPath(); g.arc(x, y, rad * 3.6, 0, 6.2832); g.fill();
     }
-    pts.forEach((p, i) => {
-      g.beginPath(); g.arc(p[0], p[1], p[2] + 1.5, 0, 6.2832);
-      g.fillStyle = i % 7 === 0 ? "#A97406" : i % 5 === 0 ? "#2B5FE3" : "#6E7789";
-      g.fill();
-    });
-  } else {
-    g.fillStyle = "#0A0E1C"; g.fillRect(0, 0, w, h);
-    g.strokeStyle = "#141C33"; g.lineWidth = 1;
-    for (let x = 0; x < w; x += 26) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
-    for (let y = 0; y < h; y += 26) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-    pts.forEach((p, i) => {
-      const rec = i % 6 === 0;
-      if (rec) {
-        const gr = g.createRadialGradient(p[0], p[1], 2, p[0], p[1], 16);
-        gr.addColorStop(0, "rgba(53,224,194,.35)"); gr.addColorStop(1, "rgba(53,224,194,0)");
-        g.fillStyle = gr; g.beginPath(); g.arc(p[0], p[1], 16, 0, 6.2832); g.fill();
-      }
-      g.beginPath(); g.arc(p[0], p[1], p[2] + 1, 0, 6.2832);
-      g.fillStyle = rec ? "#35E0C2" : i % 5 === 0 ? "#F0B429" : "#5A6B93";
-      g.globalAlpha = rec || i % 5 === 0 ? 1 : .5; g.fill(); g.globalAlpha = 1;
-    });
-    const lg = g.createRadialGradient(w * .42, h * .55, 5, w * .42, h * .55, 62);
-    lg.addColorStop(0, "rgba(255,233,168,.16)"); lg.addColorStop(1, "rgba(255,233,168,0)");
-    g.fillStyle = lg; g.beginPath(); g.arc(w * .42, h * .55, 62, 0, 6.2832); g.fill();
-    if (window.CG_SPRITES) CG_SPRITES.drawWalker(g, w * .42, h * .55, {
-      dir: "down", phase: .25, scale: .85, palette: CG_SPRITES.CHARACTERS[0].palette });
+    g.globalAlpha = al;
+    g.beginPath(); g.arc(x, y, rad, 0, 6.2832);
+    g.fillStyle = (dark ? DARK_FILL : PAPER_FILL)[n[3]];
+    g.fill();
+    g.globalAlpha = 1;
+  }
+
+  if (dark) {                                   /* 등불과 캐릭터 */
+    const px = X(P[0]), py = Y(P[1]);
+    const lg = g.createRadialGradient(px, py, 6, px, py, LIGHT);
+    lg.addColorStop(0, "rgba(255,233,168,.15)");
+    lg.addColorStop(1, "rgba(255,233,168,0)");
+    g.fillStyle = lg; g.beginPath(); g.arc(px, py, LIGHT, 0, 6.2832); g.fill();
+    if (window.CG_SPRITES) {
+      CG_SPRITES.drawWalker(g, px, py, { dir: "down", phase: 0.25, scale: 0.9,
+        palette: CG_SPRITES.CHARACTERS[0].palette });
+    }
   }
 }
-addEventListener("load", () => { thumb("bGraph", "graph"); thumb("bSafari", "safari"); });
+
+function drawAllPreviews(){
+  drawPreview("bGraph", "paper");
+  drawPreview("bSafari", "dark");
+}
+addEventListener("load", drawAllPreviews);
+addEventListener("resize", drawAllPreviews);
 </script>
 </body>
 </html>

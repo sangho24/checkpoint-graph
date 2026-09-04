@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>OG 이미지 원본</title>
+<!-- 링크 미리보기용 1200x630 이미지의 원본.
+     헤드리스 크롬으로 이 페이지를 그대로 찍어 assets/og.png 를 만든다.
+     생성:
+       chrome --headless=new --disable-gpu --hide-scrollbars \
+         --force-device-scale-factor=1 --window-size=1200,630 \
+         --screenshot=assets/og.png --virtual-time-budget=8000 tools/og.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #F3F0E9; color: #16150F;
+    font-family: "Gothic A1", -apple-system, "Apple SD Gothic Neo", sans-serif;
+    word-break: keep-all; position: relative;
+  }
+  #bg { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .veil {
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg, #F3F0E9 0%, #F3F0E9 46%, rgba(243,240,233,.86) 58%, rgba(243,240,233,.34) 78%, rgba(243,240,233,.12) 100%);
+  }
+  .pane { position: absolute; left: 72px; top: 76px; width: 660px; }
+  .head { display: flex; align-items: center; gap: 13px; margin-bottom: 34px; }
+  .head svg { width: 46px; height: 46px; display: block; overflow: visible; }
+  .head b { font-size: 21px; font-weight: 800; letter-spacing: -.02em; display: block; line-height: 1.2; }
+  .head i {
+    font-style: normal; font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; color: #8C8678; letter-spacing: .04em;
+  }
+  h1 {
+    font-size: 50px; font-weight: 800; letter-spacing: -.035em;
+    line-height: 1.24; margin-bottom: 24px;
+  }
+  h1 em { font-style: normal; color: #2B5FE3; }
+  p.lede { font-size: 19px; color: #59554B; line-height: 1.55; margin-bottom: 38px; max-width: 30ch; }
+  p.lede b { color: #16150F; font-weight: 700; }
+  .stats { display: flex; gap: 30px; margin-bottom: 32px; }
+  .stats div b {
+    display: block; font-family: "IBM Plex Mono", monospace; font-size: 31px;
+    font-weight: 500; letter-spacing: -.02em; line-height: 1.15;
+  }
+  .stats div span { font-size: 14px; color: #8C8678; }
+  .url {
+    font-family: "IBM Plex Mono", monospace; font-size: 15px; color: #2B5FE3;
+    border-top: 1px solid #D2CABA; padding-top: 18px; display: inline-block;
+  }
+  .legend {
+    position: absolute; right: 44px; bottom: 36px; display: flex; gap: 18px;
+    font-family: "IBM Plex Mono", monospace; font-size: 13px; color: #59554B;
+  }
+  .legend span { display: flex; align-items: center; gap: 7px; }
+  .legend i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+</style>
+</head>
+<body>
+<canvas id="bg" width="2400" height="1260"></canvas>
+<div class="veil"></div>
+
+<div class="pane">
+  <div class="head">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M8.6 24.1 L13.4 20.7" stroke="#A97406" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M18.1 17.6 L22.9 13.4" stroke="#2B5FE3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <circle cx="6.4" cy="25.6" r="3.3" fill="#A97406"/>
+      <circle cx="15.8" cy="19.1" r="2.4" fill="none" stroke="#A97406" stroke-width="1.8"/>
+      <circle cx="25.2" cy="11.6" r="6" fill="none" stroke="#2B5FE3" stroke-width="1.6"/>
+      <circle cx="25.2" cy="11.6" r="3.3" fill="#2B5FE3"/>
+    </svg>
+    <span><b>Checkpoint Graph</b><i>연구자용 Second Brain</i></span>
+  </div>
+
+  <h1>읽은 것을 넣으면<br>다음에 읽을 것을<br><em>이유와 함께</em> 돌려준다</h1>
+  <p class="lede">추천의 근거는 LLM 요약이 아니라 <b>내가 읽은 논문에서 그 논문까지의 최단 경로</b>다.</p>
+
+  <div class="stats">
+    <div><b>89</b><span>노드</span></div>
+    <div><b>274</b><span>인용 엣지</span></div>
+    <div><b>28</b><span>백테스트 폴드</span></div>
+    <div><b>0</b><span>외부 라이브러리</span></div>
+  </div>
+
+  <span class="url">sangho24.github.io/checkpoint-graph</span>
+</div>
+
+<script src="../assets/preview-data.js"></script>
+<script>
+"use strict";
+/* 랜딩 벤토와 같은 실제 그래프를 배경으로 깐다. 장식용 난수가 아니다. */
+const FILL = { 0:"#6E7789", 1:"#A97406", 2:"#B9B0A0", 3:"#2B5FE3", 4:"#6B4FD8", 5:"#B4485F" };
+const c = document.getElementById("bg"), g = c.getContext("2d");
+g.setTransform(2, 0, 0, 2, 0, 0);
+const W = 1200, H = 630;
+g.fillStyle = "#EDE9E1"; g.fillRect(0, 0, W, H);
+
+/* 오른쪽에 무게를 두고 화면 밖으로 살짝 흘려보낸다 */
+const k = 860;
+const ox = 640, oy = H / 2 - (k * CG_PREVIEW.aspect) / 2;
+const X = v => ox + v * k, Y = v => oy + v * k * CG_PREVIEW.aspect;
+
+g.lineWidth = 1.1; g.strokeStyle = "#5C564A";
+for (const [a, b] of CG_PREVIEW.e) {
+  const na = CG_PREVIEW.n[a], nb = CG_PREVIEW.n[b];
+  g.globalAlpha = .3;
+  g.beginPath(); g.moveTo(X(na[0]), Y(na[1])); g.lineTo(X(nb[0]), Y(nb[1])); g.stroke();
+}
+g.globalAlpha = 1;
+
+for (const n of CG_PREVIEW.n) {
+  const x = X(n[0]), y = Y(n[1]);
+  const r = 3.4 + Math.sqrt(n[2]) * 13;
+  if (n[3] === 3) {
+    const gr = g.createRadialGradient(x, y, r * .6, x, y, r * 3.8);
+    gr.addColorStop(0, "rgba(43,95,227,.3)"); gr.addColorStop(1, "rgba(43,95,227,0)");
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, r * 3.8, 0, 6.2832); g.fill();
+  }
+  g.beginPath(); g.arc(x, y, r, 0, 6.2832);
+  g.fillStyle = FILL[n[3]]; g.fill();
+}
+document.body.dataset.ready = "1";
+</script>
+</body>
+</html>

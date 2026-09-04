@@ -17,9 +17,15 @@ checkpoint-graph/
 ├── index.html                    랜딩 (히어로에 게임 자동 시연)
 ├── graph.html                    그래프 뷰
 ├── safari.html                   논문 사파리
-├── assets/sprites.js             캐릭터 스프라이트 (Canvas 2D, 이미지 없음)
-└── data/reading-history.json     mock 독서 이력 (읽은 시각 포함)
-    data/reading-history.js       같은 데이터의 인라인용 사본
+├── assets/
+│   ├── sprites.js                캐릭터 스프라이트 (Canvas 2D, 이미지 없음)
+│   ├── preview-data.js           랜딩 미리보기용 사전 계산 레이아웃 (자동 생성)
+│   ├── logo.svg · mark.svg       로고 (배경 투명)
+│   └── og.png                    링크 미리보기 이미지 1200x630 (자동 생성)
+├── data/reading-history.json     mock 독서 이력 (읽은 시각 포함)
+│   data/reading-history.js       같은 데이터의 인라인용 사본
+├── backtest/                     롤링 오리진 백테스트 · node backtest/run.mjs
+└── tools/                        자동 생성물 빌드 스크립트
 ```
 
 ---
