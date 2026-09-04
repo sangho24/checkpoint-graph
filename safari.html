@@ -104,7 +104,7 @@ body { word-break: keep-all; }
   .bar { height: 4px; background: var(--edge); border-radius: 2px; margin-top: 6px; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--beacon); border-radius: 2px; transition: width .35s ease; }
 
-  .keys { pointer-events: auto; }
+  .keys { pointer-events: auto; display: flex; gap: 5px; }
   .keys button {
     font: inherit; font-size: 11px; color: var(--ink-2);
     background: rgba(16,23,40,.86); border: 1px solid var(--edge);
@@ -262,10 +262,65 @@ body { word-break: keep-all; }
   }
   .intro .note { font-size: 11.5px; color: var(--ink-3); border-top: 1px solid var(--edge); padding-top: 10px; }
 
+  /* ── 파라미터 설정 패널 ─────────────────────── */
+  .cfg { pointer-events: auto; width: 236px; }
+  .cfg[hidden] { display: none !important; }
+  .cfg .row { margin-bottom: 10px; }
+  .cfg .lab {
+    display: block; font-family: var(--mono); font-size: 9px;
+    letter-spacing: .12em; color: var(--ink-3); margin-bottom: 5px;
+  }
+  .seg { display: flex; gap: 3px; }
+  .seg button {
+    flex: 1 1 0; min-width: 0; padding: 5px 2px;
+    font-family: var(--mono); font-size: 10px; color: var(--ink-2);
+    background: var(--panel-2); border: 1px solid var(--edge);
+    border-radius: 5px; cursor: pointer; white-space: nowrap;
+    transition: border-color .12s, color .12s;
+  }
+  .seg button:hover:not([disabled]) { color: var(--ink); border-color: var(--ink-3); }
+  .seg button[aria-pressed="true"] { color: var(--beacon); border-color: var(--beacon); background: rgba(53,224,194,.1); }
+  .seg button[disabled] { cursor: not-allowed; opacity: .45; }
+  .cfg .note { font-size: 10.5px; color: var(--ink-3); line-height: 1.5; margin: 6px 0 0; }
+  .cfg .foot {
+    margin: 0; padding-top: 8px; border-top: 1px solid var(--edge);
+    font-size: 10px; color: var(--ink-3); line-height: 1.5;
+  }
+  .cfg .foot.lock { color: var(--bad); }
+
+  /* ── 조합별 성적 비교표 ─────────────────── */
+  .combotab { width: 100%; border-collapse: collapse; margin: 0; }
+  .combotab th, .combotab td { padding: 5px 6px; border-bottom: 1px solid var(--edge); text-align: right; }
+  .combotab th {
+    font-family: var(--mono); font-size: 9px; font-weight: 400;
+    letter-spacing: .1em; color: var(--ink-3); white-space: nowrap;
+  }
+  .combotab td {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .combotab th:first-child, .combotab td:first-child { text-align: left; }
+  .combotab td:first-child { font-size: 11px; }
+  .combotab tr.cur td { color: var(--beacon); }
+  .combotab tr.void td { color: var(--ink-3); opacity: .5; }
+  .combotab .thin {
+    display: inline-block; margin-left: 5px; padding: 0 4px;
+    font-size: 9px; color: var(--caught); border: 1px solid currentColor; border-radius: 3px;
+  }
+  .combotab .now {
+    display: inline-block; margin-left: 5px; font-size: 9px; color: var(--beacon);
+  }
+
   :focus-visible { outline: 2px solid var(--beacon); outline-offset: 2px; }
   @media (max-width: 560px) {
     .minimap { transform: scale(.8); transform-origin: bottom right; }
     .hud .gauges { grid-template-columns: auto auto; gap: 1px 10px; }
+    /* 좁은 화면에서는 설정 패널이 플레이어를 덜 가리도록 죈다 */
+    .cfg { width: 204px; padding: 7px 9px; }
+    .cfg .row { margin-bottom: 8px; }
+    .cfg .note { font-size: 9.5px; margin-top: 5px; }
+    .cfg .foot { font-size: 9.5px; padding-top: 6px; }
+    .seg button { font-size: 9px; padding: 4px 1px; }
   }
 </style>
 
@@ -297,8 +352,13 @@ body { word-break: keep-all; }
       <dt>재계산</dt><dd id="gRecalc">0</dd>
     </dl>
     <div class="bar"><i id="gBar" style="width:0%"></i></div>
+    <div style="font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-top:5px" id="gCombo"></div>
   </div>
-  <div class="keys"><button id="btnDex">도감 (Q)</button></div>
+  <div class="keys">
+    <button id="btnDex">도감 (Q)</button>
+    <button id="btnCfg" aria-expanded="false" aria-controls="cfg">설정 (E)</button>
+  </div>
+  <div class="plate cfg" id="cfg" hidden></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -330,6 +390,7 @@ body { word-break: keep-all; }
       <li>논문에 닿으면 조우가 뜬다. <kbd>1</kbd> 읽는다 · <kbd>2</kbd> 스킵 · <kbd>Esc</kbd> 지나친다</li>
       <li>고르고 나면 <b>그래프가 그것을 몇 위로 두고 있었는지</b> 공개된다</li>
       <li>읽을 때마다 시드가 갱신되고 PPR 이 다시 돌아 <b>빛나는 곳이 바뀐다</b></li>
+      <li><kbd>E</kbd> 로 추천 파라미터를 바꾼다. 조합별 일치율은 <kbd>Q</kbd> 도감에서 비교한다</li>
     </ul>
     <p class="note">판정 일치율은 곧 hit rate 다. 당신의 판단과 그래프의 순위가 얼마나 겹치는지를 잰다. 낮게 나오면 그건 당신이 틀린 게 아니라 추천이 틀린 것이다.</p>
     <div class="choices"><button id="btnStart">벌판으로 나간다 <b>SPACE</b></button></div>
@@ -602,8 +663,24 @@ const ALL = [...N.values()];
    랭킹 (mvp.html 과 동일한 계산)
    ───────────────────────────────────────────────────────── */
 const WGT = { liked: 2, read: 1, skipped: -1 };
-const HUB_EXP = 0.8;
-const TOP_N = 8;
+const TOP_N = 8;              // 판정 기준. 상위 8위 안이면 추천으로 친다. 절대 바꾸지 않는다
+
+/* 추천 파라미터. 코드에 박아두지 않고 게임 안에서 갈아끼운다.
+   이 두 값이 순위를 통째로 뒤집으므로, 일치율은 항상 "어느 조합의 일치율"인지와 함께 읽어야 한다.
+   라벨과 설명문은 graph.html 의 buildHub / buildHalfLife 와 같은 것을 쓴다. */
+const HUBS = [[0, "없음"], [0.5, "deg^0.5"], [0.8, "deg^0.8"]];
+const HALFLIVES = [[30, "30일"], [90, "90일"], [0, "감쇠 없음"]];
+const HUB_NOTE = {
+  0: "보정 없음. PPR 질량이 피인용 많은 허브로 몰려 상위가 이미 아는 유명 논문으로 찬다.",
+  0.5: "약한 보정. 허브가 아직 상위에 남아 있다.",
+  0.8: "강한 보정. 시드에 특이적인 논문이 올라온다. 지수 하나가 순위를 뒤집는다는 것이 이 화면의 요점이다."
+};
+const HL_NOTE = {
+  30: "가장 최근에 읽은 몇 편이 추천을 독식한다. 관심이 빠르게 옮겨다닐 때 맞다.",
+  90: "5개월치 이력에서 4월 독서가 약 30% 가중치로 남는다.",
+  0: "언제 읽었든 같은 무게. 오래된 관심이 계속 따라붙는다."
+};
+const PARAM = { hubexp: 0.8, halfLife: 90 };   // 기본값은 종전 고정값과 같다
 
 /* mock 독서 이력. data/reading-history.json 과 같은 내용이다.
    실제 기록이 아니라 백테스트 설계 검증용 가짜 데이터다.
@@ -653,8 +730,6 @@ const READING_HISTORY = [
 /* 총 38개 엔트리. 기간: 2026-04-02 ~ 2026-09-03 (Asia/Seoul).
    dwell_min 등 나머지 필드는 data/reading-history.json 을 참조. */
 
-const HALF_LIFE_DAYS = 90;    // 시드 가중치 반감기
-
 const RX = new Map();         // id -> {r, at, src}
 READING_HISTORY.forEach(([id, at, r]) => {
   if (N.has(id)) RX.set(id, { r, at: Date.parse(at), src: "history" });
@@ -666,7 +741,8 @@ function seedVector(){
     const w = WGT[o.r] || 0;
     if (!w) continue;
     const days = Math.max(0, (Date.now() - o.at) / 86400000);
-    const v = w * Math.pow(0.5, days / HALF_LIFE_DAYS);
+    // 반감기 0 은 "감쇠 없음". 언제 읽었든 같은 무게로 둔다
+    const v = PARAM.halfLife > 0 ? w * Math.pow(0.5, days / PARAM.halfLife) : w;
     s[id] = (s[id] || 0) + v; norm += Math.abs(v);
   }
   if (norm > 0) for (const k in s) s[k] /= norm;
@@ -693,7 +769,7 @@ function fullRank(){
   const raw = ppr(), fixed = {};
   for (const id in raw) {
     const deg = (ADJ.get(id) || []).length;
-    fixed[id] = raw[id] / Math.pow(Math.max(deg, 1), HUB_EXP);
+    fixed[id] = raw[id] / Math.pow(Math.max(deg, 1), PARAM.hubexp);
   }
   return Object.keys(fixed)
     .filter(id => N.has(id) && !RX.has(id) && fixed[id] > 0)
@@ -805,7 +881,28 @@ const player = {
   dx: 0, dy: 1, dir: "down", walk: 0, walkDist: 0
 };
 const cam = { x: player.x, y: player.y };
-const G = { agree: 0, judged: 0, recalcs: 0, encounter: null, phase: "intro", cooldown: new Set() };
+const G = { recalcs: 0, encounter: null, phase: "intro", cooldown: new Set() };
+
+/* 조합별 판정 집계.
+   허브 보정 3 × 반감기 3 = 9가지 조합마다 {agree, judged} 를 따로 쌓는다.
+   단일 카운터로 두면 파라미터를 바꾼 순간 이전 조합의 판정과 섞여 비교가 무의미해진다.
+   키는 "hubexp|halfLife" 문자열, 값은 카운터 객체. 조우가 한 번도 없던 조합은 아예 만들지 않는다. */
+const COMBO = new Map();
+const MIN_SAMPLE = 10;        // 이 미만이면 비율을 그대로 믿지 않는다 (표본 부족 표시)
+const comboKey = (hub, hl) => hub + "|" + hl;
+function comboLabel(hub, hl){
+  const h = HUBS.find(o => o[0] === hub), d = HALFLIVES.find(o => o[0] === hl);
+  return (h ? h[1] : hub) + " · " + (d ? d[1] : hl);
+}
+/* 없으면 만들어서 돌려준다 */
+function comboStat(hub, hl){
+  const k = comboKey(hub, hl);
+  let v = COMBO.get(k);
+  if (!v) { v = { agree: 0, judged: 0 }; COMBO.set(k, v); }
+  return v;
+}
+/* 현재 조합의 성적. HUD 게이지는 이것만 본다 */
+const curStat = () => comboStat(PARAM.hubexp, PARAM.halfLife);
 for (const id of RX.keys()) N.get(id).seen = true;
 
 const keys = new Set();
@@ -1029,6 +1126,7 @@ function whyHTML(id){
 
 function openEncounter(n){
   G.encounter = n; G.phase = "encounter";
+  syncCfg();                                     // 조우 중에는 파라미터 잠금
   const [tname, tcolor] = TOPICS[n.topic] || [n.kind === "model" ? "모델 릴리스" : "아티클", COL.ink3];
   dlgBox.className = "box";
   dlgBox.innerHTML = `
@@ -1061,12 +1159,14 @@ function resolve(choice){
   if (choice === "flee") {
     G.cooldown.add(n.id);
     dlg.hidden = true; G.phase = "play"; G.encounter = null;
+    syncCfg();
     return;
   }
   const rankIdx = RANK.indexOf(n.id);            // -1 이면 순위 밖
   const wasRec = rankIdx > -1 && rankIdx < TOP_N;
   const agreed = (choice === "read") === wasRec;
-  G.judged++; if (agreed) G.agree++;
+  const st = curStat();                          // 판정은 항상 "지금 조합"의 장부에 적는다
+  st.judged++; if (agreed) st.agree++;
 
   const before = new Set(RECS);
   RX.set(n.id, { r: choice, at: Date.now(), src: "session" });
@@ -1095,7 +1195,7 @@ function resolve(choice){
       </p>
       <div class="delta">
         시드에 반영해 PPR 을 다시 돌렸다. 추천 ${TOP_N}개 중 <b>${swapped}개</b>가 교체됐다.
-        누적 일치 <b>${G.agree}/${G.judged}</b>.
+        <b>${comboLabel(PARAM.hubexp, PARAM.halfLife)}</b> 조합 누적 일치 <b>${st.agree}/${st.judged}</b>.
         ${swapped ? "빛나는 곳이 바뀌었으니 지도를 다시 봐라." : "이번엔 추천이 그대로다."}
       </div>
       <div class="choices" style="margin-top:12px">
@@ -1112,6 +1212,7 @@ function closeDialog(){
   dlg.hidden = true;
   if (G.encounter) G.cooldown.add(G.encounter.id);
   G.encounter = null; G.phase = "play";
+  syncCfg();                                     // 판정이 끝났으니 잠금을 푼다
 }
 
 let toastTimer;
@@ -1125,11 +1226,105 @@ function toast(msg){
 function updateHUD(){
   const caught = [...RX.values()].filter(o => o.r === "read" || o.r === "liked").length;
   document.getElementById("gDex").textContent = `${caught}/${ALL.length}`;
-  document.getElementById("gHit").textContent = G.judged ? `${G.agree}/${G.judged}` : "0/0";
+  const st = curStat();
+  document.getElementById("gHit").textContent = st.judged ? `${st.agree}/${st.judged}` : "0/0";
   document.getElementById("gRecalc").textContent = G.recalcs;
-  document.getElementById("gBar").style.width = (G.judged ? (G.agree / G.judged) * 100 : 0) + "%";
+  document.getElementById("gBar").style.width = (st.judged ? (st.agree / st.judged) * 100 : 0) + "%";
+  document.getElementById("gCombo").textContent = comboLabel(PARAM.hubexp, PARAM.halfLife)
+    + (st.judged === 0 ? " · 미측정" : st.judged < MIN_SAMPLE ? " · 표본 부족" : "");
 }
 updateHUD();
+
+/* ─────────────────────────────────────────────────────────
+   추천 파라미터 전환 패널 (E)
+   기본은 접힌 상태다. 항상 펼쳐두면 벌판을 가린다.
+   ───────────────────────────────────────────────────────── */
+const cfgPanel = document.getElementById("cfg"), btnCfg = document.getElementById("btnCfg");
+
+/* 조우·판정 중에는 순위를 건드리지 못하게 잠근다. 도중에 바뀌면 그 판정이 오염된다 */
+const paramLocked = () => G.phase === "encounter" || G.phase === "verdict";
+
+function buildCfg(){
+  const lock = paramLocked();
+  const seg = (list, cur, kind) => list.map(([v, l]) =>
+    `<button data-kind="${kind}" data-v="${v}" aria-pressed="${cur === v}"${lock ? " disabled" : ""}>${l}</button>`
+  ).join("");
+  cfgPanel.innerHTML = `
+    <div class="row">
+      <span class="lab">허브 보정</span>
+      <div class="seg">${seg(HUBS, PARAM.hubexp, "hub")}</div>
+      <p class="note">${HUB_NOTE[PARAM.hubexp]}</p>
+    </div>
+    <div class="row">
+      <span class="lab">시드 반감기</span>
+      <div class="seg">${seg(HALFLIVES, PARAM.halfLife, "hl")}</div>
+      <p class="note">${HL_NOTE[PARAM.halfLife]}</p>
+    </div>
+    <p class="foot${lock ? " lock" : ""}">${lock
+      ? "판정 중에는 바꿀 수 없다. 도중에 순위가 바뀌면 결과가 오염된다."
+      : "판정은 조합별로 따로 쌓인다. 조합끼리의 비교는 도감(Q)에서 본다."}</p>`;
+}
+
+/* 패널은 다시 그려도 컨테이너는 남으므로 위임으로 받는다 */
+cfgPanel.addEventListener("click", e => {
+  const b = e.target.closest("button[data-kind]");
+  if (b) setParam(b.dataset.kind, +b.dataset.v);
+});
+
+function setParam(kind, v){
+  if (paramLocked()) { toast("판정 중에는 파라미터를 바꿀 수 없다"); return; }
+  if (kind === "hub") { if (PARAM.hubexp === v) return; PARAM.hubexp = v; }
+  else { if (PARAM.halfLife === v) return; PARAM.halfLife = v; }
+
+  // 순위를 통째로 다시 뽑는다. 비콘은 RECS 를 보고 그리므로 다음 프레임에 바로 바뀐다
+  const before = new Set(RECS);
+  RANK = fullRank(); RECS = new Set(RANK.slice(0, TOP_N));
+  const swapped = [...RECS].filter(id => !before.has(id)).length;
+
+  buildCfg(); updateHUD();
+  const lab = comboLabel(PARAM.hubexp, PARAM.halfLife);
+  toast(swapped ? `${lab} · 추천 ${swapped}개 교체` : `${lab} · 추천 변동 없음`);
+}
+
+function toggleCfg(open){
+  const next = open === undefined ? cfgPanel.hidden : open;
+  if (next) buildCfg();
+  cfgPanel.hidden = !next;
+  btnCfg.setAttribute("aria-expanded", String(next));
+}
+/* 열려 있는 동안 잠금 상태가 바뀌면 버튼 활성/비활성을 맞춰준다 */
+const syncCfg = () => { if (!cfgPanel.hidden) buildCfg(); };
+btnCfg.addEventListener("click", () => toggleCfg());
+
+/* 조합별 성적 비교표. 9가지를 고정 순서로 늘어놓고 미측정은 흐리게 둔다 */
+function comboTableHTML(){
+  const curKey = comboKey(PARAM.hubexp, PARAM.halfLife);
+  const rows = [];
+  for (const [hv, hl] of HUBS) for (const [dv, dl] of HALFLIVES) {
+    const k = comboKey(hv, dv), st = COMBO.get(k) || { agree: 0, judged: 0 };
+    const isCur = k === curKey;
+    // 현재 조합은 언제나 표시하되, 판정 0건이면 흐리게 눌러둔다
+    const cls = (isCur ? "cur " : "") + (st.judged === 0 ? "void" : "");
+    const ratio = st.judged
+      ? Math.round((st.agree / st.judged) * 100) + "%"
+      : "미측정";
+    // 표본이 적을 때 비율을 그대로 믿으면 안 된다. 10건 미만이면 못을 박아둔다
+    const thin = st.judged > 0 && st.judged < MIN_SAMPLE ? `<span class="thin">표본 부족</span>` : "";
+    rows.push(`<tr class="${cls}"><td>${hl} · ${dl}${isCur ? `<span class="now">현재</span>` : ""}</td>
+      <td>${st.judged || "-"}</td><td>${st.judged ? st.agree : "-"}</td><td>${ratio}${thin}</td></tr>`);
+  }
+  const total = [...COMBO.values()].reduce((a, o) => a + o.judged, 0);
+  return `
+    <h3 style="font-size:13px;font-weight:600;margin:0 0 6px;color:var(--beacon)">조합별 판정 일치율</h3>
+    <p style="font-size:11.5px;color:var(--ink-2);margin:0 0 8px;line-height:1.6">
+      허브 보정과 반감기를 바꾸면 순위가 통째로 뒤집힌다. 그래서 일치율은 조합마다 따로 쌓는다.
+      판정 기준은 어느 조합에서나 상위 ${TOP_N}위로 같다.</p>
+    <table class="combotab">
+      <thead><tr><th>조합</th><th>판정</th><th>일치</th><th>비율</th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table>
+    <div class="delta">누적 판정 ${total}건. 10건 미만 조합의 비율은 표본 부족이라 아직 읽을 수 없다. <b>E</b> 로 조합을 바꿔 더 쌓아라.</div>`;
+}
 
 /* 도감 */
 const dex = document.getElementById("dex"), dexBox = document.getElementById("dexBox");
@@ -1138,7 +1333,9 @@ function openDex(){
     .sort((a, b) => b.at - a.at);
   dexBox.innerHTML = `
     <h2>도감</h2>
-    <p style="font-size:12px;color:var(--ink-2);margin:0 0 12px;line-height:1.6">
+    ${comboTableHTML()}
+    <h3 style="font-size:13px;font-weight:600;margin:20px 0 6px;color:var(--beacon)">조우 기록</h3>
+    <p style="font-size:11.5px;color:var(--ink-2);margin:0 0 8px;line-height:1.6">
       읽은 것이 시드가 되어 다음 추천을 만든다. 스킵도 음의 가중치로 남는다.</p>
     <ul class="dexlist">${rows.map(o => `<li>
       <i style="background:${o.r === "skipped" ? COL.skip : COL.caught}"></i>
@@ -1168,6 +1365,7 @@ addEventListener("keydown", e => {
   if (G.phase === "verdict") { if (k === " " || k === "Enter" || k === "Escape") { e.preventDefault(); closeDialog(); } return; }
   if (G.phase === "dex") { if (k === "q" || k === "Q" || k === "Escape") closeDex(); return; }
   if (k === "q" || k === "Q") { openDex(); return; }
+  if (k === "e" || k === "E") { toggleCfg(); return; }
   if (k.startsWith("Arrow") || "wasdWASD".includes(k)) { e.preventDefault(); keys.add(k.toLowerCase()); }
 });
 addEventListener("keyup", e => keys.delete(e.key.toLowerCase()));
