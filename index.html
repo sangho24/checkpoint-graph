@@ -135,6 +135,95 @@ h1 {
   font-family: var(--mono); font-size: 10.5px; color: #6B7794;
 }
 
+/* ══ 추천이 만들어지는 과정 (스크롤 연동 + 고정 비주얼) ══ */
+.how { display: grid; grid-template-columns: 1fr 1.12fr; gap: 38px; align-items: start; }
+.how .track { display: flex; flex-direction: column; gap: 10px; }
+.how .step {
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  padding: 16px 18px; transition: border-color .25s, box-shadow .25s, opacity .25s;
+  opacity: .55;
+}
+.how .step[data-on="1"] {
+  opacity: 1; border-color: var(--blue);
+  box-shadow: 0 1px 2px rgba(22,21,15,.05), 0 10px 26px -14px rgba(43,95,227,.4);
+}
+.how .step .n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 21px; height: 21px; border-radius: 6px; margin-bottom: 9px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  background: var(--card-2); color: var(--ink-3); border: 1px solid var(--line);
+}
+.how .step[data-on="1"] .n { background: var(--blue); color: #fff; border-color: var(--blue); }
+.how .step h3 { margin: 0 0 6px; font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+.how .step p { margin: 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.65; max-width: none; }
+.how .step p b { color: var(--ink); font-weight: 700; }
+.how .step .f {
+  margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line);
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); overflow-x: auto;
+}
+.how .step .f b { color: var(--blue-2); font-weight: 500; }
+
+.how .pin { position: sticky; top: 26px; }
+.how .pin .screen { border-radius: 12px; }
+.how .pin .cap {
+  margin-top: 9px; font-family: var(--mono); font-size: 10.5px;
+  color: var(--ink-3); display: flex; gap: 9px; align-items: center;
+}
+.how .pin .cap i { font-style: normal; color: var(--blue); }
+.how .pin canvas { display: block; width: 100%; aspect-ratio: 4 / 3; }
+
+@media (max-width: 860px) {
+  .how { grid-template-columns: 1fr; gap: 18px; }
+  .how .pin { position: sticky; top: 8px; order: -1; z-index: 5; background: var(--paper); padding-bottom: 8px; }
+  .how .pin canvas { aspect-ratio: 16 / 10; }
+  .how .step { opacity: 1; }
+}
+
+/* ══ 결과 읽는 법 (주석 달린 실제 카드) ══════════════════ */
+.read { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; }
+@media (max-width: 800px) { .read { grid-template-columns: 1fr; } }
+
+.reccard {
+  background: var(--card); border: 1px solid var(--line); border-radius: 11px;
+  padding: 13px 14px; box-shadow: 0 1px 2px rgba(22,21,15,.05), 0 14px 34px -20px rgba(22,21,15,.3);
+}
+.reccard .row1 { display: flex; gap: 9px; align-items: baseline; }
+.reccard .rk { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--blue); }
+.reccard h4 { margin: 0; font-size: 14px; font-weight: 700; line-height: 1.35; letter-spacing: -.01em; }
+.reccard .meta {
+  display: flex; flex-wrap: wrap; gap: 3px 11px; margin: 6px 0 0 25px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.reccard .why {
+  margin: 9px 0 0 25px; padding: 8px 10px; background: var(--card-2);
+  border-radius: 7px; font-size: 12px; line-height: 1.6; color: var(--ink-2);
+}
+.reccard .why .lab {
+  display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  color: var(--ink-3); margin-bottom: 3px;
+}
+.reccard .why em { font-style: normal; color: var(--gold); font-weight: 700; }
+.reccard .why .conn { display: block; color: var(--ink-3); font-size: 11px; }
+.reccard .why strong { color: var(--ink); font-weight: 700; }
+.reccard .acts { display: flex; gap: 5px; margin: 10px 0 0 25px; }
+.reccard .acts span {
+  flex: 1; text-align: center; padding: 5px 0; font-size: 11px; color: var(--ink-2);
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 6px;
+}
+.mk {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 17px; height: 17px; border-radius: 5px; flex: none;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  background: var(--blue); color: #fff; vertical-align: 1px;
+}
+.reccard .mk { margin-right: 6px; }
+.reccard .acts .mk { flex: none; align-self: center; }
+
+.keyed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.keyed li { display: flex; gap: 11px; font-size: 13.5px; color: var(--ink-2); line-height: 1.65; }
+.keyed li b { color: var(--ink); font-weight: 700; }
+.keyed li .mk { margin-top: 3px; }
+
 /* ══ 챕터 ══════════════════════════════════════════════ */
 .chapter { padding: 44px 0; border-top: 1px solid var(--line); }
 .chapter > .k {
@@ -304,6 +393,117 @@ footer a:hover { color: var(--blue); }
       <span>시드 가중치 갱신</span><i>→</i>
       <span>PPR 재계산</span><i>→</i>
       <span class="hot">추천</span><i>↻</i>
+    </div>
+  </section>
+
+  <section class="chapter">
+    <div class="k">과정</div>
+    <h2>추천이 만들어지는 네 단계</h2>
+    <p style="margin-bottom:26px">
+      오른쪽 화면은 설명용 그림이 아니라 <b>실제로 도는 계산을 그대로 그린 것</b>이다.
+      단계를 따라 내려가면 그림이 같이 바뀐다.
+    </p>
+
+    <div class="how">
+      <div class="track" id="howTrack">
+        <article class="step" data-step="0" data-on="1">
+          <span class="n">1</span>
+          <h3>읽은 것이 시드가 된다</h3>
+          <p>논문을 읽거나 좋아요를 누르면 그래프의 그 노드에 <b>출발점 표시</b>가 붙는다.
+             스킵도 남는다. 다만 음수로 남아서 그 방향을 밀어낸다.
+             언제 읽었는지도 같이 기록되고, 오래된 것일수록 가중치가 줄어든다.</p>
+          <div class="f">좋아요 <b>+2</b> · 읽음 <b>+1</b> · 스킵 <b>-1</b> &nbsp;×&nbsp; 0.5<sup>(경과일수/반감기)</sup></div>
+        </article>
+
+        <article class="step" data-step="1">
+          <span class="n">2</span>
+          <h3>점수가 인용을 타고 퍼진다</h3>
+          <p>시드에 놓인 점수가 인용 관계를 따라 이웃으로 흘러간다. 흘러간 점수는 다시 그 이웃으로 퍼지고,
+             매번 일부는 시드로 되돌아온다. 이걸 반복하면 <b>내가 읽은 것들 근처가 두꺼워진다.</b>
+             여러 시드에서 동시에 도달하는 논문일수록 점수가 높게 쌓인다.</p>
+          <div class="f">Personalized PageRank · <b>p = 0.15·s + 0.85·W·p</b> · 45회 반복</div>
+        </article>
+
+        <article class="step" data-step="2">
+          <span class="n">3</span>
+          <h3>허브를 눌러 순위를 잡는다</h3>
+          <p>그냥 두면 Attention·BERT 처럼 <b>모두가 인용하는 논문</b>이 상위를 차지한다.
+             이미 아는 것들이라 추천으로서 값이 없다. 그래서 인용 관계가 많은 노드일수록 점수를 나눠 눌러준다.
+             누르는 세기에 따라 상위 10개가 통째로 바뀐다.</p>
+          <div class="f">score = p ÷ degree<sup>보정지수</sup> · 지수 <b>0 / 0.5 / 0.8</b> 중 선택</div>
+        </article>
+
+        <article class="step" data-step="3">
+          <span class="n">4</span>
+          <h3>경로가 곧 이유가 된다</h3>
+          <p>왜 이 논문인지는 LLM 이 지어내지 않는다. <b>내가 읽은 논문에서 그 논문까지 실제로 이어지는
+             가장 짧은 길</b>을 찾아 문장으로 편다. 길이 없으면 추천 목록에 올리지 않는다.
+             근거를 만들 수 없는 추천은 하지 않는다는 뜻이다.</p>
+          <div class="f">무방향 BFS 최단 경로 · 최대 <b>4홉</b> · 경로 없으면 제외</div>
+        </article>
+      </div>
+
+      <div class="pin">
+        <div class="screen">
+          <div class="bezel">
+            <i></i><i></i><i></i>
+            <span>계산 과정</span>
+            <em id="howPhase">시드</em>
+          </div>
+          <canvas id="howCv"></canvas>
+        </div>
+        <div class="cap"><i>●</i> 실제 계산을 축약해 그린 것이다. 노드 9개짜리 미니 그래프를 쓴다.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter">
+    <div class="k">결과</div>
+    <h2>추천 카드를 읽는 법</h2>
+    <p style="margin-bottom:24px">
+      추천 하나는 이렇게 생겼다. 숫자를 눌러 각 부분이 무엇을 뜻하는지 확인해라.
+    </p>
+
+    <div class="read">
+      <div class="reccard">
+        <div class="row1">
+          <span class="rk"><span class="mk">1</span>03</span>
+          <h4>DeepSeek-V3 Technical Report</h4>
+        </div>
+        <div class="meta">
+          <span class="mk">2</span><span>MoE</span><span>2024</span>
+          <span>arXiv:2412.19437</span><span>피인용 1.4k</span><span>score 2.5e-3</span>
+        </div>
+        <div class="why">
+          <span class="lab"><span class="mk">3</span>왜 · 1홉</span>
+          <em>읽은 Mixtral of Experts</em>
+          <span class="conn">↳ 이 논문을 인용한</span>
+          <strong>DeepSeek-V3 Technical Report</strong>
+        </div>
+        <div class="acts">
+          <span class="mk">4</span><span>읽음</span><span>좋아요</span><span>스킵</span><span>나중에</span>
+        </div>
+      </div>
+
+      <ul class="keyed">
+        <li><span class="mk">1</span><span><b>순위</b>는 절대적인 좋음이 아니라 <b>내 시드 기준 상대 순위</b>다.
+          같은 논문이라도 내가 무엇을 읽었느냐에 따라 3위도 되고 40위도 된다.</span></li>
+        <li><span class="mk">2</span><span><b>피인용수와 score 는 다른 축이다.</b> 피인용 1.4k 는 세상의 평가고,
+          score 는 내 독서 이력에서 계산된 값이다. 둘이 어긋날수록 개인화가 실제로 작동하고 있다는 뜻이다.</span></li>
+        <li><span class="mk">3</span><span><b>여기가 근거다.</b> "읽은 Mixtral 을 인용한 DeepSeek-V3" 는
+          내가 검증할 수 있는 사실이지 모델의 의견이 아니다. 홉 수가 클수록 연결이 멀다는 뜻이니
+          3~4홉짜리 근거는 의심하고 봐야 한다.</span></li>
+        <li><span class="mk">4</span><span>반응하면 그 논문이 <b>다음 계산의 시드로 들어간다.</b>
+          스킵은 무시가 아니라 음의 신호로 남아 그 방향을 밀어낸다. 목록은 즉시 다시 정렬된다.</span></li>
+      </ul>
+    </div>
+
+    <div class="note" style="margin-top:26px">
+      <p><b>순위를 믿기 전에 볼 것이 하나 있다.</b> 좌측 레일의 "피인용수 순위와 겹침"이
+         7/10 이상이면, 그 추천은 사실상 <b>유명한 논문 목록</b>과 같은 것을 내놓고 있다는 뜻이다.
+         그럴 때는 개인화가 작동하지 않는 것이므로 허브 보정을 올리거나 시드를 더 넣어야 한다.</p>
+      <p>반대로 겹침이 낮다고 해서 그 순위가 <b>더 맞다는 보장은 없다.</b>
+         다르다는 것과 옳다는 것은 별개다. 그건 백테스트에서만 갈린다.</p>
     </div>
   </section>
 
@@ -675,6 +875,280 @@ function drawDemo(now){
 sizeDemo();
 addEventListener("resize", () => { sizeDemo(); if (RM) drawDemo(performance.now()); });
 if (RM) drawDemo(performance.now()); else requestAnimationFrame(drawDemo);
+
+/* ══════════════════════════════════════════════════════════
+   "추천이 만들어지는 과정" 4단계 시연
+   설명용 그림이 아니라 노드 9개짜리 미니 그래프에서 실제로
+   PPR 을 돌린 값을 그린다. 숫자를 지어내지 않는다.
+   ══════════════════════════════════════════════════════════ */
+const HN = [
+  { id:"flash",   x: 78, y: 95,  t:"FlashAttention", seed:"liked", w:2, ago:"18일 전" },
+  { id:"switch",  x: 78, y: 215, t:"Switch",         seed:"read",  w:1, ago:"63일 전" },
+  { id:"mixtral", x: 78, y: 335, t:"Mixtral",        seed:"liked", w:2, ago:"9일 전"  },
+  { id:"gqa",     x:222, y: 58,  t:"GQA" },
+  { id:"medusa",  x:222, y:150,  t:"Medusa" },
+  { id:"gshard",  x:222, y:242,  t:"GShard" },
+  { id:"dsv3",    x:222, y:334,  t:"DeepSeek-V3" },
+  { id:"expert",  x:352, y:300,  t:"Expert Choice" },
+  { id:"gpt3",    x:400, y:180,  t:"GPT-3" },
+  { id:"t5",      x:512, y: 86,  t:"T5" },
+  { id:"bert",    x:512, y:272,  t:"BERT" }
+];
+const HE = [["flash","gqa"],["flash","medusa"],["flash","gshard"],
+            ["switch","gshard"],["switch","dsv3"],
+            ["mixtral","dsv3"],["mixtral","gshard"],["mixtral","expert"],
+            ["gqa","gpt3"],["gshard","gpt3"],["dsv3","gpt3"],
+            ["medusa","gpt3"],["expert","gpt3"],
+            ["gqa","medusa"],["dsv3","expert"],
+            ["t5","gpt3"],["t5","gqa"],["bert","gpt3"],["bert","gshard"]];
+const HIX = Object.fromEntries(HN.map(n => [n.id, n]));
+
+/* 미니 PPR: 아래 순위표에 쓰이는 값은 전부 여기서 나온다 */
+const HADJ = {}; HN.forEach(n => HADJ[n.id] = []);
+HE.forEach(([a, b]) => { HADJ[a].push(b); HADJ[b].push(a); });
+
+const HP = (() => {
+  const s = {}; let norm = 0;
+  HN.filter(n => n.seed).forEach(n => { s[n.id] = n.w; norm += n.w; });
+  for (const k in s) s[k] /= norm;
+  let p = Object.assign({}, s);
+  for (let i = 0; i < 40; i++) {
+    const nx = {};
+    for (const id in p) {
+      const nb = HADJ[id]; if (!nb.length) continue;
+      const sh = (p[id] * 0.85) / nb.length;
+      for (const m of nb) nx[m] = (nx[m] || 0) + sh;
+    }
+    for (const id in s) nx[id] = (nx[id] || 0) + 0.15 * s[id];
+    p = nx;
+  }
+  return p;
+})();
+const HMAX = Math.max(...HN.filter(n => !n.seed).map(n => HP[n.id] || 0));
+const rankBy = fn => HN.filter(n => !n.seed)
+  .map(n => ({ n, v: fn(n) })).sort((a, b) => b.v - a.v);
+const RANK_RAW = rankBy(n => HP[n.id] || 0);
+const RANK_FIX = rankBy(n => (HP[n.id] || 0) / Math.pow(HADJ[n.id].length || 1, 0.8));
+
+const howCv = document.getElementById("howCv"), hx = howCv.getContext("2d");
+let HW = 0, HH = 0, HK = 1, howStep = 0, howT0 = performance.now();
+const PHASE_NAME = ["시드", "확산", "보정", "근거"];
+
+function sizeHow(){
+  const r = howCv.getBoundingClientRect();
+  const d = Math.min(devicePixelRatio || 1, 2);
+  HW = Math.max(r.width, 300); HH = Math.max(r.height, 220);
+  howCv.width = HW * d; howCv.height = HH * d;
+  hx.setTransform(d, 0, 0, d, 0, 0);
+  HK = HW / 560;
+}
+const hxx = v => v * HK, hyy = v => v * (HH / 420);
+const F = (w, s, fam) => `${w} ${Math.max(8, s * HK)}px ${fam || '"IBM Plex Mono", monospace'}`;
+
+function hEdges(alpha, hot){
+  hx.lineWidth = 1.2;
+  for (const [a, b] of HE) {
+    const isHot = hot && ((hot[0] === a && hot[1] === b) || (hot[0] === b && hot[1] === a));
+    hx.globalAlpha = isHot ? 1 : alpha;
+    hx.strokeStyle = isHot ? "#35E0C2" : "#263353";
+    hx.lineWidth = isHot ? 2.4 : 1.2;
+    hx.beginPath();
+    hx.moveTo(hxx(HIX[a].x), hyy(HIX[a].y));
+    hx.lineTo(hxx(HIX[b].x), hyy(HIX[b].y));
+    hx.stroke();
+  }
+  hx.globalAlpha = 1;
+}
+
+function hNode(n, opts){
+  const X = hxx(n.x), Y = hyy(n.y), r = (n.seed ? 13 : 11) * HK;
+  if (opts.halo > 0) {
+    const g = hx.createRadialGradient(X, Y, r * .5, X, Y, r + opts.halo * 26 * HK);
+    g.addColorStop(0, opts.haloColor || "rgba(91,141,239,.45)");
+    g.addColorStop(1, "rgba(91,141,239,0)");
+    hx.fillStyle = g;
+    hx.beginPath(); hx.arc(X, Y, r + opts.halo * 26 * HK, 0, 6.2832); hx.fill();
+  }
+  hx.globalAlpha = opts.alpha === undefined ? 1 : opts.alpha;
+  hx.beginPath(); hx.arc(X, Y, r * (opts.scale || 1), 0, 6.2832);
+  hx.fillStyle = opts.fill; hx.fill();
+  if (opts.ring) { hx.lineWidth = 2 * HK; hx.strokeStyle = opts.ring; hx.stroke(); }
+  hx.globalAlpha = 1;
+  if (opts.label !== false) {
+    hx.font = F(500, 10.5); hx.textAlign = "center"; hx.textBaseline = "top";
+    hx.fillStyle = opts.labelColor || "#98A5C4";
+    hx.fillText(n.t, X, Y + r + 5 * HK);
+  }
+}
+
+function hBadge(x, y, text, color){
+  hx.font = F(500, 9.5);
+  const w = hx.measureText(text).width + 10 * HK, h = 15 * HK;
+  hx.fillStyle = "rgba(10,14,28,.9)";
+  hx.fillRect(x - w / 2, y, w, h);
+  hx.strokeStyle = color; hx.lineWidth = 1; hx.strokeRect(x - w / 2, y, w, h);
+  hx.fillStyle = color; hx.textAlign = "center"; hx.textBaseline = "middle";
+  hx.fillText(text, x, y + h / 2 + .5);
+  hx.textBaseline = "top";
+}
+
+/* ── 1단계: 시드가 놓인다 ─────────────────────────────── */
+function stepSeed(t){
+  hEdges(.45);
+  const seeds = HN.filter(n => n.seed);
+  seeds.forEach((n, i) => {
+    const on = RM ? 1 : clamp01((t - 350 - i * 750) / 500);
+    hNode(n, {
+      fill: on ? "#F0B429" : "#39415E", ring: on ? "rgba(240,180,41,.35)" : null,
+      halo: on * .5, haloColor: "rgba(240,180,41,.4)",
+      labelColor: on ? "#F0B429" : "#5A6B93"
+    });
+    if (on > .8) {
+      const w = n.seed === "liked" ? "좋아요 +2" : "읽음 +1";
+      hBadge(hxx(n.x), hyy(n.y) - 34 * HK, `${w} · ${n.ago}`, "#F0B429");
+    }
+  });
+  HN.filter(n => !n.seed).forEach(n =>
+    hNode(n, { fill: "#39415E", halo: 0, alpha: .55, labelColor: "#5A6B93" }));
+}
+
+/* ── 2단계: 점수가 인용을 타고 퍼진다 ─────────────────── */
+function stepSpread(t){
+  hEdges(.5);
+  const grow = RM ? 1 : clamp01((t - 300) / 2600);
+  if (!RM) {                                   /* 엣지를 타고 흐르는 점 */
+    for (const [a, b] of HE) {
+      const A = HIX[a], B = HIX[b];
+      if (!A.seed && !B.seed) continue;
+      const from = A.seed ? A : B, to = A.seed ? B : A;
+      const u = ((t / 1100) % 1);
+      const X = hxx(from.x + (to.x - from.x) * u), Y = hyy(from.y + (to.y - from.y) * u);
+      hx.beginPath(); hx.arc(X, Y, 3 * HK, 0, 6.2832);
+      hx.fillStyle = "rgba(91,141,239,.9)"; hx.fill();
+    }
+  }
+  HN.forEach(n => {
+    if (n.seed) return hNode(n, { fill: "#F0B429", halo: .35, haloColor: "rgba(240,180,41,.35)", labelColor: "#F0B429" });
+    const v = ((HP[n.id] || 0) / HMAX) * grow;
+    hNode(n, { fill: v > .05 ? "#5B8DEF" : "#39415E", halo: v, scale: .85 + v * .45,
+               labelColor: v > .3 ? "#B9CCF6" : "#5A6B93" });
+  });
+  hx.font = F(400, 10.5); hx.textAlign = "left"; hx.textBaseline = "top";
+  hx.fillStyle = "#616F92";
+  hx.fillText("원의 크기 = 시드에서 흘러온 점수", hxx(16), hyy(392));
+}
+
+/* ── 3단계: 허브를 눌러 순위를 잡는다 ─────────────────── */
+function stepFix(t){
+  const reveal = RM ? 1 : clamp01((t - 500) / 1400);
+  const colW = hxx(220), left = hxx(30), right = hxx(300), top = hyy(64), rowH = hyy(52);
+
+  hx.textAlign = "left"; hx.textBaseline = "middle";
+  hx.font = F(500, 11);
+  hx.fillStyle = "#E0894A"; hx.fillText("보정 없음", left, hyy(40));
+  hx.fillStyle = "#35E0C2"; hx.fillText("deg^0.8 로 누른 뒤", right, hyy(40));
+
+  const drawCol = (list, x, color, withDeg) => {
+    list.slice(0, 4).forEach((o, i) => {
+      const y = top + i * rowH;
+      hx.fillStyle = "rgba(16,23,40,.85)";
+      hx.fillRect(x, y, colW, rowH - hyy(10));
+      hx.strokeStyle = "#263353"; hx.lineWidth = 1;
+      hx.strokeRect(x, y, colW, rowH - hyy(10));
+      hx.font = F(500, 11); hx.fillStyle = color;
+      hx.fillText(String(i + 1), x + hxx(9), y + hyy(21));
+      hx.font = F(600, 11.5, '"Gothic A1", sans-serif');
+      hx.fillStyle = "#E4E9F5";
+      hx.fillText(o.n.t, x + hxx(26), y + hyy(15));
+      hx.font = F(400, 9.5); hx.fillStyle = "#616F92";
+      hx.fillText(withDeg ? `score ${o.v.toExponential(1)} · 인용 ${HADJ[o.n.id].length}개`
+                          : `score ${o.v.toExponential(1)}`,
+                  x + hxx(26), y + hyy(30));
+    });
+  };
+  drawCol(RANK_RAW, left, "#E0894A", true);
+  hx.globalAlpha = reveal;
+  drawCol(RANK_FIX, right, "#35E0C2", false);
+  hx.globalAlpha = 1;
+
+  /* 순위가 어떻게 옮겨갔는지 잇는 선 */
+  hx.globalAlpha = reveal * .75; hx.lineWidth = 1.4;
+  RANK_RAW.slice(0, 4).forEach((o, i) => {
+    const j = RANK_FIX.findIndex(q => q.n.id === o.n.id);
+    if (j < 0 || j > 3) return;
+    hx.strokeStyle = j < i ? "#35E0C2" : j > i ? "#E0894A" : "#3A4667";
+    hx.beginPath();
+    hx.moveTo(left + colW, top + i * rowH + hyy(21));
+    hx.lineTo(right, top + j * rowH + hyy(21));
+    hx.stroke();
+  });
+  hx.globalAlpha = 1;
+
+  hx.font = F(400, 10.5); hx.textBaseline = "top";
+  hx.fillStyle = "#616F92";
+  hx.fillText("인용 관계가 많은 노드일수록 점수를 크게 나눈다", left, hyy(376));
+}
+
+/* ── 4단계: 경로가 이유가 된다 ────────────────────────── */
+function stepWhy(t){
+  const on = RM ? 1 : clamp01((t - 400) / 900);
+  hEdges(.22, on > .3 ? ["mixtral", "dsv3"] : null);
+  HN.forEach(n => {
+    const inPath = n.id === "mixtral" || n.id === "dsv3";
+    if (n.seed) hNode(n, {
+      fill: "#F0B429", alpha: inPath ? 1 : .35,
+      halo: inPath ? .4 : 0, haloColor: "rgba(240,180,41,.4)",
+      labelColor: inPath ? "#F0B429" : "#4A5573" });
+    else hNode(n, {
+      fill: inPath ? "#35E0C2" : "#39415E", alpha: inPath ? 1 : .35,
+      halo: inPath ? on * .8 : 0, haloColor: "rgba(53,224,194,.4)",
+      labelColor: inPath ? "#35E0C2" : "#4A5573" });
+  });
+
+  const bw = hxx(496), bh = hyy(64), bx = hxx(32), by = hyy(16);
+  hx.globalAlpha = on;
+  hx.fillStyle = "rgba(16,23,40,.96)"; hx.fillRect(bx, by, bw, bh);
+  hx.strokeStyle = "#35E0C2"; hx.lineWidth = 1.5; hx.strokeRect(bx, by, bw, bh);
+  hx.textAlign = "left"; hx.textBaseline = "top";
+  hx.font = F(400, 9); hx.fillStyle = "#616F92";
+  hx.fillText("왜 · 1홉", bx + hxx(13), by + hyy(11));
+  hx.font = F(600, 12, '"Gothic A1", sans-serif'); hx.fillStyle = "#F0B429";
+  hx.fillText("읽은 Mixtral of Experts", bx + hxx(13), by + hyy(27));
+  hx.font = F(400, 10.5, '"Gothic A1", sans-serif'); hx.fillStyle = "#98A5C4";
+  hx.fillText("↳ 이 논문을 인용한  DeepSeek-V3", bx + hxx(13), by + hyy(48));
+  hx.globalAlpha = 1;
+}
+
+const HOW_STEPS = [stepSeed, stepSpread, stepFix, stepWhy];
+
+function drawHow(now){
+  hx.fillStyle = "#0A0E1C"; hx.fillRect(0, 0, HW, HH);
+  const g = 40 * HK;
+  hx.strokeStyle = "#141C33"; hx.lineWidth = 1; hx.beginPath();
+  for (let x = 0; x < HW; x += g) { hx.moveTo(x, 0); hx.lineTo(x, HH); }
+  for (let y = 0; y < HH; y += g) { hx.moveTo(0, y); hx.lineTo(HW, y); }
+  hx.stroke();
+  HOW_STEPS[howStep](RM ? 9999 : now - howT0);
+  if (!RM) requestAnimationFrame(drawHow);
+}
+
+const howObs = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    const i = +e.target.dataset.step;
+    if (i === howStep) continue;
+    howStep = i; howT0 = performance.now();
+    document.getElementById("howPhase").textContent = PHASE_NAME[i];
+    document.querySelectorAll("#howTrack .step").forEach(el =>
+      el.setAttribute("data-on", el.dataset.step === String(i) ? "1" : "0"));
+    if (RM) drawHow(performance.now());
+  }
+}, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+document.querySelectorAll("#howTrack .step").forEach(el => howObs.observe(el));
+
+sizeHow();
+addEventListener("resize", () => { sizeHow(); if (RM) drawHow(performance.now()); });
+if (RM) drawHow(performance.now()); else requestAnimationFrame(drawHow);
 
 /* ── 카드 썸네일: 정적 미리보기 ────────────────────── */
 function thumb(id, kind){
