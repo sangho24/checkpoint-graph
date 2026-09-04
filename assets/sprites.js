@@ -119,7 +119,7 @@
         }
         // 림라이트 (크라운 좌상단)
         ctx.beginPath();
-        ctx.arc(cxo, cy - hR * 0.42 - ch * 0.4, cw * 1.0, Math.PI * 1.06, Math.PI * 1.55);
+        ctx.arc(cxo, cy - hR * 0.42 - ch * 0.52, cw * 0.62, Math.PI * 1.04, Math.PI * 1.62);
         ctx.lineWidth = LW * 0.95; ctx.strokeStyle = RIM; ctx.lineCap = "round"; ctx.stroke();
         ctx.lineCap = "butt";
       },
@@ -138,8 +138,8 @@
     /* ── 후드 망토 : 둥글고 부드러운 실루엣 ── */
     hood: {
       back: function (g) {
-        var ctx = g.ctx, P = g.P, hR = g.hR, LW = g.LW;
-        var cloak = shade(P.top, 0.62);          // 망토는 몸통보다 확실히 어둡게
+        var ctx = g.ctx, P = g.P, LW = g.LW;
+        var cloak = shade(P.top, 0.52);          // 망토는 몸통보다 확실히 어둡게
         // 등 뒤 망토 (몸통 실루엣을 감싸되 폭은 절제)
         ctx.beginPath();
         ctx.moveTo(-g.bw - 0.4, g.shY + 0.2);
@@ -148,53 +148,54 @@
         ctx.quadraticCurveTo(g.bw + 2.2, g.hipY + 2.6, g.bw + 0.4, g.shY + 0.2);
         ctx.closePath();
         ink(ctx, cloak, LW);
-        // 뒤통수를 감싼 후드 볼륨 (머리보다 살짝만 크게)
-        ell(ctx, g.side ? -1.0 : 0, g.headCY - 0.3, hR * 1.13, hR * 1.16);
-        ink(ctx, cloak, LW);
       },
       front: function (g) {
         var ctx = g.ctx, P = g.P, hR = g.hR, cy = g.headCY, LW = g.LW;
-        var ox = g.side ? -0.5 : 0;
-        if (g.back) {
-          // 뒤통수: 후드가 머리 전체를 덮는다
-          ell(ctx, 0, cy - 0.2, hR * 1.1, hR * 1.14);
-          ink(ctx, P.top, LW);
-          ctx.beginPath();
-          ctx.arc(0, cy - 0.2, hR * 0.62, Math.PI * 0.15, Math.PI * 0.85);
-          ctx.lineWidth = LW; ctx.strokeStyle = shade(P.top, 0.7); ctx.stroke();
-        } else {
-          // 앞머리
-          ctx.save();
-          ell(ctx, g.side ? 0.5 : 0, cy, hR * 0.99, hR * 1.05);
-          ctx.clip();
-          ell(ctx, ox, cy - hR * 0.55, hR * 1.1, hR * 0.86);
-          ink(ctx, P.hair, 0);
-          ctx.restore();
-          // 후드 앞 테두리 — 볼 옆까지 감싸는 두꺼운 천
-          ctx.beginPath();
-          ctx.ellipse(ox, cy - 0.2, hR * 1.30, hR * 1.34, 0, Math.PI * 0.80, Math.PI * 2.20);
-          ctx.ellipse(ox, cy - 0.2, hR * 0.88, hR * 0.94, 0, Math.PI * 2.20, Math.PI * 0.80, true);
-          ctx.closePath();
-          ink(ctx, P.top, LW);
-          // 얼굴에 지는 후드 그늘
-          ctx.save();
-          ell(ctx, g.side ? 0.5 : 0, cy, hR * 0.97, hR * 1.03);
-          ctx.clip();
-          ell(ctx, ox, cy - hR * 1.15, hR * 1.2, hR * 0.95);
-          ctx.fillStyle = "rgba(20,14,4,.16)"; ctx.fill();
-          ctx.restore();
-        }
-        // 후드 뒤로 넘어간 뾰족한 끝
+        var ox = g.side ? -1.5 : 0;
+        // 머리 전체를 감싼 후드 천
+        ell(ctx, ox, cy - 0.5, hR * 1.22, hR * 1.30);
+        ink(ctx, P.top, LW);
+        // 후드 뒤로 접힌 끝
         ctx.beginPath();
-        ctx.moveTo(ox - hR * 0.55, cy - hR * 0.9);
-        ctx.quadraticCurveTo(ox - hR * 0.1, cy - hR * 1.85, ox + hR * 0.5, cy - hR * 1.0);
-        ctx.quadraticCurveTo(ox, cy - hR * 1.1, ox - hR * 0.55, cy - hR * 0.9);
+        ctx.moveTo(ox - hR * 0.72, cy - hR * 1.12);
+        ctx.quadraticCurveTo(ox - hR * 0.1, cy - hR * 1.72, ox + hR * 0.68, cy - hR * 1.20);
+        ctx.quadraticCurveTo(ox, cy - hR * 1.34, ox - hR * 0.72, cy - hR * 1.12);
         ctx.closePath();
-        ink(ctx, shade(P.top, 0.86), LW);
+        ink(ctx, shade(P.top, 0.84), LW);
+
+        if (!g.back) {
+          // 얼굴 구멍 (후드가 볼까지 감싸므로 좁게)
+          var fx = g.side ? hR * 0.52 : 0, fy = cy + hR * 0.22;
+          ell(ctx, fx, fy, hR * 0.74, hR * 0.84);
+          ink(ctx, P.skin, LW * 0.85);
+          // 구멍 위쪽으로 보이는 앞머리
+          ctx.save();
+          ell(ctx, fx, fy, hR * 0.72, hR * 0.82);
+          ctx.clip();
+          ell(ctx, fx, fy - hR * 0.72, hR * 0.95, hR * 0.52);
+          ink(ctx, P.hair, 0);
+          // 얼굴에 지는 그늘
+          ell(ctx, fx, fy - hR * 0.95, hR * 0.95, hR * 0.62);
+          ctx.fillStyle = "rgba(24,16,4,.15)"; ctx.fill();
+          ctx.restore();
+          g.faceX = fx; g.faceY = fy;            // 눈 위치를 얼굴 구멍에 맞춘다
+          g.faceR = hR * 0.74;
+        } else {
+          // 뒤통수: 세로 봉제선 + 아래쪽 그늘 (정면과 헷갈리지 않게)
+          ctx.save();
+          ell(ctx, ox, cy - 0.5, hR * 1.22, hR * 1.28);
+          ctx.clip();
+          ell(ctx, ox, cy + hR * 1.5, hR * 1.3, hR * 0.95);
+          ctx.fillStyle = shade(P.top, 0.78); ctx.fill();
+          ctx.restore();
+          ctx.beginPath();
+          ctx.moveTo(ox, cy - hR * 1.5); ctx.lineTo(ox, cy + hR * 0.7);
+          ctx.lineWidth = LW * 0.8; ctx.strokeStyle = shade(P.top, 0.7); ctx.stroke();
+        }
         ctx.beginPath();
-        ctx.arc(ox, cy - 0.2, hR * 1.31, Math.PI * 1.02, Math.PI * 1.48);
-        ctx.lineWidth = g.LW; ctx.strokeStyle = RIM; ctx.lineCap = "round"; ctx.stroke();
-        ctx.lineCap = "butt";
+        ctx.arc(ox, cy - 0.5, hR * 1.25, Math.PI * 1.02, Math.PI * 1.5);
+        ctx.lineWidth = g.LW * 1.1; ctx.strokeStyle = RIM;
+        ctx.lineCap = "round"; ctx.stroke(); ctx.lineCap = "butt";
       },
       /** 앞손에 든 등불 */
       hand: function (g, hx, hy) {
@@ -216,47 +217,60 @@
     pony: {
       back: function (g) {
         var ctx = g.ctx, P = g.P, hR = g.hR, cy = g.headCY, LW = g.LW;
-        var sway = g.sw * 1.1;
+        var sway = g.sw * 1.0;
         if (g.back) return;                       // 위 방향은 앞 레이어에서 그린다
-        if (g.side) {
-          // 옆모습: 뒤로 뻗은 꼬리
-          ctx.beginPath();
-          ctx.moveTo(-hR * 0.2, cy - hR * 0.95);
-          ctx.quadraticCurveTo(-hR * 2.3, cy - hR * 1.5 + sway, -hR * 2.5, cy + hR * 0.35 + sway);
-          ctx.quadraticCurveTo(-hR * 1.5, cy - hR * 0.15, -hR * 0.6, cy - hR * 0.2);
-          ctx.closePath();
-        } else {
-          // 정면: 머리 뒤로 솟은 꼬리
-          ctx.beginPath();
-          ctx.moveTo(hR * 0.15, cy - hR * 0.9);
-          ctx.quadraticCurveTo(hR * 1.9, cy - hR * 1.9, hR * 2.15 + sway, cy - hR * 0.35);
-          ctx.quadraticCurveTo(hR * 1.25, cy - hR * 0.85, hR * 0.5, cy - hR * 0.35);
-          ctx.closePath();
-        }
+        // 뒤통수 볼륨
+        ell(ctx, (g.side ? -0.9 : 0), cy - 0.2, hR * 1.05, hR * 1.08);
         ink(ctx, P.hair, LW);
+        // 묶은 꼬리 하나 (뒤쪽 위로 뻗어 흔들린다)
+        var s = g.side ? -1 : 1;                  // 옆모습은 뒤(왼쪽)로
+        var bx = s * hR * 0.62, by = cy - hR * 0.42;
+        ctx.beginPath();
+        ctx.moveTo(bx, by + hR * 0.44);
+        ctx.quadraticCurveTo(s * hR * 1.9, cy - hR * 0.95 + sway * 0.5,
+                             s * (hR * 2.05) + s * sway, cy + hR * 0.7 + sway);
+        ctx.quadraticCurveTo(s * hR * 1.5, cy - hR * 0.1 + sway * 0.4, bx, by - hR * 0.22);
+        ctx.closePath();
+        ink(ctx, P.hair, LW);
+        // 묶은 매듭
+        ell(ctx, bx, by + hR * 0.06, hR * 0.34, hR * 0.3);
+        ink(ctx, shade(P.hair, 1.55), LW * 0.8);
       },
       front: function (g) {
         var ctx = g.ctx, P = g.P, hR = g.hR, cy = g.headCY, LW = g.LW;
         var ox = g.side ? 0.5 : 0;
-        // 머리 캡
-        ctx.save();
-        ell(ctx, ox, cy, hR * 1.04, hR * 1.08);
-        ctx.clip();
-        ell(ctx, ox, cy - hR * 0.42, hR * 1.12, hR * 0.98);
-        ink(ctx, P.hair, 0);
-        ctx.restore();
         if (g.back) {
           // 뒤통수 전체 + 등으로 늘어진 꼬리
-          ell(ctx, 0, cy, hR * 1.02, hR * 1.06);
+          ell(ctx, 0, cy - 0.1, hR * 1.04, hR * 1.08);
           ink(ctx, P.hair, LW);
-          rrect(ctx, -1.5 + g.sw * 0.7, cy + hR * 0.2, 3.0, hR * 2.0, 1.4);
-          ink(ctx, shade(P.hair, 1.18), LW);
+          var tx = g.sw * 0.9;
+          ctx.beginPath();
+          ctx.moveTo(-1.6, cy + hR * 0.3);
+          ctx.quadraticCurveTo(-1.5 + tx, cy + hR * 1.5, tx * 1.4, cy + hR * 2.15);
+          ctx.quadraticCurveTo(1.5 + tx, cy + hR * 1.5, 1.6, cy + hR * 0.3);
+          ctx.closePath();
+          ink(ctx, P.hair, LW);
+          ell(ctx, 0, cy + hR * 0.42, hR * 0.36, hR * 0.28);
+          ink(ctx, shade(P.hair, 1.55), LW * 0.8);
+        } else {
+          // 앞머리 (가운데 가르마)
+          ctx.save();
+          ell(ctx, ox, cy, hR * 1.0, hR * 1.06);
+          ctx.clip();
+          ell(ctx, ox, cy - hR * 0.5, hR * 1.1, hR * 0.92);
+          ink(ctx, P.hair, 0);
+          if (!g.side) {
+            ctx.beginPath();
+            ctx.moveTo(-hR * 0.2, cy - hR * 1.1);
+            ctx.quadraticCurveTo(hR * 0.1, cy - hR * 0.2, hR * 0.62, cy + hR * 0.1);
+            ctx.lineTo(hR * 1.2, cy - hR * 1.1);
+            ctx.closePath();
+            ink(ctx, P.hair, 0);
+          }
+          ctx.restore();
         }
-        // 이마 위로 묶어 올린 매듭
-        ell(ctx, ox + (g.side ? -0.4 : 0), cy - hR * 0.98, hR * 0.42, hR * 0.34);
-        ink(ctx, shade(P.hair, 1.2), LW);
         ctx.beginPath();
-        ctx.arc(ox, cy, hR * 1.06, Math.PI * 1.06, Math.PI * 1.5);
+        ctx.arc(ox, cy, hR * 1.05, Math.PI * 1.06, Math.PI * 1.5);
         ctx.lineWidth = g.LW; ctx.strokeStyle = RIM; ctx.lineCap = "round"; ctx.stroke();
         ctx.lineCap = "butt";
       },
@@ -266,13 +280,13 @@
         var sway = g.sw * 1.4;
         ctx.beginPath();
         if (g.side) {
-          ctx.moveTo(-0.5, shY - 0.6);
-          ctx.quadraticCurveTo(-4.5, shY - 2.6 + sway, -7.5, shY + 1.2 + sway);
-          ctx.quadraticCurveTo(-4.5, shY + 0.4 + sway * 0.4, -0.5, shY + 1.4);
+          ctx.moveTo(-0.5, shY + 0.4);
+          ctx.quadraticCurveTo(-4.0, shY - 0.6 + sway, -6.4, shY + 3.4 + sway);
+          ctx.quadraticCurveTo(-3.8, shY + 1.8 + sway * 0.4, -0.5, shY + 2.2);
         } else {
-          ctx.moveTo(bw * 0.2, shY - 0.4);
-          ctx.quadraticCurveTo(bw + 3.2, shY - 2.4 + sway, bw + 5.4, shY + 2.0 + sway);
-          ctx.quadraticCurveTo(bw + 1.6, shY + 0.6 + sway * 0.4, bw * 0.2, shY + 1.6);
+          ctx.moveTo(bw * 0.2, shY + 0.4);
+          ctx.quadraticCurveTo(bw + 2.6, shY - 0.4 + sway, bw + 4.2, shY + 3.6 + sway);
+          ctx.quadraticCurveTo(bw + 1.4, shY + 2.0 + sway * 0.4, bw * 0.2, shY + 2.4);
         }
         ctx.closePath();
         ink(ctx, shade(P.accent, 0.96), LW);
@@ -290,32 +304,37 @@
           ell(ctx, 0, cy - 0.1, hR * 1.03, hR * 1.06);
           ink(ctx, P.hair, LW);
           ctx.beginPath();
-          ctx.moveTo(-hR * 0.75, cy + hR * 0.75);
-          ctx.quadraticCurveTo(0, cy + hR * 0.3, hR * 0.75, cy + hR * 0.75);
-          ctx.lineWidth = LW; ctx.strokeStyle = shade(P.hair, 1.5); ctx.stroke();
+          ctx.moveTo(-hR * 0.74, cy + hR * 0.42);
+          ctx.quadraticCurveTo(0, cy + hR * 1.02, hR * 0.74, cy + hR * 0.42);
+          ctx.lineWidth = LW * 0.9; ctx.strokeStyle = shade(P.hair, 1.9); ctx.stroke();
         } else {
           // 각진 앞머리
           ctx.save();
-          ell(ctx, ox, cy, hR * 1.04, hR * 1.08);
+          ell(ctx, ox, cy, hR * 1.02, hR * 1.06);
           ctx.clip();
           ctx.beginPath();
-          ctx.moveTo(-hR * 1.2, cy - hR * 1.3);
-          ctx.lineTo(hR * 1.2, cy - hR * 1.3);
-          ctx.lineTo(hR * 1.2, cy - hR * 0.22);
-          ctx.lineTo(hR * 0.15, cy - hR * 0.52);
-          ctx.lineTo(-hR * 1.2, cy - hR * 0.12);
+          ctx.moveTo(-hR * 1.3, cy - hR * 1.3);
+          ctx.lineTo(hR * 1.3, cy - hR * 1.3);
+          ctx.lineTo(hR * 1.3, cy - hR * 0.28);
+          ctx.lineTo(hR * 0.1, cy - hR * 0.56);
+          ctx.lineTo(-hR * 1.3, cy - hR * 0.16);
           ctx.closePath();
           ink(ctx, P.hair, 0);
           ctx.restore();
         }
-        // 이마 서클릿
+        // 어두운 머리에 형태를 주는 하이라이트
         ctx.beginPath();
-        ctx.moveTo(ox - hR * 0.92, cy - hR * 0.14);
-        ctx.quadraticCurveTo(ox, cy - hR * 0.44, ox + hR * 0.92, cy - hR * 0.14);
-        ctx.lineWidth = g.LW * 1.1; ctx.strokeStyle = P.accent; ctx.stroke();
+        ctx.arc(ox, cy - 0.1, hR * 0.86, Math.PI * 1.12, Math.PI * 1.46);
+        ctx.lineWidth = g.LW * 0.9; ctx.strokeStyle = shade(P.hair, 2.4);
+        ctx.lineCap = "round"; ctx.stroke();
+        // 이마 서클릿 (얇게)
         ctx.beginPath();
-        ctx.arc(ox, cy, hR * 1.06, Math.PI * 1.04, Math.PI * 1.5);
-        ctx.lineWidth = g.LW * 1.15; ctx.strokeStyle = RIM; ctx.lineCap = "round"; ctx.stroke();
+        ctx.moveTo(ox - hR * 0.86, cy - hR * 0.50);
+        ctx.quadraticCurveTo(ox, cy - hR * 0.76, ox + hR * 0.86, cy - hR * 0.50);
+        ctx.lineWidth = g.LW * 0.75; ctx.strokeStyle = P.accent; ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(ox, cy, hR * 1.05, Math.PI * 1.04, Math.PI * 1.5);
+        ctx.lineWidth = g.LW * 1.1; ctx.strokeStyle = RIM; ctx.stroke();
         ctx.lineCap = "butt";
       },
       deco: function (g) {
@@ -331,11 +350,12 @@
           ink(ctx, shade(P.top, 1.45), LW);
         };
         pad(-1); pad(1);
-        // 밝은 옷깃 (어두운 배경에서 실루엣을 살린다)
+        // 밝은 옷깃 (어두운 배경에서 실루엣을 살린다). 뒤통수 방향에선 생략
+        if (g.back) return;
         ctx.beginPath();
-        ctx.moveTo(-bw * 0.5, shY - 1.4);
-        ctx.lineTo(0, shY + 2.2);
-        ctx.lineTo(bw * 0.5, shY - 1.4);
+        ctx.moveTo(-bw * 0.38, shY - 1.5);
+        ctx.lineTo(0, shY + 1.5);
+        ctx.lineTo(bw * 0.38, shY - 1.5);
         ctx.closePath();
         ink(ctx, P.accent, LW * 0.8);
         // 로브 가운데 라인
@@ -373,7 +393,7 @@
       palette: {
         style: "lamplighter",
         skin: "#F6DCC0", hair: "#E7DECA",
-        top: "#F2EEE2", bottom: "#A9814F", accent: "#FFE9A8"
+        top: "#F2EEE2", bottom: "#8A6741", accent: "#FFE9A8"
       }
     },
     {
@@ -383,7 +403,7 @@
       trait: { key: "speed", label: "이동 속도 +28%", mult: 1.28 },
       palette: {
         style: "courier",
-        skin: "#8C5A32", hair: "#241A15",
+        skin: "#8C5A32", hair: "#33251C",
         top: "#E2624A", bottom: "#33405A", accent: "#FFD9A0"
       }
     },
@@ -394,7 +414,7 @@
       trait: { key: "reach", label: "조우 반경 +50%", mult: 1.5 },
       palette: {
         style: "warden",
-        skin: "#C1854E", hair: "#1E2233",
+        skin: "#C1854E", hair: "#2B3150",
         top: "#312E4E", bottom: "#3B3757", accent: "#A79BFF"
       }
     }
@@ -404,7 +424,7 @@
   var STYLES = {
     surveyor:    { headR: 5.2, bodyW: 5.0, legGap: 2.4, hem: 2.9, flare: 1.3, tall: 0.0, hair: "hat" },
     lamplighter: { headR: 5.0, bodyW: 4.3, legGap: 2.1, hem: 1.8, flare: 0.7, tall: 0.0, hair: "hood" },
-    courier:     { headR: 4.7, bodyW: 4.0, legGap: 2.0, hem: 0.5, flare: 0.0, tall: 1.4, hair: "pony" },
+    courier:     { headR: 4.95, bodyW: 4.0, legGap: 2.0, hem: 0.5, flare: 0.0, tall: 1.4, hair: "pony" },
     warden:      { headR: 5.0, bodyW: 5.7, legGap: 2.8, hem: 4.4, flare: 2.4, tall: 0.7, hair: "crop" }
   };
   var DEFAULT_PALETTE = CHARACTERS[0].palette;
@@ -480,6 +500,7 @@
       return [x - 5.0 * Math.sin(ang), shY + 0.6 + 5.0 * Math.cos(ang)];
     }
     var sleeveDark = shade(P.top, 0.72);
+    var sleeveLit = shade(P.top, 0.86);
     if (side) arm(-1.2, -sw * 0.62, sleeveDark);
 
     /* 4. 몸통 (옷) */
@@ -502,8 +523,8 @@
     if (side) {
       handPos = arm(1.4, sw * 0.62, P.top);
     } else {
-      arm(-(bw + 0.5), sw * 0.30, P.top);
-      handPos = arm(bw + 0.5, -sw * 0.30, P.top);
+      arm(-(bw + 0.95), sw * 0.30, sleeveLit);
+      handPos = arm(bw + 0.95, -sw * 0.30, sleeveLit);
     }
     function hand(pos, col) {
       ell(ctx, pos[0], pos[1], 1.5, 1.45);
@@ -513,7 +534,7 @@
       hand([-1.2 - 5.0 * Math.sin(-sw * 0.62), shY + 0.6 + 5.0 * Math.cos(-sw * 0.62)], shade(P.skin, 0.8));
       hand(handPos, skinHand);
     } else {
-      hand([-(bw + 0.5) - 5.0 * Math.sin(sw * 0.30), shY + 0.6 + 5.0 * Math.cos(sw * 0.30)], skinHand);
+      hand([-(bw + 0.95) - 5.0 * Math.sin(sw * 0.30), shY + 0.6 + 5.0 * Math.cos(sw * 0.30)], skinHand);
       hand(handPos, skinHand);
     }
 
@@ -532,45 +553,50 @@
       ink(ctx, shade(P.skin, 0.93), LW * 0.8);
     }
 
-    /* 8. 머리 위 레이어 (머리카락 / 모자 / 후드) */
+    /* 8. 머리 위 레이어 — up 방향은 먼저 뒤통수를 머리카락으로 덮는다 */
+    if (back) {
+      ell(ctx, 0, headCY, hR * 1.02, hR * 1.07);
+      ink(ctx, P.hair, LW);
+    }
     if (hair.front) hair.front(g);
 
     /* 9. 얼굴 (위 방향은 뒤통수라 생략) */
     if (!back) {
-      var ey = headCY + hR * 0.16;
+      var fcx = g.faceX || 0, fR = g.faceR || hR;
+      var ey = (g.faceY == null ? headCY : g.faceY) + fR * 0.16;
       ctx.fillStyle = EYE;
       if (side) {
-        ell(ctx, hR * 0.5, ey, 0.72, 1.02); ctx.fill();
+        ell(ctx, fcx + fR * 0.5, ey, 0.72, 1.02); ctx.fill();
         if (detail) {
           ctx.fillStyle = "#FFFFFF";
-          ell(ctx, hR * 0.5 + 0.28, ey - 0.4, 0.26, 0.3); ctx.fill();
+          ell(ctx, fcx + fR * 0.5 + 0.28, ey - 0.4, 0.26, 0.3); ctx.fill();
           ctx.beginPath();
-          ctx.moveTo(hR * 0.16, ey - 1.65); ctx.lineTo(hR * 0.86, ey - 1.5);
+          ctx.moveTo(fcx + fR * 0.16, ey - 1.65); ctx.lineTo(fcx + fR * 0.86, ey - 1.5);
           ctx.lineWidth = LW * 1.1; ctx.strokeStyle = shade(P.hair, 0.9); ctx.stroke();
           ctx.beginPath();
-          ctx.arc(hR * 0.62, ey + 2.0, 0.75, 0.15, Math.PI * 0.85);
+          ctx.arc(fcx + fR * 0.62, ey + 2.0, 0.75, 0.15, Math.PI * 0.85);
           ctx.lineWidth = LW; ctx.strokeStyle = shade(P.skin, 0.55); ctx.stroke();
         }
       } else {
-        ell(ctx, -hR * 0.4, ey, 0.76, 1.04); ctx.fill();
-        ell(ctx, hR * 0.4, ey, 0.76, 1.04); ctx.fill();
+        ell(ctx, fcx - fR * 0.4, ey, 0.76, 1.04); ctx.fill();
+        ell(ctx, fcx + fR * 0.4, ey, 0.76, 1.04); ctx.fill();
         if (detail) {
           ctx.fillStyle = "#FFFFFF";
-          ell(ctx, -hR * 0.4 + 0.26, ey - 0.42, 0.26, 0.3); ctx.fill();
-          ell(ctx, hR * 0.4 + 0.26, ey - 0.42, 0.26, 0.3); ctx.fill();
+          ell(ctx, fcx - fR * 0.4 + 0.26, ey - 0.42, 0.26, 0.3); ctx.fill();
+          ell(ctx, fcx + fR * 0.4 + 0.26, ey - 0.42, 0.26, 0.3); ctx.fill();
           ctx.strokeStyle = shade(P.hair, 0.9); ctx.lineWidth = LW * 1.1;
           ctx.beginPath();
-          ctx.moveTo(-hR * 0.72, ey - 1.75); ctx.lineTo(-hR * 0.1, ey - 1.6);
-          ctx.moveTo(hR * 0.72, ey - 1.75); ctx.lineTo(hR * 0.1, ey - 1.6);
+          ctx.moveTo(fcx - fR * 0.72, ey - 1.75); ctx.lineTo(fcx - fR * 0.1, ey - 1.6);
+          ctx.moveTo(fcx + fR * 0.72, ey - 1.75); ctx.lineTo(fcx + fR * 0.1, ey - 1.6);
           ctx.stroke();
           // 입
           ctx.beginPath();
-          ctx.arc(0, ey + 1.9, 0.95, 0.2, Math.PI * 0.8);
+          ctx.arc(fcx, ey + 1.9, 0.95, 0.2, Math.PI * 0.8);
           ctx.lineWidth = LW; ctx.strokeStyle = shade(P.skin, 0.5); ctx.stroke();
           // 볼
           ctx.fillStyle = rgba("#E88A6A", 0.28);
-          ell(ctx, -hR * 0.72, ey + 1.2, 0.9, 0.6); ctx.fill();
-          ell(ctx, hR * 0.72, ey + 1.2, 0.9, 0.6); ctx.fill();
+          ell(ctx, fcx - fR * 0.72, ey + 1.2, 0.9, 0.6); ctx.fill();
+          ell(ctx, fcx + fR * 0.72, ey + 1.2, 0.9, 0.6); ctx.fill();
         }
       }
     }

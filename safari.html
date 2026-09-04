@@ -1,7 +1,7 @@
 <title>논문 사파리</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root {
     --ground: #0A0E1C;
@@ -33,12 +33,59 @@
     -webkit-font-smoothing: antialiased;
     user-select: none;
   }
-  canvas#world { display: block; width: 100vw; height: 100dvh; }
+  .game { position: relative; height: 100dvh; min-height: 520px; overflow: hidden; background: var(--ground); }
+  canvas#world { display: block; width: 100%; height: 100%; }
+  @media (max-width: 900px) { .game { height: calc(100dvh - 58px); } }
+
+/* ══ 사이트 셸 (모든 페이지 공통) ══════════════════════ */
+:root { --cg-nav-w: 232px; --cg-paper:#F3F0E9; --cg-card:#FFFFFF; --cg-card2:#FAF8F3;
+  --cg-ink:#16150F; --cg-ink2:#59554B; --cg-ink3:#8C8678; --cg-line:#E4DED2;
+  --cg-line2:#D2CABA; --cg-blue:#2B5FE3; --cg-blue2:#1E47B4; --cg-wash:#E9EEFC;
+  --cg-sans:"Gothic A1",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  --cg-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; }
+.cg-nav {
+  position: fixed; inset: 0 auto 0 0; width: var(--cg-nav-w); z-index: 60;
+  background: var(--cg-card); border-right: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; padding: 20px 14px 16px;
+  font-family: var(--cg-sans); color: var(--cg-ink);
+}
+.cg-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; padding: 0 6px 18px; color: inherit; }
+.cg-brand .cg-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--cg-blue); flex: none; position: relative; }
+.cg-brand .cg-mark::before, .cg-brand .cg-mark::after { content: ""; position: absolute; border-radius: 50%; background: #fff; }
+.cg-brand .cg-mark::before { width: 8px; height: 8px; left: 6px; top: 6px; }
+.cg-brand .cg-mark::after { width: 5px; height: 5px; right: 6px; bottom: 7px; opacity: .8; }
+.cg-brand b { font-size: 14px; font-weight: 800; letter-spacing: -.02em; display: block; line-height: 1.3; }
+.cg-brand i { font-style: normal; font-size: 10.5px; color: var(--cg-ink3); font-family: var(--cg-mono); }
+.cg-menu { display: flex; flex-direction: column; gap: 2px; }
+.cg-menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+  text-decoration: none; font-size: 13.5px; font-weight: 500; color: var(--cg-ink2); }
+.cg-menu a:hover { background: var(--cg-card2); color: var(--cg-ink); }
+.cg-menu a[aria-current="page"] { background: var(--cg-wash); color: var(--cg-blue2); font-weight: 700; }
+.cg-menu svg { flex: none; width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.cg-menu .cg-sub { margin-left: auto; font-family: var(--cg-mono); font-size: 9.5px; color: var(--cg-ink3); }
+.cg-menu a[aria-current="page"] .cg-sub { color: var(--cg-blue); }
+.cg-foot { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; gap: 5px; font-family: var(--cg-mono); font-size: 10.5px; color: var(--cg-ink3); }
+.cg-foot a { color: var(--cg-ink3); text-decoration: none; }
+.cg-foot a:hover { color: var(--cg-blue); }
+.cg-shift { margin-left: var(--cg-nav-w); }
+body { word-break: keep-all; }
+@media (max-width: 900px) {
+  .cg-nav { position: static; width: auto; flex-direction: row; align-items: center;
+    border-right: 0; border-bottom: 1px solid var(--cg-line); padding: 10px 14px; gap: 14px; }
+  .cg-brand { padding: 0; }
+  .cg-brand .cg-bn { display: none; }
+  .cg-menu { flex-direction: row; gap: 4px; }
+  .cg-menu .cg-sub { display: none; }
+  .cg-foot { display: none; }
+  .cg-shift { margin-left: 0; }
+}
+
   .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   /* ── HUD ─────────────────────────────────────── */
   .hud {
-    position: fixed; top: 12px; left: 12px;
+    position: absolute; top: 12px; left: 12px;
     display: flex; flex-direction: column; gap: 7px;
     pointer-events: none;
   }
@@ -66,7 +113,7 @@
   .keys button:hover { color: var(--ink); border-color: var(--beacon); }
 
   .toast {
-    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
     background: rgba(16,23,40,.94); border: 1px solid var(--beacon);
     border-radius: 6px; padding: 7px 14px;
     font-family: var(--mono); font-size: 11.5px; color: var(--beacon);
@@ -76,7 +123,7 @@
 
   /* ── 미니맵 ──────────────────────────────────── */
   .minimap {
-    position: fixed; right: 12px; bottom: 12px;
+    position: absolute; right: 12px; bottom: 12px;
     border: 1px solid var(--edge); border-radius: 7px;
     background: rgba(10,14,28,.9); padding: 6px;
     pointer-events: none;
@@ -89,7 +136,7 @@
 
   /* ── D-패드 ─────────────────────────────────── */
   .dpad {
-    position: fixed; left: 14px; bottom: 14px;
+    position: absolute; left: 14px; bottom: 14px;
     display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px);
     gap: 3px; opacity: .5;
   }
@@ -105,7 +152,7 @@
 
   /* ── 오버레이 공통 ──────────────────────────── */
   .veil {
-    position: fixed; inset: 0; display: grid; place-items: center;
+    position: absolute; inset: 0; display: grid; place-items: center;
     background: rgba(6,9,18,.72); backdrop-filter: blur(3px);
     padding: 20px; z-index: 20;
   }
@@ -188,6 +235,24 @@
   .dexlist li i { width: 7px; height: 7px; border-radius: 50%; flex: none; }
   .dexlist li span { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
 
+  .picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 18px; }
+  .pick {
+    background: var(--panel-2); border: 1px solid var(--edge); border-radius: 9px;
+    padding: 6px 5px 10px; cursor: pointer; text-align: center; color: inherit;
+    font: inherit; transition: border-color .13s, background .13s;
+  }
+  .pick:hover { border-color: var(--ink-3); }
+  .pick[aria-pressed="true"] { border-color: var(--beacon); background: rgba(53,224,194,.08); }
+  .pick canvas { display: block; width: 100%; height: 92px; }
+  .pick b { display: block; font-size: 12.5px; font-weight: 600; margin-top: 2px; }
+  .pick i { display: block; font-style: normal; font-size: 10.5px; color: var(--ink-3); line-height: 1.4; margin-top: 3px; }
+  .pick .tr {
+    display: inline-block; margin-top: 7px; font-family: var(--mono); font-size: 9.5px;
+    color: var(--ink-3); border: 1px solid currentColor; border-radius: 3px; padding: 1px 5px;
+  }
+  .pick[aria-pressed="true"] .tr { color: var(--beacon); }
+  @media (max-width: 560px) { .picks { grid-template-columns: repeat(2, 1fr); } }
+
   .intro p { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; margin: 0 0 10px; }
   .intro ul { margin: 0 0 14px; padding-left: 17px; }
   .intro li { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; margin-bottom: 3px; }
@@ -204,6 +269,23 @@
   }
 </style>
 
+<aside class="cg-nav">
+  <a class="cg-brand" href="./index.html">
+    <span class="cg-mark"></span>
+    <span class="cg-bn"><b>Checkpoint Graph</b><i>연구자용 Second Brain</i></span>
+  </a>
+  <div class="cg-menu">
+    <a href="./index.html"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg><span>홈</span></a>
+    <a href="./graph.html"><svg viewBox="0 0 24 24"><circle cx="6" cy="8" r="2.6"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="15" cy="17.5" r="2.6"/><path d="M8.4 9.2l4.6 6.6M8 7.2l7.8-.5"/></svg><span>그래프 뷰</span><span class="cg-sub">ANALYST</span></a>
+    <a href="./safari.html" aria-current="page"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6.5 20v-3.2A5.5 5.5 0 0 1 12 11.3a5.5 5.5 0 0 1 5.5 5.5V20"/></svg><span>논문 사파리</span><span class="cg-sub">GAME</span></a>
+  </div>
+  <div class="cg-foot">
+    <a href="https://github.com/sangho24/checkpoint-graph">GitHub 레포 ↗</a>
+    <span>프로토타입 · 2026-09</span>
+  </div>
+</aside>
+
+<div class="game cg-shift">
 <canvas id="world"></canvas>
 
 <div class="hud">
@@ -239,7 +321,10 @@
 <div class="veil intro" id="intro">
   <div class="box">
     <h2>인용 그래프 위를 걷는다</h2>
-    <p>당신은 논문 81편이 별처럼 흩어진 벌판에 서 있다. 등불이 닿는 곳만 보인다. 다만 <b style="color:var(--beacon)">청록으로 빛나는 것</b>은 안개를 뚫고 멀리서도 보인다. 그게 그래프가 지금 당신에게 밀고 있는 추천이다.</p>
+    <p style="margin-bottom:10px">누구로 걸을지 고른다. 능력은 <b>탐색</b>에만 영향을 준다.
+       추천 판정에는 아무 영향이 없다.</p>
+    <div class="picks" id="picks"></div>
+    <p>당신은 논문 89편이 별처럼 흩어진 벌판에 서 있다. 등불이 닿는 곳만 보인다. 다만 <b style="color:var(--beacon)">청록으로 빛나는 것</b>은 안개를 뚫고 멀리서도 보인다. 그게 그래프가 지금 당신에게 밀고 있는 추천이다.</p>
     <ul>
       <li><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 또는 <kbd>WASD</kbd> 로 이동</li>
       <li>논문에 닿으면 조우가 뜬다. <kbd>1</kbd> 읽는다 · <kbd>2</kbd> 스킵 · <kbd>Esc</kbd> 지나친다</li>
@@ -251,6 +336,9 @@
   </div>
 </div>
 
+</div>
+
+<script src="./assets/sprites.js"></script>
 <script>
 "use strict";
 
@@ -517,18 +605,68 @@ const WGT = { liked: 2, read: 1, skipped: -1 };
 const HUB_EXP = 0.8;
 const TOP_N = 8;
 
-const RX = new Map();          // id -> {r, t}
-let clock = 0;
-const GAME_SEEDS = [["attention","liked"],["switch","read"],["flash","liked"],
-                    ["vllm","read"],["mixtral","liked"],["gqa","read"]];
-GAME_SEEDS.forEach(([id, r]) => RX.set(id, { r, t: clock++ }));
+/* mock 독서 이력. data/reading-history.json 과 같은 내용이다.
+   실제 기록이 아니라 백테스트 설계 검증용 가짜 데이터다.
+   fetch() 는 file:// 에서 CORS 로 막히므로 HTML 에 <script> 로 인라인해서 쓴다.
+   형식: [node_id, read_at, reaction, source] */
+const READING_HISTORY = [
+  ["attention", "2026-04-02T21:38:00+09:00", "liked", "zotero"],
+  ["moe", "2026-04-02T22:55:00+09:00", "read", "browser_history"],
+  ["switch", "2026-04-06T22:12:00+09:00", "liked", "zotero"],
+  ["gshard", "2026-04-09T20:47:00+09:00", "read", "browser_history"],
+  ["expertchoice", "2026-04-11T14:22:00+09:00", "read", "zotero"],
+  ["mod", "2026-04-11T16:08:00+09:00", "read", "browser_history"],
+  ["ddpm", "2026-04-11T17:44:00+09:00", "skipped", "browser_history"],
+  ["mixtral", "2026-04-14T21:26:00+09:00", "liked", "zotero"],
+  ["dsv2", "2026-04-19T15:10:00+09:00", "read", "zotero"],
+  ["dsv3", "2026-04-23T22:31:00+09:00", "liked", "zotero"],
+  ["a-kipply", "2026-04-28T21:16:00+09:00", "read", "browser_history"],
+  ["mqa", "2026-05-03T13:52:00+09:00", "skipped", "browser_history"],
+  ["gqa", "2026-05-06T22:20:00+09:00", "read", "zotero"],
+  ["flash", "2026-05-07T21:03:00+09:00", "liked", "zotero"],
+  ["flash2", "2026-05-12T23:11:00+09:00", "read", "browser_history"],
+  ["rope", "2026-05-18T22:26:00+09:00", "read", "browser_history"],
+  ["vllm", "2026-05-23T13:40:00+09:00", "liked", "zotero"],
+  ["specdec", "2026-05-23T15:15:00+09:00", "read", "browser_history"],
+  ["medusa", "2026-05-23T16:52:00+09:00", "read", "browser_history"],
+  ["streaming", "2026-05-23T20:30:00+09:00", "read", "browser_history"],
+  ["ring", "2026-05-28T22:05:00+09:00", "read", "manual"],
+  ["clip", "2026-06-03T21:48:00+09:00", "skipped", "browser_history"],
+  ["mistral", "2026-06-09T20:36:00+09:00", "read", "browser_history"],
+  ["llama2", "2026-06-13T14:12:00+09:00", "read", "zotero"],
+  ["chinchilla", "2026-06-18T22:24:00+09:00", "liked", "zotero"],
+  ["scaling", "2026-06-24T21:57:00+09:00", "skipped", "browser_history"],
+  ["lora", "2026-06-30T20:52:00+09:00", "read", "browser_history"],
+  ["qlora", "2026-07-03T22:41:00+09:00", "read", "zotero"],
+  ["a-scale", "2026-07-09T21:15:00+09:00", "liked", "browser_history"],
+  ["megatron", "2026-07-11T14:26:00+09:00", "read", "manual"],
+  ["zero", "2026-07-12T16:03:00+09:00", "read", "zotero"],
+  ["whisper", "2026-07-18T15:37:00+09:00", "skipped", "browser_history"],
+  ["llama3", "2026-07-25T13:52:00+09:00", "read", "browser_history"],
+  ["qwen2", "2026-08-02T15:44:00+09:00", "read", "browser_history"],
+  ["ldm", "2026-08-09T16:58:00+09:00", "skipped", "browser_history"],
+  ["mamba", "2026-08-17T21:12:00+09:00", "read", "manual"],
+  ["dsr1", "2026-08-26T22:34:00+09:00", "liked", "zotero"],
+  ["a-weng", "2026-09-03T22:09:00+09:00", "read", "browser_history"],
+];
+
+/* 총 38개 엔트리. 기간: 2026-04-02 ~ 2026-09-03 (Asia/Seoul).
+   dwell_min 등 나머지 필드는 data/reading-history.json 을 참조. */
+
+const HALF_LIFE_DAYS = 90;    // 시드 가중치 반감기
+
+const RX = new Map();         // id -> {r, at, src}
+READING_HISTORY.forEach(([id, at, r]) => {
+  if (N.has(id)) RX.set(id, { r, at: Date.parse(at), src: "history" });
+});
 
 function seedVector(){
   const s = {}; let norm = 0;
   for (const [id, o] of RX) {
     const w = WGT[o.r] || 0;
     if (!w) continue;
-    const v = w * Math.pow(0.94, clock - 1 - o.t);
+    const days = Math.max(0, (Date.now() - o.at) / 86400000);
+    const v = w * Math.pow(0.5, days / HALF_LIFE_DAYS);
     s[id] = (s[id] || 0) + v; norm += Math.abs(v);
   }
   if (norm > 0) for (const k in s) s[k] /= norm;
@@ -655,12 +793,16 @@ const BOUND = (() => {
 /* ─────────────────────────────────────────────────────────
    게임 상태
    ───────────────────────────────────────────────────────── */
-const LIGHT = 250;
-const seedNodes = [...RX.keys()].map(id => N.get(id));
+const LIGHT_BASE = 250, SPEED_BASE = 5.4, REACH_BASE = 26, BEACON_BASE = 1100;
+const TRAIT = { light: 1, speed: 1, sight: 1, reach: 1 };
+let LIGHT = LIGHT_BASE, SPEED = SPEED_BASE, BEACON_RANGE = BEACON_BASE;
+let CHAR = (window.CG_SPRITES && CG_SPRITES.CHARACTERS[0]) || null;
+const seedNodes = [...RX].filter(([, o]) => (WGT[o.r] || 0) > 0)
+  .slice(-8).map(([id]) => N.get(id));   // 최근에 읽은 것들 한가운데서 시작
 const player = {
   x: seedNodes.reduce((a, n) => a + n.x, 0) / seedNodes.length,
   y: seedNodes.reduce((a, n) => a + n.y, 0) / seedNodes.length,
-  dx: 0, dy: 1
+  dx: 0, dy: 1, dir: "down", walk: 0
 };
 const cam = { x: player.x, y: player.y };
 const G = { agree: 0, judged: 0, recalcs: 0, encounter: null, phase: "intro", cooldown: new Set() };
@@ -672,9 +814,11 @@ const cv = document.getElementById("world"), ctx = cv.getContext("2d");
 const mini = document.getElementById("mini"), mctx = mini.getContext("2d");
 let VW = 0, VH = 0, DPR = 1;
 
+const GAMEBOX = document.querySelector(".game");
 function resize(){
+  const box = GAMEBOX.getBoundingClientRect();
   DPR = Math.min(devicePixelRatio || 1, 2);
-  VW = innerWidth; VH = innerHeight;
+  VW = Math.max(box.width, 320); VH = Math.max(box.height, 320);
   cv.width = VW * DPR; cv.height = VH * DPR;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
@@ -699,7 +843,8 @@ let frame = 0;
 
 function nodeAlpha(n, dist){
   if (dist < LIGHT) { n.seen = true; return 1; }
-  if (RECS.has(n.id)) return reduceMotion ? 0.8 : 0.62 + 0.24 * Math.sin(frame / 22);
+  if (RECS.has(n.id) && dist < BEACON_RANGE)
+    return reduceMotion ? 0.8 : 0.62 + 0.24 * Math.sin(frame / 22);
   if (n.seen) return 0.4;
   return 0;
 }
@@ -789,19 +934,19 @@ function draw(){
   ctx.fillStyle = lamp;
   ctx.beginPath(); ctx.arc(px, py, LIGHT, 0, 6.2832); ctx.fill();
 
-  const halo = ctx.createRadialGradient(px, py, 3, px, py, 26);
-  halo.addColorStop(0, "rgba(255,233,168,.55)");
+  const halo = ctx.createRadialGradient(px, py, 3, px, py, 30);
+  halo.addColorStop(0, "rgba(255,233,168,.42)");
   halo.addColorStop(1, "rgba(255,233,168,0)");
   ctx.fillStyle = halo;
-  ctx.beginPath(); ctx.arc(px, py, 26, 0, 6.2832); ctx.fill();
-  ctx.beginPath(); ctx.arc(px, py, 9, 0, 6.2832);
-  ctx.fillStyle = COL.lamp; ctx.fill();
-  ctx.lineWidth = 2.5; ctx.strokeStyle = COL.ground; ctx.stroke();
-  ctx.beginPath();                                   // 바라보는 방향
-  ctx.moveTo(px + player.dx * 14, py + player.dy * 14);
-  ctx.lineTo(px + player.dx * 6 - player.dy * 5, py + player.dy * 6 + player.dx * 5);
-  ctx.lineTo(px + player.dx * 6 + player.dy * 5, py + player.dy * 6 - player.dx * 5);
-  ctx.closePath(); ctx.fillStyle = COL.lamp; ctx.fill();
+  ctx.beginPath(); ctx.arc(px, py, 30, 0, 6.2832); ctx.fill();
+  if (window.CG_SPRITES && CHAR) {
+    CG_SPRITES.drawWalker(ctx, px, py, {
+      dir: player.dir, phase: player.walk, scale: 1.35, palette: CHAR.palette });
+  } else {
+    ctx.beginPath(); ctx.arc(px, py, 9, 0, 6.2832);
+    ctx.fillStyle = COL.lamp; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = COL.ground; ctx.stroke();
+  }
 
   drawCompass();
   drawMini();
@@ -924,7 +1069,7 @@ function resolve(choice){
   G.judged++; if (agreed) G.agree++;
 
   const before = new Set(RECS);
-  RX.set(n.id, { r: choice, t: clock++ });
+  RX.set(n.id, { r: choice, at: Date.now(), src: "session" });
   RANK = fullRank(); RECS = new Set(RANK.slice(0, TOP_N));
   G.recalcs++;
   const swapped = [...RECS].filter(id => !before.has(id)).length;
@@ -989,8 +1134,8 @@ updateHUD();
 /* 도감 */
 const dex = document.getElementById("dex"), dexBox = document.getElementById("dexBox");
 function openDex(){
-  const rows = [...RX].map(([id, o]) => ({ n: N.get(id), r: o.r, t: o.t }))
-    .sort((a, b) => b.t - a.t);
+  const rows = [...RX].map(([id, o]) => ({ n: N.get(id), r: o.r, at: o.at, src: o.src }))
+    .sort((a, b) => b.at - a.at);
   dexBox.innerHTML = `
     <h2>도감</h2>
     <p style="font-size:12px;color:var(--ink-2);margin:0 0 12px;line-height:1.6">
@@ -998,7 +1143,8 @@ function openDex(){
     <ul class="dexlist">${rows.map(o => `<li>
       <i style="background:${o.r === "skipped" ? COL.skip : COL.caught}"></i>
       <b style="font-weight:500">${esc(shortName(o.n))}</b>
-      <span>${{ read: "읽음", liked: "좋아요", skipped: "스킵" }[o.r]}</span></li>`).join("")}</ul>
+      <span>${{ read: "읽음", liked: "좋아요", skipped: "스킵" }[o.r]} · ${
+        o.src === "session" ? "방금" : new Date(o.at).toISOString().slice(2, 10)}</span></li>`).join("")}</ul>
     <div class="delta">전체 ${ALL.length}개 중 ${rows.length}개 조우. 남은 논문 ${ALL.length - rows.length}개.</div>
     <div class="choices" style="margin-top:12px"><button data-close>닫는다<b>Q</b></button></div>`;
   dexBox.querySelector("[data-close]").addEventListener("click", closeDex);
@@ -1037,13 +1183,45 @@ document.querySelectorAll(".dpad button").forEach(b => {
   b.addEventListener("pointercancel", off);
 });
 
+function applyChar(c){
+  CHAR = c;
+  for (const k in TRAIT) TRAIT[k] = 1;
+  TRAIT[c.trait.key] = c.trait.mult;
+  LIGHT = LIGHT_BASE * TRAIT.light;
+  SPEED = SPEED_BASE * TRAIT.speed;
+  BEACON_RANGE = BEACON_BASE * TRAIT.sight;
+}
+
+function buildPicks(){
+  const host = document.getElementById("picks");
+  if (!window.CG_SPRITES) { host.remove(); return; }
+  host.innerHTML = CG_SPRITES.CHARACTERS.map((c, i) => `
+    <button class="pick" data-i="${i}" aria-pressed="${i === 0}">
+      <canvas width="200" height="184"></canvas>
+      <b>${c.name}</b><i>${c.blurb}</i>
+      <span class="tr">${c.trait.label}</span>
+    </button>`).join("");
+  host.querySelectorAll(".pick").forEach((el, i) => {
+    const cv = el.querySelector("canvas"), g = cv.getContext("2d");
+    g.setTransform(2, 0, 0, 2, 0, 0);
+    CG_SPRITES.drawPortrait(g, 50, 50, {
+      scale: 0.78, palette: CG_SPRITES.CHARACTERS[i].palette, dir: "down" });
+    el.addEventListener("click", () => {
+      applyChar(CG_SPRITES.CHARACTERS[i]);
+      host.querySelectorAll(".pick").forEach((o, j) =>
+        o.setAttribute("aria-pressed", String(i === j)));
+    });
+  });
+  applyChar(CG_SPRITES.CHARACTERS[0]);
+}
+
 function start(){
   document.getElementById("intro").hidden = true;
   G.phase = "play";
 }
 document.getElementById("btnStart").addEventListener("click", start);
+buildPicks();
 
-const SPEED = 5.4;
 function step(){
   if (G.phase === "play") {
     let vx = 0, vy = 0;
@@ -1055,13 +1233,16 @@ function step(){
       const m = Math.hypot(vx, vy);
       player.x += (vx / m) * SPEED; player.y += (vy / m) * SPEED;
       player.dx = vx / m; player.dy = vy / m;
+      player.dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? "right" : "left")
+                                               : (vy > 0 ? "down" : "up");
+      player.walk = (player.walk + 0.055) % 1;
       player.x = Math.max(BOUND.x0, Math.min(BOUND.x1, player.x));
       player.y = Math.max(BOUND.y0, Math.min(BOUND.y1, player.y));
     }
     // 조우 판정
     for (const n of ALL) {
       const d = Math.hypot(n.x - player.x, n.y - player.y);
-      const trigger = nodeR(n) + 26;
+      const trigger = nodeR(n) + REACH_BASE * TRAIT.reach;
       if (G.cooldown.has(n.id)) { if (d > trigger * 2.2) G.cooldown.delete(n.id); continue; }
       if (RX.has(n.id)) continue;
       if (d < trigger) { openEncounter(n); break; }
