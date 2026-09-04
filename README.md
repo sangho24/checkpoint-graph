@@ -1,3 +1,5 @@
+<img src="assets/logo.svg" width="72" alt="Checkpoint Graph">
+
 # Checkpoint Graph
 
 > 내가 읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려주는 연구자용 Second Brain.

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Checkpoint Graph">
+  <title>Checkpoint Graph</title>
+  <!-- 작은 크기용. 희미한 그래프를 빼고 경로만 남긴다. 배경 없음. -->
+  <path d="M8.6 24.1 L13.4 20.7" stroke="#A97406" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <path d="M18.1 17.6 L22.9 13.4" stroke="#2B5FE3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <circle cx="6.4" cy="25.6" r="3.3" fill="#A97406"/>
+  <circle cx="15.8" cy="19.1" r="2.4" fill="none" stroke="#A97406" stroke-width="1.8"/>
+  <circle cx="25.2" cy="11.6" r="6" fill="none" stroke="#2B5FE3" stroke-width="1.6"/>
+  <circle cx="25.2" cy="11.6" r="3.3" fill="#2B5FE3"/>
+</svg>

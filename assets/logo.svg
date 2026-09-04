@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Checkpoint Graph">
+  <title>Checkpoint Graph</title>
+  <!-- 배경 없음. 투명하게 둔다. -->
+
+  <!-- 골라지지 않은 그래프. 경로는 이 위에서 선택된 하나다. -->
+  <g stroke="#B9B0A0" fill="#B9B0A0" stroke-linecap="round">
+    <g stroke-width="1.5" fill="none">
+      <path d="M23 17 L30 39"/>
+      <path d="M9 33 L12 51"/>
+      <path d="M44 47 L30 39"/>
+      <path d="M33 58 L44 47"/>
+      <path d="M57 37 L44 47"/>
+      <path d="M23 17 L9 33"/>
+      <path d="M13 12 L23 17"/>
+      <path d="M52 56 L44 47"/>
+      <path d="M13 12 L9 33"/>
+    </g>
+    <circle cx="23" cy="17" r="2"/>
+    <circle cx="44" cy="47" r="2"/>
+    <circle cx="9"  cy="33" r="1.7"/>
+    <circle cx="33" cy="58" r="1.7"/>
+    <circle cx="57" cy="37" r="1.7"/>
+    <circle cx="13" cy="12" r="1.7"/>
+    <circle cx="52" cy="56" r="1.7"/>
+  </g>
+
+  <!-- 경로: 읽은 것에서 다음 것까지. 선이 곧 근거다. -->
+  <path d="M16.5 48 L25.6 41.9" stroke="#A97406" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <path d="M33.7 35.3 L44.2 24.8" stroke="#2B5FE3" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+
+  <!-- 읽은 것 -->
+  <circle cx="12" cy="51" r="5.4" fill="#A97406"/>
+  <!-- 거쳐가는 것 -->
+  <circle cx="30" cy="39" r="4" fill="none" stroke="#A97406" stroke-width="2.6"/>
+  <!-- 다음에 읽을 것. 멀리서 눈에 띈다. -->
+  <circle cx="48" cy="21" r="10.4" fill="none" stroke="#2B5FE3" stroke-width="2.3"/>
+  <circle cx="48" cy="21" r="5.4" fill="#2B5FE3"/>
+</svg>

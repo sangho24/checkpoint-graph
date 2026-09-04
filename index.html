@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checkpoint Graph</title>
 <meta name="description" content="내가 읽은 것을 넣으면, 그래프 위에서 다음에 읽을 것을 이유와 함께 돌려주는 연구자용 Second Brain.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232B5FE3'/%3E%3Ccircle cx='11' cy='11' r='3.2' fill='%23fff'/%3E%3Ccircle cx='22' cy='16' r='2.4' fill='%23fff' opacity='.75'/%3E%3Ccircle cx='13' cy='23' r='2.4' fill='%23fff' opacity='.75'/%3E%3Cpath d='M11 11 22 16 13 23z' stroke='%23fff' stroke-width='1.3' fill='none' opacity='.5'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -31,9 +31,10 @@
   --nav-w: 232px;
 }
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 18px; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
-  font-family: var(--sans); font-size: 15px; line-height: 1.7;
+  font-family: var(--sans); font-size: 15px; line-height: 1.62;
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
@@ -51,10 +52,7 @@ a { color: inherit; }
   font-family: var(--cg-sans); color: var(--cg-ink);
 }
 .cg-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; padding: 0 6px 18px; color: inherit; }
-.cg-brand .cg-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--cg-blue); flex: none; position: relative; }
-.cg-brand .cg-mark::before, .cg-brand .cg-mark::after { content: ""; position: absolute; border-radius: 50%; background: #fff; }
-.cg-brand .cg-mark::before { width: 8px; height: 8px; left: 6px; top: 6px; }
-.cg-brand .cg-mark::after { width: 5px; height: 5px; right: 6px; bottom: 7px; opacity: .8; }
+.cg-brand .cg-mark { width: 32px; height: 32px; flex: none; display: block; overflow: visible; }
 .cg-brand b { font-size: 14px; font-weight: 800; letter-spacing: -.02em; display: block; line-height: 1.3; }
 .cg-brand i { font-style: normal; font-size: 10.5px; color: var(--cg-ink3); font-family: var(--cg-mono); }
 .cg-menu { display: flex; flex-direction: column; gap: 2px; }
@@ -69,6 +67,12 @@ a { color: inherit; }
   display: flex; flex-direction: column; gap: 5px; font-family: var(--cg-mono); font-size: 10.5px; color: var(--cg-ink3); }
 .cg-foot a { color: var(--cg-ink3); text-decoration: none; }
 .cg-foot a:hover { color: var(--cg-blue); }
+.cg-anchors { margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; gap: 1px; }
+.cg-anchors a { font-size: 12px; color: var(--cg-ink3); text-decoration: none;
+  padding: 5px 10px; border-radius: 6px; }
+.cg-anchors a:hover { background: var(--cg-card2); color: var(--cg-ink); }
+@media (max-width: 900px) { .cg-anchors { display: none; } }
 .cg-shift { margin-left: var(--cg-nav-w); }
 body { word-break: keep-all; }   /* 한글은 단어 단위로 끊는다 */
 @media (max-width: 900px) {
@@ -83,23 +87,28 @@ body { word-break: keep-all; }   /* 한글은 단어 단위로 끊는다 */
 }
 
 main { }
-.wrap { max-width: 940px; padding: 0 34px; margin: 0 auto; }
+.wrap { max-width: 1080px; padding: 0 34px; margin: 0 auto; }
 @media (max-width: 900px) { .wrap { padding: 0 18px; } }
 
 /* ══ 히어로 ════════════════════════════════════════════ */
-.hero { padding: 64px 0 44px; }
+.hero {
+  padding: 40px 0 20px;
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.08fr);
+  gap: 34px; align-items: center;
+}
+@media (max-width: 980px) { .hero { grid-template-columns: 1fr; gap: 22px; } }
 .eyebrow {
   font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
   text-transform: uppercase; color: var(--blue); margin-bottom: 14px;
 }
 h1 {
-  margin: 0 0 16px; font-size: clamp(28px, 4.4vw, 42px); font-weight: 800;
+  margin: 0 0 13px; font-size: clamp(26px, 3.1vw, 36px); font-weight: 800;
   letter-spacing: -.035em; line-height: 1.25; text-wrap: balance; max-width: 19ch;
 }
-.hero .lede { margin: 0 0 26px; font-size: 16px; color: var(--ink-2); max-width: 58ch; }
+.hero .lede { margin: 0 0 20px; font-size: 15px; color: var(--ink-2); max-width: 46ch; }
 .hero .lede b { color: var(--ink); font-weight: 700; }
 
-.cta { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 34px; }
+.cta { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 0; }
 .cta a {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 11px 18px; border-radius: 9px; text-decoration: none;
@@ -129,7 +138,7 @@ h1 {
   margin-left: auto; font-style: normal; font-family: var(--mono);
   font-size: 9.5px; letter-spacing: .12em; color: #35E0C2;
 }
-.screen canvas { display: block; width: 100%; aspect-ratio: 16 / 9; }
+.screen canvas { display: block; width: 100%; aspect-ratio: 16 / 10.5; }
 .screen .fallback {
   position: absolute; inset: auto 0 0 0; padding: 10px 13px;
   font-family: var(--mono); font-size: 10.5px; color: #6B7794;
@@ -140,7 +149,7 @@ h1 {
 .how .track { display: flex; flex-direction: column; gap: 10px; }
 .how .step {
   border: 1px solid var(--line); border-radius: 12px; background: var(--card);
-  padding: 16px 18px; transition: border-color .25s, box-shadow .25s, opacity .25s;
+  padding: 13px 16px; transition: border-color .25s, box-shadow .25s, opacity .25s;
   opacity: .55;
 }
 .how .step[data-on="1"] {
@@ -296,8 +305,83 @@ h1 {
 .verdict dd.ok { color: var(--blue-2); }
 .verdict dd.no { color: #A8331F; }
 
+/* ══ 히어로 수치 띠 ═══════════════════════════════════════ */
+.statstrip {
+  display: flex; flex-wrap: wrap; background: var(--card);
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  margin: 0 0 6px;
+}
+.statstrip > div { flex: 1 1 118px; padding: 10px 14px; border-right: 1px solid var(--line); }
+.statstrip > div:last-child { border-right: 0; }
+.statstrip b {
+  display: block; font-family: var(--mono); font-size: 19px;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.25;
+}
+.statstrip span { font-size: 11px; color: var(--ink-3); }
+.statstrip .neg b { color: #A8331F; }
+
+/* ══ 기능 벤토 그리드 ═════════════════════════════════════ */
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 148px; gap: 11px; }
+.cell {
+  position: relative; overflow: hidden; min-width: 0;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 7px;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, transform .15s;
+}
+a.cell:hover { border-color: var(--blue); transform: translateY(-2px); }
+.cell .lab {
+  display: flex; align-items: center; gap: 6px; flex: none;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.cell .lab em { font-style: normal; color: var(--blue); }
+.cell h3 { margin: 0; font-size: 14px; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+.cell p { margin: 0; font-size: 11.5px; color: var(--ink-2); line-height: 1.5; max-width: none; }
+.cell .fill { flex: 1; min-height: 0; margin: 2px -14px -12px; position: relative; }
+.cell .fill canvas { display: block; width: 100%; height: 100%; }
+.cell .go2 {
+  margin-top: auto; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); flex: none;
+}
+a.cell:hover .go2 { color: var(--blue); }
+.w2 { grid-column: span 2; }
+.h2 { grid-row: span 2; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chips span {
+  font-family: var(--mono); font-size: 10px; padding: 3px 7px; border-radius: 5px;
+  background: var(--card-2); border: 1px solid var(--line); color: var(--ink-3);
+}
+.chips span.on { background: var(--wash); border-color: var(--blue); color: var(--blue-2); }
+
+.mini { display: flex; flex-direction: column; gap: 5px; }
+.mini .r { display: grid; grid-template-columns: 76px 1fr 32px; gap: 7px; align-items: center; }
+.mini .r em { font-style: normal; font-size: 10.5px; color: var(--ink-2); }
+.mini .r i { display: block; height: 8px; border-radius: 0 3px 3px 0; background: #2B5FE3; }
+.mini .r i.b { background: #A97406; }
+.mini .r span { font-family: var(--mono); font-size: 10px; color: var(--ink-3); text-align: right; }
+
+.decay { width: 100%; height: 100%; }
+.rc {
+  background: var(--card-2); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 10px; font-size: 11px; line-height: 1.5;
+}
+.rc .t { font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 2px; }
+.rc .m { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.rc .w { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); color: var(--ink-2); }
+.rc .w em { font-style: normal; color: var(--gold); font-weight: 700; }
+
+@media (max-width: 900px) {
+  .bento { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 540px) {
+  .bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .w2, .h2 { grid-column: auto; grid-row: auto; }
+  .cell .fill { height: 130px; }
+}
+
 /* ══ 챕터 ══════════════════════════════════════════════ */
-.chapter { padding: 44px 0; border-top: 1px solid var(--line); }
+.chapter { padding: 30px 0; border-top: 1px solid var(--line); }
 .chapter > .k {
   font-family: var(--mono); font-size: 10.5px; letter-spacing: .15em;
   text-transform: uppercase; color: var(--ink-3); margin-bottom: 12px;
@@ -310,7 +394,7 @@ h2 {
   margin: 0 0 14px; font-size: clamp(20px, 2.6vw, 26px); font-weight: 800;
   letter-spacing: -.025em; line-height: 1.35; text-wrap: balance; max-width: 24ch;
 }
-.chapter p { margin: 0 0 14px; color: var(--ink-2); max-width: 62ch; }
+.chapter p { margin: 0 0 11px; color: var(--ink-2); max-width: 64ch; }
 .chapter p b { color: var(--ink); font-weight: 700; }
 .chapter p:last-child { margin-bottom: 0; }
 
@@ -407,13 +491,27 @@ footer a:hover { color: var(--blue); }
 
 <aside class="cg-nav">
   <a class="cg-brand" href="./index.html">
-    <span class="cg-mark"></span>
+    <svg class="cg-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M8.6 24.1 L13.4 20.7" stroke="#A97406" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M18.1 17.6 L22.9 13.4" stroke="#2B5FE3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <circle cx="6.4" cy="25.6" r="3.3" fill="#A97406"/>
+      <circle cx="15.8" cy="19.1" r="2.4" fill="none" stroke="#A97406" stroke-width="1.8"/>
+      <circle cx="25.2" cy="11.6" r="6" fill="none" stroke="#2B5FE3" stroke-width="1.6"/>
+      <circle cx="25.2" cy="11.6" r="3.3" fill="#2B5FE3"/>
+    </svg>
     <span class="cg-bn"><b>Checkpoint Graph</b><i>연구자용 Second Brain</i></span>
   </a>
   <div class="cg-menu">
     <a href="./index.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg><span>홈</span></a>
     <a href="./graph.html"><svg viewBox="0 0 24 24"><circle cx="6" cy="8" r="2.6"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="15" cy="17.5" r="2.6"/><path d="M8.4 9.2l4.6 6.6M8 7.2l7.8-.5"/></svg><span>그래프 뷰</span><span class="cg-sub">ANALYST</span></a>
     <a href="./safari.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6.5 20v-3.2A5.5 5.5 0 0 1 12 11.3a5.5 5.5 0 0 1 5.5 5.5V20"/></svg><span>논문 사파리</span><span class="cg-sub">GAME</span></a>
+  </div>
+  <div class="cg-anchors">
+    <a href="#features">기능</a>
+    <a href="#how">과정</a>
+    <a href="#result">결과 읽는 법</a>
+    <a href="#verify">검증</a>
+    <a href="#limits">한계</a>
   </div>
   <div class="cg-foot">
     <a href="https://github.com/sangho24/checkpoint-graph">GitHub 레포 ↗</a>
@@ -425,6 +523,7 @@ footer a:hover { color: var(--blue); }
 <div class="wrap">
 
   <section class="hero">
+    <div class="htext">
     <div class="eyebrow">Personalized PageRank · Citation Graph</div>
     <h1>내가 읽은 것을 넣으면, 다음에 읽을 것을 이유와 함께 돌려준다</h1>
     <p class="lede">
@@ -436,6 +535,7 @@ footer a:hover { color: var(--blue); }
       <a class="prim" href="./safari.html">사파리 시작하기 →</a>
       <a class="sec" href="./graph.html">그래프 뷰 열기</a>
     </div>
+    </div>
 
     <div class="screen">
       <div class="bezel">
@@ -444,6 +544,96 @@ footer a:hover { color: var(--blue); }
         <em id="demoPhase">WALKING</em>
       </div>
       <canvas id="demo"></canvas>
+    </div>
+  </section>
+
+  <div class="statstrip">
+      <div><b>89</b><span>노드</span></div>
+      <div><b>274</b><span>인용 엣지</span></div>
+      <div><b>38</b><span>독서 이력</span></div>
+      <div><b>28</b><span>백테스트 폴드</span></div>
+      <div><b>9</b><span>파라미터 조합</span></div>
+      <div class="neg"><b>0</b><span>외부 라이브러리</span></div>
+    </div>
+
+<section class="chapter" id="features" style="padding-top:8px">
+    <div class="k">기능</div>
+    <h2>지금 눌러볼 수 있는 것들</h2>
+
+    <div class="bento">
+      <a class="cell w2 h2" href="./graph.html">
+        <div class="lab"><em>◆</em> 그래프 뷰</div>
+        <h3>렌즈로 갈라 보는 인용 그래프</h3>
+        <p>내 것만 / 추천 포함 / 인용 이웃 1홉 / 토픽별 / 전체. 노드 크기가 점수다.</p>
+        <div class="go2">열기 →</div>
+        <div class="fill"><canvas id="bGraph"></canvas></div>
+      </a>
+
+      <div class="cell w2">
+        <div class="lab"><em>◆</em> 추천 · 왜</div>
+        <h3>근거는 경로다</h3>
+        <div class="rc">
+          <div class="t">DeepSeek-V3 Technical Report</div>
+          <div class="m">MoE · 2024 · arXiv:2412.19437 · score 2.5e-3</div>
+          <div class="w"><em>읽은 Mixtral of Experts</em> ↳ 이 논문을 인용한 <b>DeepSeek-V3</b></div>
+        </div>
+      </div>
+
+      <div class="cell">
+        <div class="lab"><em>◆</em> 랭킹 방법</div>
+        <h3>4종 즉시 전환</h3>
+        <div class="chips">
+          <span class="on">PPR</span><span>참고문헌 최빈</span><span>피인용수</span><span>최근성</span>
+        </div>
+      </div>
+
+      <div class="cell">
+        <div class="lab"><em>◆</em> 허브 보정</div>
+        <h3>유명함을 누른다</h3>
+        <div class="chips" style="margin-bottom:6px">
+          <span>없음</span><span>deg^0.5</span><span class="on">deg^0.8</span>
+        </div>
+        <p style="font-size:11px">지수 하나로 상위 10개가 통째로 바뀐다.</p>
+      </div>
+
+      <a class="cell w2 h2" href="./safari.html">
+        <div class="lab"><em>◆</em> 논문 사파리</div>
+        <h3>안개 속에서 추천만 빛난다</h3>
+        <p>걸어다니다 논문에 닿으면 판정한다. 캐릭터 4인 · 조합별 일치율 집계.</p>
+        <div class="go2">시작 →</div>
+        <div class="fill"><canvas id="bSafari"></canvas></div>
+      </a>
+
+      <div class="cell">
+        <div class="lab"><em>◆</em> 시드 반감기</div>
+        <h3>오래된 관심의 무게</h3>
+        <div class="fill" style="margin:4px -6px 0">
+          <svg class="decay" viewBox="0 0 120 54" preserveAspectRatio="none" aria-label="반감기 감쇠 곡선">
+            <path d="M4 6 C 34 6, 40 44, 116 49" fill="none" stroke="#2B5FE3" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4" y1="49" x2="116" y2="49" stroke="#D2CABA" stroke-width="1"/>
+            <circle cx="4" cy="6" r="3" fill="#2B5FE3"/>
+            <circle cx="116" cy="49" r="3" fill="#A97406"/>
+          </svg>
+        </div>
+        <p style="font-size:10.5px;color:var(--ink-3)">30일 / 90일 / 감쇠 없음</p>
+      </div>
+
+      <div class="cell">
+        <div class="lab"><em>◆</em> 주간 리포트</div>
+        <h3>Discord 로 온다</h3>
+        <p style="font-size:11px">이번 주 읽은 것, 그래프가 자란 부분, 다음 주 추천 5개와 각각의 근거 한 줄.</p>
+      </div>
+
+      <div class="cell w2">
+        <div class="lab"><em>◆</em> 백테스트</div>
+        <h3>실제로 재봤다 · 28폴드</h3>
+        <div class="mini">
+          <div class="r"><em>PPR deg^0.8</em><i style="width:87%"></i><span>0.158</span></div>
+          <div class="r"><em>참고문헌 최빈</em><i class="b" style="width:55%"></i><span>0.099</span></div>
+          <div class="r"><em>피인용수 순</em><i class="b" style="width:19%"></i><span>0.034</span></div>
+        </div>
+        <p style="font-size:10.5px;color:var(--ink-3);margin-top:auto">MRR · 무작위 기대치 0.067 아래가 피인용수 순이다</p>
+      </div>
     </div>
   </section>
 
@@ -468,7 +658,7 @@ footer a:hover { color: var(--blue); }
     </div>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="how">
     <div class="k">과정</div>
     <h2>추천이 만들어지는 네 단계</h2>
     <p style="margin-bottom:26px">
@@ -529,7 +719,7 @@ footer a:hover { color: var(--blue); }
     </div>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="result">
     <div class="k">결과</div>
     <h2>추천 카드를 읽는 법</h2>
     <p style="margin-bottom:24px">
@@ -580,38 +770,6 @@ footer a:hover { color: var(--blue); }
   </section>
 
   <section class="chapter">
-    <div class="k">두 화면</div>
-    <h2>같은 그래프, 같은 알고리즘, 다른 껍데기</h2>
-    <p>
-      하나는 알고리즘이 무엇을 하고 있는지 드러내는 분석용 화면이고,
-      다른 하나는 그것을 게임으로 감싼 화면이다. 게임 쪽은 재미만 있는 게 아니라
-      <b>평가 도구를 겸한다.</b>
-    </p>
-    <div class="views">
-      <a class="view" href="./graph.html">
-        <div class="thumb"><canvas id="thumbA"></canvas></div>
-        <div class="body">
-          <div class="tag">Analyst</div>
-          <h3>그래프 뷰</h3>
-          <p>렌즈 5종으로 그래프를 갈라 보고, 랭킹 방법 4종과 허브 보정 3단을 바꿔가며
-             피인용수 베이스라인과의 겹침률을 실시간으로 본다.</p>
-          <div class="go">열기 →</div>
-        </div>
-      </a>
-      <a class="view" href="./safari.html">
-        <div class="thumb"><canvas id="thumbB"></canvas></div>
-        <div class="body">
-          <div class="tag">Game</div>
-          <h3>논문 사파리</h3>
-          <p>인용 그래프를 벌판 삼아 걸어다닌다. 등불 밖은 안 보이지만 추천만 안개를 뚫고 빛난다.
-             조우한 논문을 판정하면 그래프의 순위가 공개된다.</p>
-          <div class="go">시작 →</div>
-        </div>
-      </a>
-    </div>
-  </section>
-
-  <section class="chapter">
     <div class="k">평가</div>
     <h2>게임을 하는 행위가 곧 hit rate 측정이다</h2>
     <p>
@@ -657,7 +815,7 @@ footer a:hover { color: var(--blue); }
     </p>
   </section>
 
-<section class="chapter">
+<section class="chapter" id="verify">
     <div class="k">검증</div>
     <h2>PPR 은 베이스라인을 이겼는가</h2>
     <p>
@@ -760,7 +918,7 @@ footer a:hover { color: var(--blue); }
     </dl>
   </section>
 
-  <section class="chapter">
+  <section class="chapter" id="limits">
     <div class="k">한계</div>
     <h2>이 프로토타입이 답하지 못하는 것</h2>
     <div class="note">
@@ -1367,7 +1525,7 @@ function thumb(id, kind){
       dir: "down", phase: .25, scale: .85, palette: CG_SPRITES.CHARACTERS[0].palette });
   }
 }
-addEventListener("load", () => { thumb("thumbA", "graph"); thumb("thumbB", "safari"); });
+addEventListener("load", () => { thumb("bGraph", "graph"); thumb("bSafari", "safari"); });
 </script>
 </body>
 </html>
