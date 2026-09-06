@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>온보딩 · Checkpoint Graph</title>
+<link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
+<meta name="description" content="입력을 요구하기 전에 값을 먼저 보여주는 온보딩. 관심 3개 → 아무거나 붙여넣기 → 가져오기 → 계속 쌓기. 그래프와 추천은 뒤에서 항상 돈다.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Checkpoint Graph">
+<meta property="og:title" content="온보딩 · Checkpoint Graph">
+<meta property="og:description" content="입력을 요구하기 전에 값을 먼저 보여주는 온보딩. 관심 3개 → 아무거나 붙여넣기 → 가져오기 → 계속 쌓기.">
+<meta property="og:url" content="https://sangho24.github.io/checkpoint-graph/onboard.html">
+<meta property="og:image" content="https://sangho24.github.io/checkpoint-graph/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #F3F0E9; --panel: #FFFFFF; --panel-2: #FAF8F3; --stage: #EBE7DE;
+    --ink: #16150F; --ink-2: #59554B; --ink-3: #8C8678;
+    --line: #E4DED2; --line-2: #D2CABA;
+    --gold: #A97406; --slate: #6E7789; --teal: #2B5FE3; --indigo: #6B4FD8; --rose: #B4485F; --warn: #A85A12; --ok: #2E7D4F;
+    --edge: rgba(92,86,74,.22); --edge-hot: rgba(43,95,227,.9);
+    --shadow: 0 1px 2px rgba(22,21,15,.05), 0 6px 18px rgba(22,21,15,.05);
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  }
+
+/* ══ 사이트 셸 (모든 페이지 공통) ══════════════════════ */
+:root { --cg-nav-w: 232px; --cg-paper:#F3F0E9; --cg-card:#FFFFFF; --cg-card2:#FAF8F3;
+  --cg-ink:#16150F; --cg-ink2:#59554B; --cg-ink3:#8C8678; --cg-line:#E4DED2;
+  --cg-line2:#D2CABA; --cg-blue:#2B5FE3; --cg-blue2:#1E47B4; --cg-wash:#E9EEFC;
+  --cg-sans:"Gothic A1",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  --cg-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; }
+.cg-nav { position: fixed; inset: 0 auto 0 0; width: var(--cg-nav-w); z-index: 60;
+  background: var(--cg-card); border-right: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; padding: 20px 14px 16px; font-family: var(--cg-sans); color: var(--cg-ink); }
+.cg-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; padding: 0 6px 18px; color: inherit; }
+.cg-brand .cg-mark { width: 32px; height: 32px; flex: none; display: block; overflow: visible; }
+.cg-brand b { font-size: 14px; font-weight: 800; letter-spacing: -.02em; display: block; line-height: 1.3; }
+.cg-brand i { font-style: normal; font-size: 10.5px; color: var(--cg-ink3); font-family: var(--cg-mono); }
+.cg-menu { display: flex; flex-direction: column; gap: 2px; }
+.cg-menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+  text-decoration: none; font-size: 13.5px; font-weight: 500; color: var(--cg-ink2); }
+.cg-menu a:hover { background: var(--cg-card2); color: var(--cg-ink); }
+.cg-menu a[aria-current="page"] { background: var(--cg-wash); color: var(--cg-blue2); font-weight: 700; }
+.cg-menu svg { flex: none; width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.cg-menu .cg-sub { margin-left: auto; font-family: var(--cg-mono); font-size: 9.5px; color: var(--cg-ink3); }
+.cg-menu a[aria-current="page"] .cg-sub { color: var(--cg-blue); }
+.cg-foot { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid var(--cg-line);
+  display: flex; flex-direction: column; gap: 5px; font-family: var(--cg-mono); font-size: 10.5px; color: var(--cg-ink3); }
+.cg-foot a { color: var(--cg-ink3); text-decoration: none; }
+.cg-foot a:hover { color: var(--cg-blue); }
+.cg-shift { margin-left: var(--cg-nav-w); }
+body { word-break: keep-all; }
+@media (max-width: 900px) {
+  .cg-nav { position: static; width: auto; flex-direction: row; align-items: center;
+    border-right: 0; border-bottom: 1px solid var(--cg-line); padding: 10px 14px; gap: 14px; }
+  .cg-brand { padding: 0; }
+  .cg-brand .cg-bn { display: none; }
+  .cg-menu { flex-direction: row; gap: 4px; }
+  .cg-menu .cg-sub { display: none; }
+  .cg-foot { display: none; }
+  .cg-shift { margin-left: 0; }
+}
+@media (max-width: 480px) {
+  .cg-nav { flex-wrap: wrap; gap: 8px 10px; padding: 8px 10px; }
+  .cg-menu { flex-wrap: wrap; width: 100%; }
+  .cg-menu a { padding: 5px 8px; font-size: 12px; gap: 6px; }
+  .cg-menu svg { width: 15px; height: 15px; }
+}
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 13px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  kbd { font-family: var(--mono); font-size: 10.5px; border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); }
+
+  /* ── 셸 ─────────────────────────────────────────────── */
+  .app { display: grid; grid-template-rows: auto 1fr; height: 100dvh; min-height: 640px; }
+  .bar { display: flex; align-items: center; gap: 16px; padding: 0 16px; height: 52px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .bar h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.015em; }
+  .bar .tag { font-family: var(--mono); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); border: 1px solid var(--line-2); border-radius: 3px; padding: 1px 5px; }
+  .bar .spring { flex: 1; }
+  .steps { display: flex; gap: 4px; align-items: center; }
+  .steps button { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-2); border-radius: 999px; padding: 3px 11px; font-size: 11.5px; cursor: pointer; white-space: nowrap; }
+  .steps button[aria-current="step"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .steps button.done { color: var(--ok); }
+  .steps button:disabled { opacity: .45; cursor: not-allowed; }
+  .funnel { display: flex; gap: 10px; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .funnel b { color: var(--ink-2); font-weight: 600; }
+  .bar .lnk { background: none; border: 0; color: var(--ink-3); cursor: pointer; font-size: 11.5px; text-decoration: underline; text-underline-offset: 3px; }
+  .bar .lnk:hover { color: var(--ink); }
+
+  .body { display: grid; grid-template-columns: 420px 1fr; min-height: 0; }
+  .panel { border-right: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 18px 18px 40px; }
+  .stage { display: grid; grid-template-rows: minmax(0, 1fr) 238px; min-height: 0; background: var(--stage); }
+  @media (max-width: 800px) {
+    .app { height: auto; }
+    .body { grid-template-columns: 1fr; }
+    .panel { border-right: 0; border-bottom: 1px solid var(--line); max-height: none; }
+    .stage { grid-template-rows: 380px 238px; }
+    .bar .funnel, .bar .claim { display: none; }
+    .bar { height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 8px 12px; }
+  }
+
+  /* ── 패널 공통 ───────────────────────────────────────── */
+  .k { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .panel h2 { margin: 4px 0 6px; font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+  .panel p { margin: 0 0 10px; color: var(--ink-2); }
+  .panel .time { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .btn { border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: var(--panel-2); }
+  .btn.prim { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.prim:hover { background: #2a2820; }
+  .btn.prim:disabled { background: var(--line-2); border-color: var(--line-2); color: #fff; cursor: not-allowed; }
+  .btn.sm { padding: 5px 9px; font-size: 11.5px; font-weight: 500; }
+  .btn.ghost { border-color: transparent; color: var(--ink-3); }
+  .note { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--ink-2); margin-top: 12px; }
+  .note code, .panel code { font-family: var(--mono); font-size: 11px; background: #EFEAE0; padding: 1px 5px; border-radius: 4px; }
+  .step { display: none; }
+  .step.on { display: block; }
+  textarea, .drop { width: 100%; border: 1px solid var(--line-2); border-radius: 10px; background: var(--panel-2); padding: 10px 12px; font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: var(--ink); resize: vertical; }
+  textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+  .drop { border-style: dashed; text-align: center; color: var(--ink-3); font-family: var(--sans); font-size: 12px; padding: 14px; margin-top: 8px; cursor: pointer; }
+  .drop.over { border-color: var(--teal); background: #E9EEFC; }
+
+  /* 0 관심 그리드 */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .pick { text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 10px 11px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; }
+  .pick:hover { border-color: var(--line-2); background: var(--panel-2); }
+  .pick[aria-pressed="true"] { border-color: var(--gold); background: #FBF4E2; box-shadow: inset 0 0 0 1px var(--gold); }
+  .pick b { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+  .pick .meta { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .chip { display: inline-block; padding: 0 6px; border-radius: 999px; font-size: 10px; font-family: var(--mono); color: #fff; }
+
+  /* 1 추출 카드 */
+  .cards { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .card { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 9px 11px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .card.out { background: var(--panel-2); color: var(--ink-3); }
+  .card b { font-size: 12.5px; font-weight: 600; display: block; line-height: 1.3; }
+  .card.out b { color: var(--ink-2); font-weight: 500; }
+  .card .sub { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 7px; overflow: hidden; }
+  .seg button { border: 0; background: var(--panel); color: var(--ink-2); padding: 4px 8px; font-size: 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line-2); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  details { margin-top: 10px; font-size: 12px; color: var(--ink-3); }
+  details summary { cursor: pointer; }
+  details ul { margin: 6px 0 0; padding-left: 18px; font-family: var(--mono); font-size: 10.5px; }
+
+  /* 2 탭·판정 */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: 10px; }
+  .tabs button { border: 0; background: none; padding: 8px 10px; color: var(--ink-3); cursor: pointer; font-size: 12.5px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+  .tab { display: none; padding-top: 12px; }
+  .tab.on { display: block; }
+  .stack { position: relative; margin-top: 12px; min-height: 150px; }
+  .tcard { border: 1px solid var(--line-2); background: var(--panel); border-radius: 12px; padding: 14px 15px; box-shadow: var(--shadow); }
+  .tcard .idx { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); display: flex; justify-content: space-between; }
+  .tcard h3 { margin: 6px 0 4px; font-size: 15px; font-weight: 700; line-height: 1.3; letter-spacing: -.01em; }
+  .tcard .meta { display: flex; gap: 8px; flex-wrap: wrap; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+  .badge { border: 1px solid var(--line-2); border-radius: 4px; padding: 0 5px; }
+  .badge.hot { color: var(--warn); border-color: #E7C9A8; background: #FBF1E6; }
+  .judge { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+  .judge button { border: 1px solid var(--line-2); background: var(--panel); border-radius: 8px; padding: 8px 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .judge button:hover { background: var(--panel-2); }
+  .judge button small { font-family: var(--mono); font-size: 10px; color: var(--ink-3); font-weight: 400; }
+  .judge .r { color: var(--gold); } .judge .l { color: var(--teal); } .judge .s { color: var(--ink-3); }
+  .tally { display: flex; gap: 12px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); margin-top: 8px; }
+
+  /* 3 */
+  .bm { display: inline-block; border: 1px dashed var(--teal); background: #E9EEFC; color: var(--teal); border-radius: 8px; padding: 8px 12px; font-weight: 700; text-decoration: none; cursor: grab; }
+  .report { border: 1px solid var(--line); background: var(--panel-2); border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+  .report h4 { margin: 0 0 6px; font-size: 13px; }
+  .report .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+  .report .facts div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  .report .facts b { display: block; font-family: var(--mono); font-size: 16px; }
+  .report .facts span { font-size: 10.5px; color: var(--ink-3); }
+
+  /* ── 그래프 ──────────────────────────────────────────── */
+  .canvasWrap { position: relative; min-height: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: 11.5px; padding: 5px 8px; border-radius: 6px; max-width: 280px; display: none; z-index: 5; }
+  .legend { position: absolute; left: 12px; bottom: 10px; display: flex; gap: 10px; font-family: var(--mono); font-size: 10px; color: var(--ink-2); background: rgba(255,255,255,.7); padding: 4px 8px; border-radius: 6px; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+  .stat { position: absolute; right: 12px; top: 10px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); background: rgba(255,255,255,.75); padding: 5px 9px; border-radius: 6px; }
+
+  .recs { border-top: 1px solid var(--line); background: var(--panel); padding: 12px 16px 10px; height: 238px; overflow: hidden; }
+  .recs .head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .recs .head h3 { margin: 0; font-size: 14px; font-weight: 700; }
+  .recs .head .why { color: var(--ink-3); font-size: 11.5px; }
+  .rlist { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 300px); gap: 8px; overflow-x: auto; padding-bottom: 6px; height: 176px; }
+  .rc { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--panel); cursor: default; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+  .rc .t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rc .p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rc .acts { margin-top: auto; }
+  .rc:hover { border-color: var(--teal); box-shadow: 0 0 0 2px #E9EEFC; }
+  .rc .t { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+  .rc .p { font-size: 11px; color: var(--ink-2); }
+  .rc .p b { color: var(--gold); font-weight: 600; }
+  .rc .m { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .rc .acts { display: flex; gap: 4px; margin-top: 2px; }
+  .empty { color: var(--ink-3); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<aside class="cg-nav">
+  <a class="cg-brand" href="./index.html">
+    <svg class="cg-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M8.6 24.1 L13.4 20.7" stroke="#A97406" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <path d="M18.1 17.6 L22.9 13.4" stroke="#2B5FE3" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <circle cx="6.4" cy="25.6" r="3.3" fill="#A97406"/>
+      <circle cx="15.8" cy="19.1" r="2.4" fill="none" stroke="#A97406" stroke-width="1.8"/>
+      <circle cx="25.2" cy="11.6" r="6" fill="none" stroke="#2B5FE3" stroke-width="1.6"/>
+      <circle cx="25.2" cy="11.6" r="3.3" fill="#2B5FE3"/>
+    </svg>
+    <span class="cg-bn"><b>Checkpoint Graph</b><i>연구자용 Second Brain</i></span>
+  </a>
+  <div class="cg-menu">
+    <a href="./index.html"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg><span>홈</span></a>
+    <a href="./onboard.html" aria-current="page"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/><circle cx="12" cy="12" r="9"/></svg><span>온보딩</span><span class="cg-sub">INPUT</span></a>
+    <a href="./graph.html"><svg viewBox="0 0 24 24"><circle cx="6" cy="8" r="2.6"/><circle cx="18" cy="6.5" r="2.2"/><circle cx="15" cy="17.5" r="2.6"/><path d="M8.4 9.2l4.6 6.6M8 7.2l7.8-.5"/></svg><span>그래프 뷰</span><span class="cg-sub">ANALYST</span></a>
+    <a href="./safari.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6.5 20v-3.2A5.5 5.5 0 0 1 12 11.3a5.5 5.5 0 0 1 5.5 5.5V20"/></svg><span>논문 사파리</span><span class="cg-sub">GAME</span></a>
+  </div>
+  <div class="cg-foot">
+    <a href="https://github.com/sangho24/checkpoint-graph">GitHub 레포 ↗</a>
+    <span>프로토타입 · 2026-09</span>
+  </div>
+</aside>
+
+<div class="app cg-shift">
+  <div class="bar">
+    <h1>온보딩</h1><span class="tag">input</span>
+    <div class="steps" id="stepNav"></div>
+    <button class="lnk" id="skipBtn">이 단계 건너뛰기</button>
+    <div class="spring"></div>
+    <div class="funnel" id="funnel" title="단계별 도달 · 완료 · 건너뛰기 (이 브라우저의 localStorage 기준)"></div>
+    <button class="lnk" id="resetBtn">처음부터</button>
+  </div>
+
+  <div class="body">
+    <section class="panel" id="panel">
+
+      <!-- 0 관심 고르기 -->
+      <div class="step" data-step="0">
+        <div class="k">0 · 관심 고르기 <span class="time">30초 · 필수</span></div>
+        <h2>아는 것 3개만 고르세요</h2>
+        <p>고르는 순간 오른쪽에 그래프와 탐색 목록이 뜹니다. 목록을 가져오는 건 나중 일입니다.</p>
+        <div class="grid" id="pickGrid"></div>
+        <div class="row">
+          <button class="btn prim" id="startBtn" disabled>시작</button>
+          <span class="time" id="pickCount">0 / 3</span>
+        </div>
+      </div>
+
+      <!-- 1 아무거나 붙여넣기 -->
+      <div class="step" data-step="1">
+        <div class="k">1 · 아무거나 붙여넣기 <span class="time">1~2분</span></div>
+        <h2>최근 읽은 걸 그냥 던지세요</h2>
+        <p>arXiv 링크, DOI, 제목, BibTeX, 트윗 링크가 섞여 있어도 됩니다. 어디서 가져올지 고민하지 마세요.</p>
+        <textarea id="pasteBox" rows="7" placeholder="https://arxiv.org/abs/2401.04088&#10;Mixtral of Experts&#10;@article{...}&#10;https://x.com/.../status/..."></textarea>
+        <div class="drop" id="pdfDrop">PDF 를 여기 떨어뜨리면 파일명에서 id 만 읽습니다 (내용은 읽지 않음)<input type="file" id="pdfInput" accept=".pdf" multiple hidden></div>
+        <div class="row">
+          <button class="btn prim" id="parseBtn">추출</button>
+          <button class="btn" id="sampleBtn">예시 텍스트 넣기</button>
+        </div>
+        <div id="parsed"></div>
+      </div>
+
+      <!-- 2 가져오기 -->
+      <div class="step" data-step="2">
+        <div class="k">2 · 가져오기 <span class="time">5~10분 · 나중에 해도 됨</span></div>
+        <h2>흩어진 목록을 후보로 올립니다</h2>
+        <p>가져오기는 "열었다"까지만 압니다. 읽었는지는 카드에서 직접 누릅니다. 안 누른 건 무시됩니다.</p>
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="hist">브라우저 히스토리</button>
+          <button role="tab" aria-selected="false" data-tab="bib">Zotero · BibTeX</button>
+          <button role="tab" aria-selected="false" data-tab="memo">메모 · 링크 목록</button>
+        </div>
+        <div class="tab on" data-tab="hist">
+          <div class="note">웹앱은 브라우저 히스토리를 읽을 수 없습니다. 로컬에서 후보를 뽑아 JSON 을 붙여넣습니다.<br>
+            <code>node tools/history-candidates.mjs &gt; candidates.json</code> <span class="time">(CLI 는 W0 에서 만든다)</span></div>
+          <textarea id="histBox" rows="4" placeholder='[{"url":"https://arxiv.org/abs/2401.04088","last_visit":"2026-09-01T10:00:00Z","visits":3,"pdf":true}, ...]' style="margin-top:8px"></textarea>
+          <div class="drop" id="histDrop">candidates.json 을 여기 떨어뜨리기<input type="file" id="histInput" accept=".json" hidden></div>
+          <div class="row">
+            <button class="btn prim" id="histBtn">후보 올리기</button>
+            <button class="btn" id="histSampleBtn">샘플 후보 불러오기 (24건)</button>
+          </div>
+        </div>
+        <div class="tab" data-tab="bib">
+          <p>Zotero, Mendeley, Paperpile 모두 BibTeX 로 내보낼 수 있습니다. <code>dateadded</code> 필드가 있으면 읽은 시각으로 씁니다.</p>
+          <textarea id="bibBox" rows="6" placeholder="@article{key,&#10;  title = {...},&#10;  eprint = {2305.13245},&#10;  dateadded = {2026-08-30}&#10;}"></textarea>
+          <div class="drop" id="bibDrop">.bib 파일을 여기 떨어뜨리기<input type="file" id="bibInput" accept=".bib,.txt" hidden></div>
+          <div class="row"><button class="btn prim" id="bibBtn">후보 올리기</button></div>
+        </div>
+        <div class="tab" data-tab="memo">
+          <p>Notion·Obsidian 메모, 트위터 북마크, HF Papers 업보트는 결국 링크 목록입니다. 1단계 붙여넣기 상자가 그대로 받습니다.</p>
+          <div class="row"><button class="btn" id="toStep1">1단계로 가서 붙여넣기</button></div>
+        </div>
+        <div id="triage"></div>
+      </div>
+
+      <!-- 3 계속 쌓기 -->
+      <div class="step" data-step="3">
+        <div class="k">3 · 계속 쌓기 <span class="time">매번 3초</span></div>
+        <h2>이제부터는 한 번의 동작</h2>
+        <p>아래 버튼을 북마크바로 끌어다 놓으세요. 논문 페이지에서 누르면 이 페이지가 열리며 읽음 처리됩니다.</p>
+        <a class="bm" id="bookmarklet" href="#">★ 읽음으로 저장</a>
+        <div class="note">동작: 현재 페이지 URL 을 <code>onboard.html#add=&lt;url&gt;</code> 로 넘깁니다. 이 페이지는 열릴 때 해시를 1단계 파서로 처리합니다.</div>
+        <div class="report" id="report"></div>
+        <div class="row"><button class="btn prim" id="finishBtn">온보딩 끝내기</button> <a class="btn" href="./graph.html">그래프 뷰로</a></div>
+      </div>
+    </section>
+
+    <section class="stage">
+      <div class="canvasWrap">
+        <canvas id="cv"></canvas>
+        <div class="tip" id="tip"></div>
+        <div class="stat" id="stat"></div>
+        <div class="legend"><span><i style="background:#A97406"></i>내 것</span><span><i style="background:#2B5FE3"></i>추천</span><span><i style="background:#8C8678"></i>스킵</span><span><i style="background:#C9C3B5"></i>외부</span></div>
+      </div>
+      <div class="recs">
+        <div class="head"><h3 id="recTitle">탐색</h3><span class="why" id="recWhy"></span></div>
+        <div class="rlist" id="recList"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="./assets/corpus.js"></script>
+<script src="./assets/onboard-parse.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   온보딩 데모. 그래프·추천은 뒤에서 항상 돌고, 왼쪽 패널만 단계를 바꾼다.
+   저장은 localStorage 뿐이고, 저장되는 것은 id 와 시각·반응뿐이다.
+   ═══════════════════════════════════════════════════════════ */
+const C = window.CORPUS;
+/* innerHTML 에 들어가는 모든 문자열은 이걸 거친다. 사용자 유래(붙여넣기·파일명·히스토리 JSON·해시)는 물론 코퍼스 제목도 예외 없이 */
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const TOPICS = { arch:["구조","#4C7DF0"], moe:["MoE","#D2691E"], eff:["효율·서빙","#0C9C8A"], align:["정렬·RLHF","#B08010"], reason:["추론","#7B5BD6"], rag:["검색증강","#0E8FA8"], sys:["분산학습","#8A6FA8"], ssm:["상태공간","#C04A78"], vis:["비전·멀티모달","#3FA05A"], eval:["평가","#9AA13C"], opt:["최적화","#CC5544"], scale:["스케일링","#5E6B8C"] };
+const PICKS = ["attention","bert","gpt3","llama2","mixtral","dsv3","flash","lora","dpo","cot","vllm","mamba"];
+const LS_HIST = "cg.onboard.history", LS_FUNNEL = "cg.onboard.funnel", LS_STEP = "cg.onboard.step", LS_PICKS = "cg.onboard.picks";
+const HALF_LIFE = 90, HUB = 0.8;
+const W = { liked: 2, read: 1 };          // 스킵은 시드에 넣지 않는다 (백테스트 결과). 후보에서만 뺀다
+
+/* ── 그래프 ─────────────────────────────────────────────── */
+const N = new Map(), ADJ = new Map(), OUT = new Map();
+for (const p of C.papers) N.set(p.id, { ...p, kind: "paper" });
+for (const m of C.models) N.set(m.id, { id: m.id, title: m.name, kind: "model", year: (N.get(m.paper) || {}).year, cites: 0 });
+for (const a of C.articles) N.set(a.id, { ...a, kind: "article", cites: 0 });
+for (const id of N.keys()) { ADJ.set(id, []); OUT.set(id, []); }
+const EDGES = [];
+for (const [a, b] of [...C.cites, ...C.describes]) { if (!N.has(a) || !N.has(b)) continue; EDGES.push([a, b]); ADJ.get(a).push(b); ADJ.get(b).push(a); OUT.get(a).push(b); }
+const BY_ARXIV = new Map(C.papers.filter(p => p.arxiv).map(p => [p.arxiv, p.id]));
+
+/* ── 상태 ───────────────────────────────────────────────── */
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+/* localStorage 가 손상돼 있어도 페이지가 죽지 않게 형태를 검사한다 */
+const REACTIONS = new Set(["read", "liked", "skipped"]);
+function loadHistory() {
+  const v = ls.get(LS_HIST, []);
+  if (!Array.isArray(v)) return [];
+  return v.filter(h => h && typeof h === "object" && REACTIONS.has(h.reaction) && (typeof h.node_id === "string" || typeof h.arxiv === "string"))
+    .map(h => ({ node_id: typeof h.node_id === "string" && N.has(h.node_id) ? h.node_id : null, arxiv: typeof h.arxiv === "string" ? h.arxiv : null,
+      read_at: typeof h.read_at === "string" && !isNaN(Date.parse(h.read_at)) ? h.read_at : new Date().toISOString(), reaction: h.reaction, source: typeof h.source === "string" ? h.source : "unknown" }))
+    .filter(h => h.node_id || h.arxiv);
+}
+function loadFunnel() {
+  const d = { reach: [0,0,0,0], done: [0,0,0,0], skip: [0,0,0,0] };
+  const v = ls.get(LS_FUNNEL, null);
+  if (!v || typeof v !== "object") return d;
+  for (const k of ["reach", "done", "skip"]) if (Array.isArray(v[k]) && v[k].length === 4 && v[k].every(x => Number.isInteger(x) && x >= 0)) d[k] = v[k].slice();
+  return d;
+}
+let history = loadHistory();                       // [{node_id, arxiv, read_at, reaction, source}]
+let funnel = loadFunnel();
+let step = (v => Number.isInteger(v) && v >= 0 && v <= 3 ? v : 0)(ls.get(LS_STEP, 0));
+let picks = (v => Array.isArray(v) ? v.filter(x => typeof x === "string" && N.has(x)) : [])(ls.get(LS_PICKS, []));   // 0단계에서 고른 id. 이력과 별도로 둔다
+let hotPath = null, hoverId = null;
+let scoreCache = {}, recs = [], seedCount = 0;
+
+function reactions() {
+  const m = new Map();
+  for (const h of history) if (h.node_id && N.has(h.node_id)) m.set(h.node_id, { r: h.reaction, at: Date.parse(h.read_at) || Date.now() });
+  return m;
+}
+function saveHistory() { ls.set(LS_HIST, history); }
+function addHistory(items) {
+  // 같은 노드의 기존 반응은 덮어쓴다 (최신이 이긴다)
+  for (const it of items) {
+    const key = it.node_id ? h => h.node_id === it.node_id : h => h.arxiv && h.arxiv === it.arxiv;
+    history = history.filter(h => !key(h));
+    history.push({ node_id: it.node_id || null, arxiv: it.arxiv || null, read_at: it.read_at || new Date().toISOString(), reaction: it.reaction, source: it.source });
+  }
+  saveHistory(); recompute();
+}
+function removeHistory(node_id) { history = history.filter(h => h.node_id !== node_id); saveHistory(); recompute(); }
+
+/* ── PPR (engine.mjs 와 같은 계산) ───────────────────────── */
+function seedVector(rx) {
+  const s = {}; let norm = 0;
+  for (const [id, o] of rx) {
+    const w = W[o.r] || 0; if (!w) continue;
+    const days = Math.max(0, (Date.now() - o.at) / 86400000);
+    const v = w * Math.pow(0.5, days / HALF_LIFE);
+    s[id] = (s[id] || 0) + v; norm += Math.abs(v);
+  }
+  if (norm > 0) for (const k in s) s[k] /= norm;
+  return s;
+}
+function ppr(s) {
+  let p = { ...s };
+  for (let it = 0; it < 45; it++) {
+    const nx = {};
+    for (const id in p) { const nb = ADJ.get(id); if (!nb || !nb.length) continue; const sh = (p[id] * 0.85) / nb.length; for (const m of nb) nx[m] = (nx[m] || 0) + sh; }
+    for (const id in s) nx[id] = (nx[id] || 0) + 0.15 * s[id];
+    p = nx;
+  }
+  return p;
+}
+function pool(seedIds, maxHops) {
+  const dist = new Map(); let frontier = [];
+  for (const id of seedIds) if (N.has(id)) { dist.set(id, 0); frontier.push(id); }
+  for (let h = 1; h <= maxHops && frontier.length; h++) { const next = []; for (const id of frontier) for (const m of ADJ.get(id)) if (!dist.has(m)) { dist.set(m, h); next.push(m); } frontier = next; }
+  return dist;
+}
+function whyPath(rx, target) {
+  const starts = [...rx].filter(([, o]) => (W[o.r] || 0) > 0).map(([id]) => id);
+  if (!starts.length) return null;
+  const prev = new Map(), seen = new Set(starts); let frontier = starts.slice();
+  for (let hop = 0; hop < 4 && frontier.length; hop++) {
+    const next = [];
+    for (const cur of frontier) for (const nb of ADJ.get(cur)) {
+      if (seen.has(nb)) continue; seen.add(nb); prev.set(nb, cur); next.push(nb);
+      if (nb === target) { const path = [target]; let c = target; while (prev.has(c)) { c = prev.get(c); path.unshift(c); } return path; }
+    }
+    frontier = next;
+  }
+  return null;
+}
+function recompute() {
+  const rx = reactions();
+  const s = seedVector(rx);
+  seedCount = Object.keys(s).length;
+  const p = ppr(s);
+  scoreCache = {};
+  const seedIds = [...rx.keys()].filter(id => (W[rx.get(id).r] || 0) > 0);
+  const dist = pool(seedIds, 3);
+  for (const id of N.keys()) scoreCache[id] = (p[id] || 0) / Math.pow(Math.max(ADJ.get(id).length, 1), HUB);
+  // 모델 노드는 그래프에는 두되 "읽을 것" 후보에서는 뺀다 (degree-1 과보상으로 상위를 차지하는 부작용, README 참조)
+  recs = [...dist.keys()].filter(id => dist.get(id) > 0 && !rx.has(id) && scoreCache[id] > 0 && N.get(id).kind !== "model")
+    .sort((a, b) => scoreCache[b] - scoreCache[a] || N.get(b).cites - N.get(a).cites).slice(0, 5)
+    .map(id => ({ id, path: whyPath(rx, id), hops: dist.get(id) }));
+  renderRecs(); renderStat(); draw();
+  if (step === 3) renderReport();
+}
+
+/* ── 추천 카드 ───────────────────────────────────────────── */
+const short = t => (t.length > 34 ? t.slice(0, 33) + "…" : t);
+function whyText(path) {
+  if (!path) return "경로 없음";
+  const names = path.map((id, i) => (i === 0 ? `<b>읽은 ${esc(short(N.get(id).title))}</b>` : i === path.length - 1 ? `<u>${esc(short(N.get(id).title))}</u>` : esc(short(N.get(id).title))));
+  return names.join(" → ");
+}
+function renderRecs() {
+  const el = document.getElementById("recList");
+  document.getElementById("recTitle").textContent = seedCount >= 5 ? "추천" : "탐색";
+  document.getElementById("recWhy").textContent = seedCount === 0 ? "시드가 없습니다. 왼쪽에서 3개를 고르세요" : seedCount < 5 ? `시드 ${seedCount}개. 5개 미만이라 "추천"이라 부르지 않습니다` : `시드 ${seedCount}개 · PPR deg^0.8 · 반감기 90일`;
+  if (!recs.length) { el.innerHTML = `<div class="empty">아직 없습니다.</div>`; return; }
+  el.innerHTML = recs.map((r, i) => {
+    const n = N.get(r.id); const tp = TOPICS[n.topic];
+    return `<div class="rc" data-id="${esc(r.id)}">
+      <div class="t">${i + 1}. ${esc(n.title)}</div>
+      <div class="p">${whyText(r.path)}</div>
+      <div class="m">${esc(n.year || "")}${tp ? ` <span class="chip" style="background:${tp[1]}">${tp[0]}</span>` : ""}<span>${esc(r.hops)}홉</span></div>
+      <div class="acts"><button class="btn sm" data-act="read" data-id="${esc(r.id)}">읽음</button><button class="btn sm" data-act="liked" data-id="${esc(r.id)}">좋아요</button><button class="btn sm ghost" data-act="skipped" data-id="${esc(r.id)}">스킵</button></div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll(".rc").forEach(c => {
+    c.addEventListener("mouseenter", () => { const r = recs.find(x => x.id === c.dataset.id); hotPath = r ? r.path : null; draw(); });
+    c.addEventListener("mouseleave", () => { hotPath = null; draw(); });
+  });
+  el.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: N.get(b.dataset.id).arxiv, reaction: b.dataset.act, source: "rec-card" }])));
+}
+function renderStat() {
+  const rx = reactions();
+  const dist = pool([...rx.keys()].filter(id => (W[rx.get(id).r] || 0) > 0), 3);
+  const outside = history.filter(h => !h.node_id).length;
+  document.getElementById("stat").innerHTML = `시드 ${seedCount} · 3홉 안 ${Math.max(0, dist.size - seedCount)} · 전체 ${N.size}${outside ? ` · 그래프 밖 ${outside}` : ""}`;
+}
+
+/* ── 캔버스 ─────────────────────────────────────────────── */
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), tip = document.getElementById("tip");
+let Wd = 0, Hd = 0, dpr = 1;
+function resize() {
+  const r = cv.parentElement.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1; Wd = r.width; Hd = r.height;
+  cv.width = Wd * dpr; cv.height = Hd * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+}
+function toScreen(id) {
+  const [px, py] = C.pos[id]; const pad = 36;
+  const w = Wd - pad * 2, h = Hd - pad * 2;
+  // 종횡비 유지
+  const s = Math.min(w / C.aspect, h);
+  const ox = pad + (w - s * C.aspect) / 2, oy = pad + (h - s) / 2;
+  return [ox + px * s * C.aspect, oy + py * s];
+}
+function draw() {
+  if (!Wd) return;
+  ctx.clearRect(0, 0, Wd, Hd);
+  const rx = reactions(), recSet = new Set(recs.map(r => r.id));
+  const hot = hotPath ? new Set(hotPath) : null;
+  const maxS = Math.max(1e-9, ...Object.values(scoreCache));
+  // 엣지
+  for (const [a, b] of EDGES) {
+    const [x1, y1] = toScreen(a), [x2, y2] = toScreen(b);
+    let isHot = false;
+    if (hot) for (let i = 0; i + 1 < hotPath.length; i++) if ((hotPath[i] === a && hotPath[i + 1] === b) || (hotPath[i] === b && hotPath[i + 1] === a)) isHot = true;
+    ctx.strokeStyle = isHot ? "rgba(43,95,227,.9)" : (rx.has(a) || rx.has(b)) ? "rgba(169,116,6,.35)" : "rgba(92,86,74,.13)";
+    ctx.lineWidth = isHot ? 2.4 : 1;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+  // 노드
+  for (const n of N.values()) {
+    const [x, y] = toScreen(n.id);
+    const r = rx.get(n.id);
+    const sc = Math.sqrt((scoreCache[n.id] || 0) / maxS);
+    let color = "#C9C3B5", rad = 3.2 + sc * 6, glow = null;
+    if (r) { color = r.r === "skipped" ? "#8C8678" : "#A97406"; rad = 6.5; }
+    else if (recSet.has(n.id)) { color = "#2B5FE3"; rad = 5 + sc * 5; glow = "rgba(43,95,227,.25)"; }
+    else if (n.kind === "model") color = "#B9AEE8";
+    else if (n.kind === "article") color = "#D9A3B0";
+    if (hot && hot.has(n.id)) { glow = "rgba(43,95,227,.35)"; rad += 2; }
+    if (hoverId === n.id) rad += 2;
+    if (glow) { ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, rad + 7, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+    if (r || recSet.has(n.id) || (hot && hot.has(n.id))) {
+      ctx.fillStyle = "#16150F"; ctx.font = "10.5px " + getComputedStyle(document.body).getPropertyValue("--sans");
+      ctx.fillText(short(n.title), x + rad + 4, y + 4);
+    }
+  }
+}
+cv.addEventListener("mousemove", e => {
+  const r = cv.getBoundingClientRect(); const mx = e.clientX - r.left, my = e.clientY - r.top;
+  let best = null, bd = 12;
+  for (const id of N.keys()) { const [x, y] = toScreen(id); const d = Math.hypot(x - mx, y - my); if (d < bd) { bd = d; best = id; } }
+  if (best !== hoverId) { hoverId = best; draw(); }
+  if (best) { const n = N.get(best); tip.style.display = "block"; tip.style.left = (mx + 12) + "px"; tip.style.top = (my + 12) + "px"; tip.textContent = `${n.title}${n.year ? " · " + n.year : ""}`; }
+  else tip.style.display = "none";
+});
+cv.addEventListener("mouseleave", () => { hoverId = null; tip.style.display = "none"; draw(); });
+window.addEventListener("resize", resize);
+
+/* ── 단계 전환·퍼널 ─────────────────────────────────────── */
+const STEP_NAMES = ["관심", "붙여넣기", "가져오기", "계속 쌓기"];
+function goStep(n, how) {
+  if (how === "skip") funnel.skip[step]++;
+  if (how === "done") funnel.done[step]++;
+  step = n; funnel.reach[step]++; ls.set(LS_FUNNEL, funnel); ls.set(LS_STEP, step);
+  renderStep();
+}
+function renderStep() {
+  document.querySelectorAll(".step").forEach(s => s.classList.toggle("on", +s.dataset.step === step));
+  const nav = document.getElementById("stepNav");
+  nav.innerHTML = STEP_NAMES.map((nm, i) => `<button data-s="${i}" ${i === step ? 'aria-current="step"' : ""} ${i > 0 && pickedCount() < 3 ? "disabled" : ""} class="${funnel.done[i] ? "done" : ""}">${i} ${nm}</button>`).join("");
+  nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => goStep(+b.dataset.s, "jump")));
+  document.getElementById("skipBtn").style.visibility = step === 0 || step === 3 ? "hidden" : "visible";
+  document.getElementById("funnel").innerHTML = STEP_NAMES.map((nm, i) => `<span>${i}·${nm} <b>${funnel.reach[i]}</b>/${funnel.done[i]}/${funnel.skip[i]}</span>`).join("") + `<span title="도달/완료/건너뛰기">도달/완료/건너뛰기</span>`;
+  if (step === 0) renderPicks();
+  if (step === 3) { renderBookmarklet(); renderReport(); }
+  document.getElementById("panel").scrollTop = 0;
+}
+document.getElementById("skipBtn").addEventListener("click", () => goStep(Math.min(3, step + 1), "skip"));
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("저장된 이력과 퍼널을 지우고 처음부터 시작할까요?")) return;
+  ls.del(LS_HIST); ls.del(LS_FUNNEL); ls.del(LS_STEP); ls.del(LS_PICKS);
+  history = []; picks = []; funnel = { reach: [1,0,0,0], done: [0,0,0,0], skip: [0,0,0,0] }; step = 0; ls.set(LS_FUNNEL, funnel);
+  pending = []; cands = []; cIdx = 0; batchStart = 0; tally = { read: 0, liked: 0, skipped: 0, ignore: 0 }; hotPath = null;
+  document.getElementById("parsed").innerHTML = ""; document.getElementById("triage").innerHTML = ""; document.getElementById("pasteBox").value = "";
+  recompute(); renderStep();
+});
+
+/* ── 0 관심 고르기 ──────────────────────────────────────── */
+/* 단계 진입 조건: 0단계 선택 3개, 또는 이미 양의 반응이 3개 이상 */
+function pickedCount() { return Math.max(picks.length, history.filter(h => h.node_id && (h.reaction === "read" || h.reaction === "liked")).length); }
+function renderPicks() {
+  const picked = new Set(picks);
+  document.getElementById("pickGrid").innerHTML = PICKS.map(id => { const n = N.get(id); const tp = TOPICS[n.topic];
+    return `<button class="pick" data-id="${esc(id)}" aria-pressed="${picked.has(id)}"><b>${esc(n.title)}</b><span class="meta">${esc(n.year)}<span class="chip" style="background:${tp[1]}">${tp[0]}</span></span></button>`; }).join("");
+  document.getElementById("pickGrid").querySelectorAll(".pick").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.id;
+    if (picked.has(id)) { picks = picks.filter(x => x !== id); ls.set(LS_PICKS, picks); if (history.some(h => h.node_id === id && h.source === "onboard-pick")) removeHistory(id); }
+    else { picks.push(id); ls.set(LS_PICKS, picks); if (!history.some(h => h.node_id === id)) addHistory([{ node_id: id, arxiv: N.get(id).arxiv, reaction: "liked", source: "onboard-pick" }]); }
+    renderPicks(); renderStep();
+  }));
+  const c = picked.size;
+  document.getElementById("pickCount").textContent = `${c} / 3${c >= 3 ? " · 관심으로 표시됨" : ""}`;
+  document.getElementById("startBtn").disabled = c < 3;
+}
+document.getElementById("startBtn").addEventListener("click", () => goStep(1, "done"));
+
+/* ── 1 붙여넣기 ─────────────────────────────────────────── */
+const SAMPLE = `이번 주 읽은 것들
+https://arxiv.org/abs/2401.04088v2
+arxiv.org/pdf/2309.06180.pdf
+https://x.com/someone/status/1234 <- 이 스레드에서 https://arxiv.org/abs/2305.18290 봄
+Mixtral of Experts
+FlashAttention: Fast and Memory-Efficient Exact Attention
+doi:10.48550/arXiv.2307.08691
+2402.99999
+https://lilianweng.github.io/posts/2018-06-24-attention/
+@article{ainslie2023gqa,
+  title = {GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints},
+  eprint = {2305.13245},
+  dateadded = {2026-08-30T21:00:00+09:00}
+}
+오늘 점심은 뭐 먹지`;
+let pending = [];    // 저장 전 확인 카드
+function parsePaste(text, source) {
+  const r = CGParse.parseText(text, C);
+  pending = r.items.map(it => ({ ...it, reaction: "read", source: source || (it.via && it.via.startsWith("bibtex") ? "bibtex" : "paste") }));
+  renderPending(r.ignored);
+}
+function renderPending(ignored) {
+  const el = document.getElementById("parsed");
+  if (!pending.length && !(ignored || []).length) { el.innerHTML = ""; return; }
+  const inC = pending.filter(p => p.node_id), outC = pending.filter(p => !p.node_id);
+  el.innerHTML = `<div class="cards">${pending.map((p, i) => `
+    <div class="card ${p.node_id ? "" : "out"}">
+      <div><b>${esc(p.title)}</b><span class="sub">${esc(p.arxiv || "")} · ${esc(p.via)}${p.read_at ? " · " + esc(String(p.read_at).slice(0, 10)) : ""}${p.node_id ? "" : " · 그래프 밖 · 나중에 Semantic Scholar 로 확장"}</span></div>
+      <div class="seg" data-i="${i}"><button data-r="read" aria-pressed="${p.reaction === "read"}">읽음</button><button data-r="liked" aria-pressed="${p.reaction === "liked"}">좋아요</button><button data-r="skipped" aria-pressed="${p.reaction === "skipped"}">스킵</button></div>
+    </div>`).join("")}</div>
+    ${(ignored || []).length ? `<details><summary>무시된 ${ignored.length}줄</summary><ul>${ignored.map(g => `<li>${esc(String(g.line).slice(0, 60))} <span>(${esc(g.why)})</span></li>`).join("")}</ul></details>` : ""}
+    <div class="row"><button class="btn prim" id="saveBtn">${pending.length}건 저장</button><span class="time">그래프 안 ${inC.length} · 밖 ${outC.length}</span></div>
+    <div class="note">저장되는 것은 id 와 시각·반응뿐입니다. 본문은 저장하지 않습니다.</div>`;
+  el.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { pending[+b.parentElement.dataset.i].reaction = b.dataset.r; renderPending(ignored); }));
+  const sb = el.querySelector("#saveBtn");
+  if (sb) sb.addEventListener("click", () => { addHistory(pending); pending = []; el.innerHTML = `<div class="note">저장했습니다. 오른쪽 목록이 다시 정렬됐습니다.</div><div class="row"><button class="btn prim" id="next1">다음: 가져오기</button><button class="btn" id="stay1">더 붙여넣기</button></div>`;
+    el.querySelector("#next1").addEventListener("click", () => goStep(2, "done")); el.querySelector("#stay1").addEventListener("click", () => { el.innerHTML = ""; }); });
+}
+document.getElementById("parseBtn").addEventListener("click", () => parsePaste(document.getElementById("pasteBox").value));
+document.getElementById("sampleBtn").addEventListener("click", () => { document.getElementById("pasteBox").value = SAMPLE; parsePaste(SAMPLE); });
+function wireDrop(dropId, inputId, onFiles) {
+  const d = document.getElementById(dropId), inp = document.getElementById(inputId);
+  d.addEventListener("click", () => inp.click());
+  inp.addEventListener("change", () => onFiles([...inp.files]));
+  d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
+  d.addEventListener("dragleave", () => d.classList.remove("over"));
+  d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); onFiles([...e.dataTransfer.files]); });
+}
+wireDrop("pdfDrop", "pdfInput", files => {
+  const ignored = [];
+  const got = files.map(f => { const it = CGParse.parseFilename(f.name, C); if (!it) ignored.push({ line: f.name, why: "파일명에 id 가 없어 건너뜀" }); return it; }).filter(Boolean);
+  pending = pending.concat(got.map(it => ({ ...it, reaction: "read", source: "file" })));
+  renderPending(ignored);
+});
+
+/* ── 2 가져오기·판정 ─────────────────────────────────────── */
+document.querySelectorAll('[role="tab"]').forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll('[role="tab"]').forEach(x => x.setAttribute("aria-selected", x === t));
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x.dataset.tab === t.dataset.tab));
+}));
+document.getElementById("toStep1").addEventListener("click", () => goStep(1, "jump"));
+const SAMPLE_HIST = (() => {
+  const inIds = ["mixtral","medusa","vllm","specdec","streaming","flash2","gqa","rope","dsv2","mod","expertchoice","qwen2","llama3","mistral","ring","yarn","lion","tulu"];
+  const outIds = ["2502.01234","2503.04567","2506.07890","2507.11111","2508.02222","2509.00001"];
+  const day = 86400000, base = Date.now();
+  const list = [];
+  inIds.forEach((id, i) => list.push({ arxiv: N.get(id).arxiv, last_visit: new Date(base - (i * 3 + 1) * day).toISOString(), visits: [3,1,2,1,4,1,2,1,1,2,1,3,1,1,2,1,1,1][i], pdf: i % 3 === 0 }));
+  outIds.forEach((a, i) => list.push({ arxiv: a, last_visit: new Date(base - (i * 5 + 2) * day).toISOString(), visits: i % 2 ? 2 : 1, pdf: i === 1 }));
+  return list;
+})();
+let cands = [], cIdx = 0, batchStart = 0, tally = { read: 0, liked: 0, skipped: 0, ignore: 0 }, candSource = "history";
+let candIgnored = [];
+function loadCandidates(list, source, ignored) {
+  candSource = source; candIgnored = ignored || [];
+  cands = CGParse.sortCandidates(list); cIdx = 0; batchStart = 0; tally = { read: 0, liked: 0, skipped: 0, ignore: 0 };
+  renderTriage();
+}
+function renderTriage() {
+  const el = document.getElementById("triage");
+  if (!cands.length) { el.innerHTML = candIgnored.length ? `<div class="note">올릴 후보가 없습니다. 무시된 항목 ${candIgnored.length}건.</div>` : ""; return; }
+  const batchEnd = Math.min(cands.length, batchStart + 20);
+  if (cIdx >= batchEnd) {
+    el.innerHTML = `<div class="note">이번 묶음 끝. 읽음 ${tally.read} · 좋아요 ${tally.liked} · 스킵 ${tally.skipped} · 무시 ${tally.ignore}</div>
+      <div class="row">${cIdx < cands.length ? `<button class="btn" id="moreBtn">다음 20장</button>` : ""}<button class="btn prim" id="next2">다음: 계속 쌓기</button></div>`;
+    const mb = el.querySelector("#moreBtn"); if (mb) mb.addEventListener("click", () => { batchStart = cIdx; tally = { read: 0, liked: 0, skipped: 0, ignore: 0 }; renderTriage(); });
+    el.querySelector("#next2").addEventListener("click", () => goStep(3, "done"));
+    return;
+  }
+  const c = cands[cIdx];
+  const n = c.node_id ? N.get(c.node_id) : null;
+  el.innerHTML = `<div class="stack"><div class="tcard">
+      <div class="idx"><span>${cIdx + 1} / ${batchEnd}${cands.length > batchEnd ? ` (전체 ${cands.length})` : ""}</span><span>${candSource === "history" ? "히스토리" : "BibTeX"}</span></div>
+      <h3>${esc(c.title)}</h3>
+      <div class="meta"><span>${esc(c.arxiv || "")}</span>${n ? `<span>${esc(n.year)}</span>` : `<span class="badge">그래프 밖 · 나중에 확장</span>`}${c.last_visit ? `<span>${esc(String(c.last_visit).slice(0, 10))}</span>` : ""}${c.visits >= 2 ? `<span class="badge hot">재방문 ${esc(c.visits)}회</span>` : ""}${c.pdf ? `<span class="badge hot">PDF 열람</span>` : ""}</div>
+      <div class="judge">
+        <button class="r" data-j="read">읽음<small><kbd>1</kbd></small></button>
+        <button class="l" data-j="liked">좋아요<small><kbd>2</kbd></small></button>
+        <button class="s" data-j="skipped">스킵<small><kbd>3</kbd></small></button>
+        <button data-j="ignore">무시<small><kbd>0</kbd>/<kbd>Esc</kbd></small></button>
+      </div></div></div>
+    ${candIgnored.length ? `<details><summary>무시된 ${candIgnored.length}건</summary><ul>${candIgnored.map(g => `<li>${esc(String(g.line).slice(0, 60))} <span>(${esc(g.why)})</span></li>`).join("")}</ul></details>` : ""}
+    <div class="tally"><span>읽음 ${tally.read}</span><span>좋아요 ${tally.liked}</span><span>스킵 ${tally.skipped}</span><span>무시 ${tally.ignore}</span><span style="margin-left:auto"><button class="btn sm ghost" id="restBtn">나머지 무시</button></span></div>`;
+  el.querySelectorAll("[data-j]").forEach(b => b.addEventListener("click", () => judge(b.dataset.j)));
+  el.querySelector("#restBtn").addEventListener("click", () => { while (cIdx < batchEnd) { tally.ignore++; cIdx++; } renderTriage(); });
+}
+function judge(j) {
+  if (cIdx >= cands.length) return;
+  const c = cands[cIdx];
+  tally[j]++;
+  if (j !== "ignore") addHistory([{ node_id: c.node_id, arxiv: c.arxiv, reaction: j, read_at: c.last_visit || c.read_at || null, source: candSource }]);
+  cIdx++; renderTriage();
+}
+document.addEventListener("keydown", e => {
+  if (step !== 2 || !cands.length || cIdx >= cands.length) return;
+  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  const map = { "1": "read", "2": "liked", "3": "skipped", "0": "ignore", "Escape": "ignore" };
+  if (map[e.key]) { e.preventDefault(); judge(map[e.key]); }
+});
+function histFromText(text) {
+  try { const r = CGParse.parseHistoryJson(text, C); loadCandidates(r.candidates, "history", r.ignored); }
+  catch (err) { document.getElementById("triage").innerHTML = `<div class="note">JSON 을 읽지 못했습니다: ${esc(err && err.message)}</div>`; }
+}
+document.getElementById("histBtn").addEventListener("click", () => histFromText(document.getElementById("histBox").value));
+document.getElementById("histSampleBtn").addEventListener("click", () => { document.getElementById("histBox").value = JSON.stringify(SAMPLE_HIST.slice(0, 2), null, 0) + " …"; const r = CGParse.parseHistoryJson(SAMPLE_HIST, C); loadCandidates(r.candidates, "history", r.ignored); });
+wireDrop("histDrop", "histInput", files => { if (files[0]) files[0].text().then(histFromText); });
+function bibFromText(text) {
+  const r = CGParse.parseText(text, C);
+  loadCandidates(r.items.map(it => ({ ...it, last_visit: it.read_at, visits: 1, pdf: false })), "bibtex", r.ignored);
+}
+document.getElementById("bibBtn").addEventListener("click", () => bibFromText(document.getElementById("bibBox").value));
+wireDrop("bibDrop", "bibInput", files => { if (files[0]) files[0].text().then(t => { document.getElementById("bibBox").value = t; bibFromText(t); }); });
+
+/* ── 3 계속 쌓기 ────────────────────────────────────────── */
+function renderBookmarklet() {
+  const here = location.href.split("#")[0];
+  document.getElementById("bookmarklet").setAttribute("href", `javascript:location.href=${JSON.stringify(here + "#add=")}+encodeURIComponent(location.href)`);
+}
+function renderReport() {
+  const week = Date.now() - 7 * 86400000;
+  const rx = reactions();
+  const thisWeek = history.filter(h => Date.parse(h.read_at) >= week && h.reaction !== "skipped");
+  const dist = pool([...rx.keys()].filter(id => (W[rx.get(id).r] || 0) > 0), 3);
+  const grown = Math.max(0, dist.size - seedCount);
+  document.getElementById("report").innerHTML = `<h4>주간 리포트 미리보기</h4>
+    <div class="facts"><div><b>${thisWeek.length}</b><span>이번 주 읽은 것</span></div><div><b>${seedCount}</b><span>시드 (읽음·좋아요)</span></div><div><b>+${grown}</b><span>3홉 안에 들어온 노드</span></div></div>
+    <div class="k" style="margin-top:8px">다음 주 추천 ${Math.min(5, recs.length)}</div>
+    <div class="cards">${recs.length ? recs.map(r => `<div class="card"><div><b>${esc(N.get(r.id).title)}</b><span class="sub">${r.path ? r.path.length - 1 + "홉 · " : ""}${r.path ? "읽은 " + esc(short(N.get(r.path[0]).title)) + " 에서" : ""}</span></div>
+      <div class="seg"><button data-act="read" data-id="${esc(r.id)}">읽음</button><button data-act="skipped" data-id="${esc(r.id)}">스킵</button></div></div>`).join("") : `<div class="empty">시드가 없습니다.</div>`}</div>`;
+  document.getElementById("report").querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: N.get(b.dataset.id).arxiv, reaction: b.dataset.act, source: "weekly-report" }])));
+}
+document.getElementById("finishBtn").addEventListener("click", () => { funnel.done[3]++; ls.set(LS_FUNNEL, funnel); renderStep(); alert("온보딩을 마쳤습니다. 이력은 이 브라우저에만 저장돼 있습니다."); });
+
+/* ── 시작 ───────────────────────────────────────────────── */
+(function boot() {
+  if (!ls.get(LS_FUNNEL, null)) { funnel.reach[0] = 1; ls.set(LS_FUNNEL, funnel); }
+  const m = location.hash.match(/#add=(.+)$/);
+  if (m) {
+    let url; try { url = decodeURIComponent(m[1]); } catch (e) { url = m[1]; }   // 깨진 퍼센트 인코딩이면 원문 그대로 파서에 넘긴다
+    if (pickedCount() < 3) { /* 시드가 없어도 저장은 받되 0단계로 돌려보낸다 */ }
+    step = 1; ls.set(LS_STEP, 1); funnel.reach[1]++; ls.set(LS_FUNNEL, funnel);
+    document.getElementById("pasteBox").value = url;
+    window.history.replaceState(null, "", location.pathname);   // history 변수가 이력 배열이라 window 를 명시한다
+    resize(); recompute(); renderStep(); parsePaste(url, "bookmarklet");
+    return;
+  }
+  if (step > 0 && pickedCount() < 3) step = 0;
+  resize(); recompute(); renderStep();
+})();
+</script>
+</body>
+</html>
