@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>논문 사파리</title>
 <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
 <meta name="description" content="인용 그래프를 벌판 삼아 걸어다니며 논문과 조우한다. 안개 속에서 추천만 빛나고, 판정 일치율이 곧 hit rate 다.">
@@ -331,6 +332,12 @@ body { word-break: keep-all; }
     .cfg .foot { font-size: 9.5px; padding-top: 6px; }
     .seg button { font-size: 9px; padding: 4px 1px; }
   }
+  .onbanner { display: none; position: fixed; left: 50%; top: 8px; transform: translateX(-50%); z-index: 40; max-width: calc(100vw - 24px); box-sizing: border-box; align-items: center; gap: 10px; padding: 5px 12px; border-radius: 999px; background: rgba(20,24,34,.88); border: 1px solid rgba(120,160,255,.35); color: #DDE3F0; font-size: 11.5px; line-height: 1.4; }
+  .onbanner.on { display: flex; }
+  .onbanner b { color: #9DB8FF; font-weight: 600; }
+  .onbanner a { color: #9DB8FF; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .onbanner .sp { flex: 0 0 4px; }
+  @media (max-width: 600px) { .onbanner { flex-wrap: wrap; justify-content: center; border-radius: 12px; gap: 4px 10px; } }
 </style>
 
 <aside class="cg-nav">
@@ -359,6 +366,7 @@ body { word-break: keep-all; }
 <div class="game cg-shift">
 <canvas id="world"></canvas>
 
+<div class="onbanner" id="onbanner"></div>
 <div class="hud">
   <div class="plate title">논문 사파리<span>CHECKPOINT GRAPH</span></div>
   <div class="plate">
@@ -400,7 +408,7 @@ body { word-break: keep-all; }
     <p style="margin-bottom:10px">누구로 걸을지 고른다. 능력은 <b>탐색</b>에만 영향을 준다.
        추천 판정에는 아무 영향이 없다.</p>
     <div class="picks" id="picks"></div>
-    <p>당신은 논문 89편이 별처럼 흩어진 벌판에 서 있다. 등불이 닿는 곳만 보인다. 다만 <b style="color:var(--beacon)">청록으로 빛나는 것</b>은 안개를 뚫고 멀리서도 보인다. 그게 그래프가 지금 당신에게 밀고 있는 추천이다.</p>
+    <p>당신은 논문 <b id="introCount">89</b>편이 별처럼 흩어진 벌판에 서 있다. 등불이 닿는 곳만 보인다. 다만 <b style="color:var(--beacon)">청록으로 빛나는 것</b>은 안개를 뚫고 멀리서도 보인다. 그게 그래프가 지금 당신에게 밀고 있는 추천이다.</p>
     <ul>
       <li><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 또는 <kbd>WASD</kbd> 로 이동</li>
       <li>논문에 닿으면 조우가 뜬다. <kbd>1</kbd> 읽는다 · <kbd>2</kbd> 스킵 · <kbd>Esc</kbd> 지나친다</li>
@@ -415,195 +423,27 @@ body { word-break: keep-all; }
 
 </div>
 
+<div id="cgLoading" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F3F0E9;color:#5C564A;font:13px/1.5 -apple-system,BlinkMacSystemFont,'IBM Plex Sans KR',sans-serif;z-index:9999">코퍼스를 불러오는 중입니다 (약 3 MB)…</div>
+<script src="./assets/corpus.js"></script>
+<script src="./assets/profile.js"></script>
+<script src="./data/reading-history.js"></script>
 <script src="./assets/sprites.js"></script>
 <script>
 "use strict";
 
-// [id, 제목, 연도, arXiv id, 대략 피인용수, 토픽]
-const PAPERS = [
-  ["lstm","Long Short-Term Memory",1997,"","110000","arch"],
-  ["seq2seq","Sequence to Sequence Learning with Neural Networks",2014,"1409.3215","28000","arch"],
-  ["bahdanau","Neural Machine Translation by Jointly Learning to Align and Translate",2014,"1409.0473","38000","arch"],
-  ["adam","Adam: A Method for Stochastic Optimization",2014,"1412.6980","190000","opt"],
-  ["resnet","Deep Residual Learning for Image Recognition",2015,"1512.03385","240000","vis"],
-  ["layernorm","Layer Normalization",2016,"1607.06450","12000","arch"],
-  ["moe","Outrageously Large Neural Networks: The Sparsely-Gated MoE Layer",2017,"1701.06538","3100","moe"],
-  ["attention","Attention Is All You Need",2017,"1706.03762","135000","arch"],
-  ["ppo","Proximal Policy Optimization Algorithms",2017,"1707.06347","23000","align"],
-  ["gpipe","GPipe: Efficient Training of Giant Neural Networks",2018,"1811.06965","1600","sys"],
-  ["bert","BERT: Pre-training of Deep Bidirectional Transformers",2018,"1810.04805","115000","arch"],
-  ["gpt2","Language Models are Unsupervised Multitask Learners",2019,"","14000","arch"],
-  ["megatron","Megatron-LM: Training Multi-Billion Parameter LMs",2019,"1909.08053","2600","sys"],
-  ["zero","ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",2019,"1910.02054","1800","sys"],
-  ["t5","Exploring the Limits of Transfer Learning (T5)",2019,"1910.10683","19000","arch"],
-  ["mqa","Fast Transformer Decoding: One Write-Head is All You Need",2019,"1911.02150","520","eff"],
-  ["scaling","Scaling Laws for Neural Language Models",2020,"2001.08361","3400","scale"],
-  ["dpr","Dense Passage Retrieval for Open-Domain QA",2020,"2004.04906","4200","rag"],
-  ["colbert","ColBERT: Efficient Passage Search over BERT",2020,"2004.12832","1600","rag"],
-  ["rag","Retrieval-Augmented Generation for Knowledge-Intensive NLP",2020,"2005.11401","5600","rag"],
-  ["gpt3","Language Models are Few-Shot Learners",2020,"2005.14165","38000","arch"],
-  ["ddpm","Denoising Diffusion Probabilistic Models",2020,"2006.11239","16000","vis"],
-  ["gshard","GShard: Scaling Giant Models with Conditional Computation",2020,"2006.16668","1100","moe"],
-  ["rlhfsum","Learning to Summarize from Human Feedback",2020,"2009.01325","3100","align"],
-  ["mmlu","Measuring Massive Multitask Language Understanding",2020,"2009.03300","4300","eval"],
-  ["vit","An Image is Worth 16x16 Words (ViT)",2020,"2010.11929","44000","vis"],
-  ["switch","Switch Transformers: Scaling to Trillion Parameter Models",2021,"2101.03961","2200","moe"],
-  ["clip","Learning Transferable Visual Models from Natural Language",2021,"2103.00020","28000","vis"],
-  ["rope","RoFormer: Enhanced Transformer with Rotary Position Embedding",2021,"2104.09864","2600","arch"],
-  ["lora","LoRA: Low-Rank Adaptation of Large Language Models",2021,"2106.09685","9800","eff"],
-  ["humaneval","Evaluating Large Language Models Trained on Code",2021,"2107.03374","6100","eval"],
-  ["alibi","Train Short, Test Long: Attention with Linear Biases",2021,"2108.12409","1100","arch"],
-  ["gsm8k","Training Verifiers to Solve Math Word Problems",2021,"2110.14168","2900","eval"],
-  ["s4","Efficiently Modeling Long Sequences with Structured State Spaces",2021,"2111.00396","1900","ssm"],
-  ["ldm","High-Resolution Image Synthesis with Latent Diffusion Models",2021,"2112.10752","19000","vis"],
-  ["cot","Chain-of-Thought Prompting Elicits Reasoning in LLMs",2022,"2201.11903","10000","reason"],
-  ["instructgpt","Training Language Models to Follow Instructions with Human Feedback",2022,"2203.02155","11000","align"],
-  ["selfcons","Self-Consistency Improves Chain of Thought Reasoning",2022,"2203.11171","3200","reason"],
-  ["chinchilla","Training Compute-Optimal Large Language Models",2022,"2203.15556","3500","scale"],
-  ["flash","FlashAttention: Fast and Memory-Efficient Exact Attention",2022,"2205.14135","2900","eff"],
-  ["bigbench","Beyond the Imitation Game (BIG-bench)",2022,"2206.04615","1500","eval"],
-  ["expertchoice","Mixture-of-Experts with Expert Choice Routing",2022,"2202.09368","420","moe"],
-  ["react","ReAct: Synergizing Reasoning and Acting in Language Models",2022,"2210.03629","3600","reason"],
-  ["specdec","Fast Inference from Transformers via Speculative Decoding",2022,"2211.17192","830","eff"],
-  ["whisper","Robust Speech Recognition via Large-Scale Weak Supervision",2022,"2212.04356","3400","vis"],
-  ["cai","Constitutional AI: Harmlessness from AI Feedback",2022,"2212.08073","1900","align"],
-  ["llama","LLaMA: Open and Efficient Foundation Language Models",2023,"2302.13971","12000","arch"],
-  ["toolformer","Toolformer: Language Models Can Teach Themselves to Use Tools",2023,"2302.04761","1500","reason"],
-  ["hyena","Hyena Hierarchy: Towards Larger Convolutional Language Models",2023,"2302.10866","560","ssm"],
-  ["gpt4","GPT-4 Technical Report",2023,"2303.08774","9500","arch"],
-  ["lion","Symbolic Discovery of Optimization Algorithms (Lion)",2023,"2302.06675","640","opt"],
-  ["starcoder","StarCoder: May the Source Be With You",2023,"2305.06161","880","arch"],
-  ["lima","LIMA: Less Is More for Alignment",2023,"2305.11206","1100","align"],
-  ["gqa","GQA: Training Generalized Multi-Query Transformer Models",2023,"2305.13245","900","eff"],
-  ["rwkv","RWKV: Reinventing RNNs for the Transformer Era",2023,"2305.13048","560","ssm"],
-  ["qlora","QLoRA: Efficient Finetuning of Quantized LLMs",2023,"2305.14314","3100","eff"],
-  ["sophia","Sophia: A Scalable Stochastic Second-order Optimizer",2023,"2305.14342","280","opt"],
-  ["dpo","Direct Preference Optimization",2023,"2305.18290","4200","align"],
-  ["phi","Textbooks Are All You Need",2023,"2306.11644","900","arch"],
-  ["flash2","FlashAttention-2: Faster Attention with Better Parallelism",2023,"2307.08691","1300","eff"],
-  ["llama2","Llama 2: Open Foundation and Fine-Tuned Chat Models",2023,"2307.09288","13000","arch"],
-  ["yarn","YaRN: Efficient Context Window Extension of LLMs",2023,"2309.00071","560","arch"],
-  ["vllm","Efficient Memory Management for LLM Serving with PagedAttention",2023,"2309.06180","1500","eff"],
-  ["streaming","Efficient Streaming Language Models with Attention Sinks",2023,"2309.17453","760","eff"],
-  ["mistral","Mistral 7B",2023,"2310.06825","2600","arch"],
-  ["ring","Ring Attention with Blockwise Transformers",2023,"2310.01889","400","eff"],
-  ["mamba","Mamba: Linear-Time Sequence Modeling with Selective State Spaces",2023,"2312.00752","2400","ssm"],
-  ["mixtral","Mixtral of Experts",2024,"2401.04088","1600","moe"],
-  ["medusa","Medusa: Simple LLM Inference Acceleration Framework",2024,"2401.10774","390","eff"],
-  ["olmo","OLMo: Accelerating the Science of Language Models",2024,"2402.00838","560","arch"],
-  ["gemma","Gemma: Open Models Based on Gemini Research",2024,"2403.08295","1200","arch"],
-  ["mod","Mixture-of-Depths: Dynamically Allocating Compute",2024,"2404.02258","230","moe"],
-  ["dsv2","DeepSeek-V2: A Strong, Economical, Efficient MoE Language Model",2024,"2405.04434","640","moe"],
-  ["qwen2","Qwen2 Technical Report",2024,"2407.10671","1100","arch"],
-  ["llama3","The Llama 3 Herd of Models",2024,"2407.21783","3200","arch"],
-  ["tulu","Tulu 3: Pushing Frontiers in Open Language Model Post-Training",2024,"2411.15124","310","align"],
-  ["dsv3","DeepSeek-V3 Technical Report",2024,"2412.19437","1400","moe"],
-  ["dsr1","DeepSeek-R1: Incentivizing Reasoning Capability via RL",2025,"2501.12948","2100","reason"]
-];
-
-// 모델 릴리스 노드 (기획안: tracker.json 을 외부 소스로 소비)
-const MODELS = [
-  ["m-dsv3","DeepSeek-V3","dsv3","MIT"],
-  ["m-dsr1","DeepSeek-R1","dsr1","MIT"],
-  ["m-mixtral","Mixtral 8x7B","mixtral","Apache-2.0"],
-  ["m-llama3","Llama 3.1 405B","llama3","Llama Community"],
-  ["m-qwen2","Qwen2.5 72B","qwen2","Apache-2.0"],
-  ["m-mistral","Mistral 7B","mistral","Apache-2.0"],
-  ["m-gemma","Gemma 2 27B","gemma","Gemma Terms"],
-  ["m-olmo","OLMo 2 13B","olmo","Apache-2.0"]
-];
-
-// 아티클: 인용 그래프에 붙지 않는다. 의도적으로 고립 노드로 남긴다.
-const ARTICLES = [
-  ["a-kipply","Transformer Inference Arithmetic","kipply.github.io",2022],
-  ["a-scale","How to Scale Your Model","jax-ml.github.io",2025],
-  ["a-weng","Attention? Attention!","lilianweng.github.io",2018]
-];
-
-// from: 이 논문이 인용하는 논문들
-const CITE_SRC = `
-attention: bahdanau seq2seq lstm adam layernorm
-bert: attention seq2seq adam
-gpt2: attention bert layernorm
-t5: attention bert adam
-megatron: attention bert gpt2 adam
-zero: megatron adam gpipe
-gpipe: resnet seq2seq
-mqa: attention
-scaling: attention gpt2 adam
-gpt3: attention bert gpt2 scaling t5
-mmlu: gpt3 bert t5
-dpr: bert attention
-colbert: bert dpr attention
-rag: dpr bert t5 attention
-ddpm: resnet adam
-moe: lstm adam
-gshard: attention moe t5
-switch: moe gshard attention t5 adam
-expertchoice: switch gshard moe attention
-vit: attention resnet bert
-clip: vit attention resnet bert
-ldm: ddpm clip vit attention
-rope: attention bert
-alibi: attention rope
-lora: attention bert gpt3 adam
-humaneval: gpt3 attention
-gsm8k: gpt3 t5
-s4: attention lstm
-hyena: s4 attention gpt2
-rwkv: attention lstm s4
-mamba: s4 attention hyena rwkv
-chinchilla: scaling gpt3 attention t5
-cot: gpt3 t5 gsm8k
-selfcons: cot gpt3 gsm8k
-react: cot gpt3 selfcons
-toolformer: gpt3 cot
-rlhfsum: ppo gpt2
-instructgpt: gpt3 ppo rlhfsum t5
-cai: instructgpt rlhfsum ppo
-dpo: instructgpt ppo rlhfsum gpt3
-lima: llama instructgpt gpt3
-flash: attention bert gpt3 megatron
-flash2: flash attention megatron
-gqa: mqa attention t5 flash
-bigbench: gpt3 t5 mmlu bert
-specdec: attention t5 gpt3
-whisper: attention clip gpt2
-gpt4: gpt3 instructgpt mmlu humaneval bigbench chinchilla
-llama: attention rope scaling chinchilla gpt3 adam t5
-llama2: llama attention rope gqa instructgpt ppo flash
-mistral: llama llama2 flash gqa attention rope
-starcoder: humaneval llama attention flash
-phi: gpt3 humaneval gpt4
-qlora: lora llama attention gpt3
-lion: adam vit resnet
-sophia: adam gpt2 chinchilla
-yarn: rope alibi llama flash
-vllm: attention flash gpt3 megatron llama
-streaming: attention rope alibi flash llama2
-ring: flash attention megatron
-mixtral: mistral switch moe gshard llama2 attention
-medusa: specdec vllm llama2 flash
-olmo: llama2 attention t5 adam
-gemma: llama2 attention rope gqa
-mod: switch moe expertchoice attention
-dsv2: switch gshard llama2 attention rope gqa mqa
-qwen2: llama2 attention rope gqa dpo yarn
-llama3: llama2 rope gqa flash2 chinchilla scaling dpo
-tulu: dpo instructgpt llama2 llama3
-dsv3: dsv2 mixtral switch gqa rope flash expertchoice chinchilla
-dsr1: dsv3 ppo cot instructgpt gsm8k
-`;
+/* ── 코퍼스·프로필 (assets/corpus.js + assets/profile.js) ──
+   손 코퍼스 인라인 상수는 data/hand-corpus.js 로 옮겼고, 여기서는 프로필의 범위(scope)로 거른 부분그래프에서
+   PAPERS/MODELS/ARTICLES/CITE_SRC 를 같은 형식으로 만든다. 아래 기존 코드는 그대로 이 튜플을 소비한다.
+   프로필이 없으면 mock 독서 이력(data/reading-history.js) + 기본 범위다. */
+(function(){ const l = document.getElementById("cgLoading"); if (l) l.remove(); })();
+const PG = CG.pageGraph();
+const PAPERS = PG.tuples.papers;
+const MODELS = PG.tuples.models;
+const ARTICLES = PG.tuples.articles;
+const CITE_SRC = PG.tuples.citeSrc;
+const CORPUS_POS = new Map(PG.sub.nodes.map(n => [n.id, [n.x, n.y]]));   // 전체 코퍼스 기준 사전 계산 좌표 (0~1)
 
 // 가정한 읽음 이력 (효율적 LLM 서빙 + MoE 관심 연구자)
-const SEED_HISTORY = [
-  ["attention","liked"], ["chinchilla","read"], ["switch","liked"], ["rope","read"],
-  ["gqa","read"], ["flash","liked"], ["llama2","read"], ["vllm","liked"],
-  ["specdec","read"], ["mixtral","liked"], ["dsv2","liked"], ["lora","read"],
-  ["ddpm","skipped"], ["clip","skipped"],
-  ["a-kipply","liked"], ["a-scale","read"]
-];
-
 const TOPICS = {
   arch:["구조","#4C7DF0"], moe:["MoE","#D2691E"], eff:["효율·서빙","#0C9C8A"],
   align:["정렬·RLHF","#B08010"], reason:["추론","#7B5BD6"], rag:["검색증강","#0E8FA8"],
@@ -698,58 +538,14 @@ const HL_NOTE = {
 };
 const PARAM = { hubexp: 0.8, halfLife: 90 };   // 기본값은 종전 고정값과 같다
 
-/* mock 독서 이력. data/reading-history.json 과 같은 내용이다.
-   실제 기록이 아니라 백테스트 설계 검증용 가짜 데이터다.
-   fetch() 는 file:// 에서 CORS 로 막히므로 HTML 에 <script> 로 인라인해서 쓴다.
-   형식: [node_id, read_at, reaction, source] */
-const READING_HISTORY = [
-  ["attention", "2026-04-02T21:38:00+09:00", "liked", "zotero"],
-  ["moe", "2026-04-02T22:55:00+09:00", "read", "browser_history"],
-  ["switch", "2026-04-06T22:12:00+09:00", "liked", "zotero"],
-  ["gshard", "2026-04-09T20:47:00+09:00", "read", "browser_history"],
-  ["expertchoice", "2026-04-11T14:22:00+09:00", "read", "zotero"],
-  ["mod", "2026-04-11T16:08:00+09:00", "read", "browser_history"],
-  ["ddpm", "2026-04-11T17:44:00+09:00", "skipped", "browser_history"],
-  ["mixtral", "2026-04-14T21:26:00+09:00", "liked", "zotero"],
-  ["dsv2", "2026-04-19T15:10:00+09:00", "read", "zotero"],
-  ["dsv3", "2026-04-23T22:31:00+09:00", "liked", "zotero"],
-  ["a-kipply", "2026-04-28T21:16:00+09:00", "read", "browser_history"],
-  ["mqa", "2026-05-03T13:52:00+09:00", "skipped", "browser_history"],
-  ["gqa", "2026-05-06T22:20:00+09:00", "read", "zotero"],
-  ["flash", "2026-05-07T21:03:00+09:00", "liked", "zotero"],
-  ["flash2", "2026-05-12T23:11:00+09:00", "read", "browser_history"],
-  ["rope", "2026-05-18T22:26:00+09:00", "read", "browser_history"],
-  ["vllm", "2026-05-23T13:40:00+09:00", "liked", "zotero"],
-  ["specdec", "2026-05-23T15:15:00+09:00", "read", "browser_history"],
-  ["medusa", "2026-05-23T16:52:00+09:00", "read", "browser_history"],
-  ["streaming", "2026-05-23T20:30:00+09:00", "read", "browser_history"],
-  ["ring", "2026-05-28T22:05:00+09:00", "read", "manual"],
-  ["clip", "2026-06-03T21:48:00+09:00", "skipped", "browser_history"],
-  ["mistral", "2026-06-09T20:36:00+09:00", "read", "browser_history"],
-  ["llama2", "2026-06-13T14:12:00+09:00", "read", "zotero"],
-  ["chinchilla", "2026-06-18T22:24:00+09:00", "liked", "zotero"],
-  ["scaling", "2026-06-24T21:57:00+09:00", "skipped", "browser_history"],
-  ["lora", "2026-06-30T20:52:00+09:00", "read", "browser_history"],
-  ["qlora", "2026-07-03T22:41:00+09:00", "read", "zotero"],
-  ["a-scale", "2026-07-09T21:15:00+09:00", "liked", "browser_history"],
-  ["megatron", "2026-07-11T14:26:00+09:00", "read", "manual"],
-  ["zero", "2026-07-12T16:03:00+09:00", "read", "zotero"],
-  ["whisper", "2026-07-18T15:37:00+09:00", "skipped", "browser_history"],
-  ["llama3", "2026-07-25T13:52:00+09:00", "read", "browser_history"],
-  ["qwen2", "2026-08-02T15:44:00+09:00", "read", "browser_history"],
-  ["ldm", "2026-08-09T16:58:00+09:00", "skipped", "browser_history"],
-  ["mamba", "2026-08-17T21:12:00+09:00", "read", "manual"],
-  ["dsr1", "2026-08-26T22:34:00+09:00", "liked", "zotero"],
-  ["a-weng", "2026-09-03T22:09:00+09:00", "read", "browser_history"],
-];
-
-/* 총 38개 엔트리. 기간: 2026-04-02 ~ 2026-09-03 (Asia/Seoul).
-   dwell_min 등 나머지 필드는 data/reading-history.json 을 참조. */
-
 const RX = new Map();         // id -> {r, at, src}
-READING_HISTORY.forEach(([id, at, r]) => {
-  if (N.has(id)) RX.set(id, { r, at: Date.parse(at), src: "history" });
-});
+if (PG.usingProfile) {
+  for (const s of CG.profile.seeds(PG.profile)) if (N.has(s.node_id)) RX.set(s.node_id, { r: s.reaction, at: s.ts, src: "profile" });
+} else {
+  READING_HISTORY.forEach(([id, at, r]) => {
+    if (N.has(id)) RX.set(id, { r, at: Date.parse(at), src: "history" });
+  });
+}
 
 function seedVector(){
   const s = {}; let norm = 0;
@@ -787,8 +583,9 @@ function fullRank(){
     const deg = (ADJ.get(id) || []).length;
     fixed[id] = raw[id] / Math.pow(Math.max(deg, 1), PARAM.hubexp);
   }
+  // 모델 노드는 그래프에는 두되 추천 상위(비콘·판정 기준)에서는 뺀다 (graph.html·온보딩과 같은 규칙)
   return Object.keys(fixed)
-    .filter(id => N.has(id) && !RX.has(id) && fixed[id] > 0)
+    .filter(id => N.has(id) && !RX.has(id) && fixed[id] > 0 && N.get(id).kind !== "model")
     .sort((a, b) => fixed[b] - fixed[a] || N.get(b).cites - N.get(a).cites);
 }
 let RANK = fullRank();
@@ -835,7 +632,13 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">"
 /* ─────────────────────────────────────────────────────────
    월드 배치: 포스 레이아웃을 한 번 돌리고 굳힌다
    ───────────────────────────────────────────────────────── */
+const BIG_WORLD = 350;   // 이보다 크면 O(n²) 포스 배치를 건너뛰고 사전 계산 좌표(assets/corpus.js)를 펼쳐 쓴다
 function buildWorld(){
+  if (ALL.length > BIG_WORLD) {
+    const span = 260 * Math.sqrt(ALL.length);
+    for (const n of ALL) { const p = CORPUS_POS.get(n.id) || [Math.random(), Math.random()]; n.x = (p[0] - 0.5) * span; n.y = (p[1] - 0.5) * span; n.vx = 0; n.vy = 0; }
+    return;
+  }
   for (const n of ALL) {
     const ang = Math.random() * 6.2832, rad = 220 + Math.random() * 560;
     n.x = Math.cos(ang) * rad; n.y = Math.sin(ang) * rad; n.vx = 0; n.vy = 0;
@@ -1186,6 +989,7 @@ function resolve(choice){
 
   const before = new Set(RECS);
   RX.set(n.id, { r: choice, at: Date.now(), src: "session" });
+  if (PG.usingProfile) CG.profile.addReaction(n.id, choice, "safari");   // 그래프 뷰·온보딩과 같은 프로필에 남긴다
   RANK = fullRank(); RECS = new Set(RANK.slice(0, TOP_N));
   G.recalcs++;
   const swapped = [...RECS].filter(id => !before.has(id)).length;
@@ -1435,6 +1239,9 @@ function start(){
 }
 document.getElementById("btnStart").addEventListener("click", start);
 buildPicks();
+(function(){ const el = document.getElementById("introCount"); if (el) el.textContent = String(PAPERS.length); })();
+/* 프로필 배너 (graph.html 과 같은 문구·링크) */
+(function(){ const el = document.getElementById("onbanner"); if (el) { el.innerHTML = PG.bannerHTML; el.classList.add("on"); } })();
 
 function step(){
   if (G.phase === "play") {

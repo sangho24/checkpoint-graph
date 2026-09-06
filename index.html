@@ -936,7 +936,8 @@ footer a:hover { color: var(--blue); }
     <div class="k">지금 들어있는 것</div>
     <h2>실제 논문과 실제 인용 관계</h2>
     <dl class="facts">
-      <div><dt>코퍼스</dt><dd>논문 <b>78편</b> · 모델 릴리스 <b>8개</b> · 아티클 <b>3개</b> = 노드 <b>89개</b>, 엣지 <b>274개</b></dd></div>
+      <div><dt>코퍼스</dt><dd>손 코퍼스 논문 <b>78편</b> · 모델 <b>8개</b> · 아티클 <b>3개</b> (노드 89, 엣지 274, 백테스트 원본). 화면은 이것을 Semantic Scholar 로 1홉 확장한 <b>3,031 노드 · 42,238 엣지</b> 위에서 돌고, 온보딩에서 고른 범위로 거른다</dd></div>
+      <div><dt>프로필</dt><dd>온보딩의 범위·관심, 사파리의 판정, 그래프 뷰의 반응이 <b>같은 프로필 하나</b>(브라우저 localStorage)에 쌓인다. 페이지를 오가도 이어진다</dd></div>
       <div><dt>독서 이력</dt><dd><b>읽은 시각이 붙은 mock 데이터.</b> 5개월치 <code>data/reading-history.json</code>. 최근성 감쇠가 인덱스가 아니라 경과 일수로 돈다</dd></div>
       <div><dt>추천</dt><dd>Personalized PageRank (α = 0.85, 45회 멱반복) + degree 정규화. 베이스라인 3종을 나란히 계산</dd></div>
       <div><dt>근거</dt><dd>시드에서 후보까지 무방향 BFS 최단 경로. <b>경로가 없으면 추천하지 않는다</b></dd></div>

@@ -137,6 +137,21 @@ body { word-break: keep-all; }
   .pick b { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
   .pick .meta { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
   .chip { display: inline-block; padding: 0 6px; border-radius: 999px; font-size: 10px; font-family: var(--mono); color: #fff; }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tchip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 10px 4px 7px; font-size: 12px; cursor: pointer; color: var(--ink-2); }
+  .tchip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c, #999); opacity: .45; }
+  .tchip small { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .tchip[aria-pressed="true"] { border-color: var(--c, var(--gold)); background: #FBF4E2; color: var(--ink); }
+  .tchip[aria-pressed="true"] i { opacity: 1; }
+  .tchip.cat[aria-pressed="true"] { border-color: var(--gold); }
+  .range2 { position: relative; height: 28px; margin-top: 6px; }
+  .range2 input[type=range] { position: absolute; left: 0; right: 0; top: 4px; width: 100%; margin: 0; pointer-events: none; -webkit-appearance: none; background: transparent; }
+  .range2 input[type=range]::-webkit-slider-runnable-track { height: 3px; background: var(--line-2); border-radius: 2px; }
+  .range2 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 16px; height: 16px; margin-top: -6.5px; border-radius: 50%; background: var(--panel); border: 2px solid var(--gold); cursor: pointer; }
+  .range2 input[type=range]::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: var(--panel); border: 2px solid var(--gold); cursor: pointer; }
+  .scopeCount { margin-top: 12px; font-size: 12.5px; }
+  .scopeCount .warn { display: block; margin-top: 6px; color: #A8412D; font-size: 12px; }
 
   /* 1 추출 카드 */
   .cards { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
@@ -257,15 +272,24 @@ body { word-break: keep-all; }
   <div class="body">
     <section class="panel" id="panel">
 
-      <!-- 0 관심 고르기 -->
+      <!-- 0a 범위 · 0b 관심 -->
       <div class="step" data-step="0">
-        <div class="k">0 · 관심 고르기 <span class="time">30초 · 필수</span></div>
-        <h2>아는 것 3개만 고르세요</h2>
-        <p>고르는 순간 오른쪽에 그래프와 탐색 목록이 뜹니다. 목록을 가져오는 건 나중 일입니다.</p>
-        <div class="grid" id="pickGrid"></div>
-        <div class="row">
-          <button class="btn prim" id="startBtn" disabled>시작</button>
-          <span class="time" id="pickCount">0 / 3</span>
+        <div id="sub0a">
+          <div class="k">0 · 범위 <span class="time">30초 · 기본값으로 넘어가도 됨</span></div>
+          <h2>어디까지 다룰지 정합니다</h2>
+          <p>주제·기간·깊이를 만질 때마다 오른쪽 그래프가 실제로 커지고 줄어듭니다. 나중에 그래프 뷰 배너에서 바꿀 수 있습니다.</p>
+          <div id="scopeUI"></div>
+        </div>
+        <div id="sub0b" hidden>
+          <div class="k">0 · 관심 고르기 <span class="time">30초 · 필수</span></div>
+          <h2>아는 것 3개만 고르세요</h2>
+          <p>고르는 순간 오른쪽에 그래프와 탐색 목록이 뜹니다. 목록을 가져오는 건 나중 일입니다.</p>
+          <div class="row" style="margin-top:4px"><span class="time" id="pickScope"></span><button class="lnk" id="backToScope">범위 바꾸기</button></div>
+          <div class="grid" id="pickGrid"></div>
+          <div class="row">
+            <button class="btn prim" id="startBtn" disabled>시작</button>
+            <span class="time" id="pickCount">0 / 3</span>
+          </div>
         </div>
       </div>
 
@@ -324,7 +348,7 @@ body { word-break: keep-all; }
         <a class="bm" id="bookmarklet" href="#">★ 읽음으로 저장</a>
         <div class="note">동작: 현재 페이지 URL 을 <code>onboard.html#add=&lt;url&gt;</code> 로 넘깁니다. 이 페이지는 열릴 때 해시를 1단계 파서로 처리합니다.</div>
         <div class="report" id="report"></div>
-        <div class="row"><button class="btn prim" id="finishBtn">온보딩 마치기</button> <a class="btn" href="./graph.html?from=onboard">그래프 뷰로 바로 가기</a></div>
+        <div class="row"><button class="btn prim" id="finishBtn">온보딩 마치기</button> <a class="btn" href="./graph.html">그래프 뷰로 바로 가기</a></div>
       </div>
     </section>
 
@@ -349,59 +373,44 @@ body { word-break: keep-all; }
   <div class="oskip">클릭 또는 Esc 로 건너뛰기</div>
 </div>
 
+<div id="cgLoading" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#F3F0E9;color:#5C564A;font:13px/1.5 -apple-system,BlinkMacSystemFont,'IBM Plex Sans KR',sans-serif;z-index:9999">코퍼스를 불러오는 중입니다 (약 3 MB)…</div>
 <script src="./assets/corpus.js"></script>
+<script src="./assets/profile.js"></script>
 <script src="./assets/onboard-parse.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    온보딩 데모. 그래프·추천은 뒤에서 항상 돌고, 왼쪽 패널만 단계를 바꾼다.
    저장은 localStorage 뿐이고, 저장되는 것은 id 와 시각·반응뿐이다.
    ═══════════════════════════════════════════════════════════ */
-const C = window.CORPUS;
-/* innerHTML 에 들어가는 모든 문자열은 이걸 거친다. 사용자 유래(붙여넣기·파일명·히스토리 JSON·해시)는 물론 코퍼스 제목도 예외 없이 */
-const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const TOPICS = { arch:["구조","#4C7DF0"], moe:["MoE","#D2691E"], eff:["효율·서빙","#0C9C8A"], align:["정렬·RLHF","#B08010"], reason:["추론","#7B5BD6"], rag:["검색증강","#0E8FA8"], sys:["분산학습","#8A6FA8"], ssm:["상태공간","#C04A78"], vis:["비전·멀티모달","#3FA05A"], eval:["평가","#9AA13C"], opt:["최적화","#CC5544"], scale:["스케일링","#5E6B8C"] };
-const PICKS = ["attention","bert","gpt3","llama2","mixtral","dsv3","flash","lora","dpo","cot","vllm","mamba"];
-const LS_HIST = "cg.onboard.history", LS_FUNNEL = "cg.onboard.funnel", LS_STEP = "cg.onboard.step", LS_PICKS = "cg.onboard.picks";
+(function(){ const l = document.getElementById("cgLoading"); if (l) l.remove(); })();
+const K = CG.corpus();                    // 정규화된 코퍼스 (v1·v2 모두 같은 모양)
+const esc = CG.esc;
 const HALF_LIFE = 90, HUB = 0.8;
 const W = { liked: 2, read: 1 };          // 스킵은 시드에 넣지 않는다 (백테스트 결과). 후보에서만 뺀다
 
-/* ── 그래프 ─────────────────────────────────────────────── */
-const N = new Map(), ADJ = new Map(), OUT = new Map();
-for (const p of C.papers) N.set(p.id, { ...p, kind: "paper" });
-for (const m of C.models) N.set(m.id, { id: m.id, title: m.name, kind: "model", year: (N.get(m.paper) || {}).year, cites: 0 });
-for (const a of C.articles) N.set(a.id, { ...a, kind: "article", cites: 0 });
-for (const id of N.keys()) { ADJ.set(id, []); OUT.set(id, []); }
-const EDGES = [];
-for (const [a, b] of [...C.cites, ...C.describes]) { if (!N.has(a) || !N.has(b)) continue; EDGES.push([a, b]); ADJ.get(a).push(b); ADJ.get(b).push(a); OUT.get(a).push(b); }
-const BY_ARXIV = new Map(C.papers.filter(p => p.arxiv).map(p => [p.arxiv, p.id]));
+/* ── 프로필: 앱 전체의 진실. 온보딩·그래프 뷰·사파리가 같은 것을 읽고 쓴다 ── */
+let P = CG.profile.load() || CG.profile.blank(K);
+let history = P.history, picks = P.picks, funnel = P.funnel, step = P.step, scope = P.scope;
+let sub0 = P.scopeSet ? "b" : "a";       // 0단계의 두 화면: a 범위, b 관심
+function persist() { P.history = history; P.picks = picks; P.funnel = funnel; P.step = step; P.scope = scope; CG.profile.save(P); }
 
-/* ── 상태 ───────────────────────────────────────────────── */
-const ls = {
-  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
-  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
-};
-/* localStorage 가 손상돼 있어도 페이지가 죽지 않게 형태를 검사한다 */
-const REACTIONS = new Set(["read", "liked", "skipped"]);
-function loadHistory() {
-  const v = ls.get(LS_HIST, []);
-  if (!Array.isArray(v)) return [];
-  return v.filter(h => h && typeof h === "object" && REACTIONS.has(h.reaction) && (typeof h.node_id === "string" || typeof h.arxiv === "string"))
-    .map(h => ({ node_id: typeof h.node_id === "string" && N.has(h.node_id) ? h.node_id : null, arxiv: typeof h.arxiv === "string" ? h.arxiv : null,
-      read_at: typeof h.read_at === "string" && !isNaN(Date.parse(h.read_at)) ? h.read_at : new Date().toISOString(), reaction: h.reaction, source: typeof h.source === "string" ? h.source : "unknown" }))
-    .filter(h => h.node_id || h.arxiv);
+/* ── 그래프: 범위(scope)로 거른 부분그래프. 시드가 바뀌면 다시 만든다 ── */
+let N = new Map(), ADJ = new Map(), OUT = new Map(), EDGES = [], POS = new Map(), ASPECT = 1, SUB = null;
+const BY_ARXIV = K.byArxiv;
+function seedIdsNow() { return history.filter(h => h.node_id && (W[h.reaction] || 0) > 0).map(h => h.node_id).concat(picks).filter((v, i, arr) => arr.indexOf(v) === i); }
+function buildGraph() {
+  SUB = CG.scopeGraph(K, scope, seedIdsNow());
+  N = new Map(); ADJ = new Map(); OUT = new Map(); EDGES = []; POS = new Map();
+  for (const n of SUB.nodes) { N.set(n.id, n); ADJ.set(n.id, []); OUT.set(n.id, []); }
+  for (const e of SUB.edges) { EDGES.push([e.from, e.to]); ADJ.get(e.from).push(e.to); ADJ.get(e.to).push(e.from); OUT.get(e.from).push(e.to); }
+  // 사전 계산 좌표(전체 코퍼스 기준 0~1)를 부분그래프의 bbox 로 다시 정규화한다
+  let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+  for (const n of SUB.nodes) { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x); y1 = Math.max(y1, n.y); }
+  const w = Math.max(1e-6, x1 - x0), h = Math.max(1e-6, y1 - y0);
+  for (const n of SUB.nodes) POS.set(n.id, SUB.nodes.length > 1 ? [(n.x - x0) / w, (n.y - y0) / h] : [0.5, 0.5]);
+  ASPECT = SUB.nodes.length > 1 ? Math.max(0.6, Math.min(1.8, w / h)) : 1;
 }
-function loadFunnel() {
-  const d = { reach: [0,0,0,0], done: [0,0,0,0], skip: [0,0,0,0] };
-  const v = ls.get(LS_FUNNEL, null);
-  if (!v || typeof v !== "object") return d;
-  for (const k of ["reach", "done", "skip"]) if (Array.isArray(v[k]) && v[k].length === 4 && v[k].every(x => Number.isInteger(x) && x >= 0)) d[k] = v[k].slice();
-  return d;
-}
-let history = loadHistory();                       // [{node_id, arxiv, read_at, reaction, source}]
-let funnel = loadFunnel();
-let step = (v => Number.isInteger(v) && v >= 0 && v <= 3 ? v : 0)(ls.get(LS_STEP, 0));
-let picks = (v => Array.isArray(v) ? v.filter(x => typeof x === "string" && N.has(x)) : [])(ls.get(LS_PICKS, []));   // 0단계에서 고른 id. 이력과 별도로 둔다
+buildGraph();
 let hotPath = null, hoverId = null;
 let scoreCache = {}, recs = [], seedCount = 0;
 
@@ -410,13 +419,13 @@ function reactions() {
   for (const h of history) if (h.node_id && N.has(h.node_id)) m.set(h.node_id, { r: h.reaction, at: Date.parse(h.read_at) || Date.now() });
   return m;
 }
-function saveHistory() { ls.set(LS_HIST, history); }
+function saveHistory() { persist(); }
 function addHistory(items) {
   // 같은 노드의 기존 반응은 덮어쓴다 (최신이 이긴다)
   for (const it of items) {
     const key = it.node_id ? h => h.node_id === it.node_id : h => h.arxiv && h.arxiv === it.arxiv;
     history = history.filter(h => !key(h));
-    history.push({ node_id: it.node_id || null, arxiv: it.arxiv || null, read_at: it.read_at || new Date().toISOString(), reaction: it.reaction, source: it.source });
+    history.push({ node_id: it.node_id && K.byId.has(it.node_id) ? it.node_id : null, arxiv: it.arxiv || null, read_at: it.read_at || new Date().toISOString(), reaction: it.reaction, source: it.source });
   }
   saveHistory(); recompute();
 }
@@ -465,6 +474,7 @@ function whyPath(rx, target) {
   return null;
 }
 function recompute() {
+  buildGraph();
   const rx = reactions();
   const s = seedVector(rx);
   seedCount = Object.keys(s).length;
@@ -494,11 +504,11 @@ function renderRecs() {
   document.getElementById("recWhy").textContent = seedCount === 0 ? "시드가 없습니다. 왼쪽에서 3개를 고르세요" : seedCount < 5 ? `시드 ${seedCount}개. 5개 미만이라 "추천"이라 부르지 않습니다` : `시드 ${seedCount}개 · PPR deg^0.8 · 반감기 90일`;
   if (!recs.length) { el.innerHTML = `<div class="empty">아직 없습니다.</div>`; return; }
   el.innerHTML = recs.map((r, i) => {
-    const n = N.get(r.id); const tp = TOPICS[n.topic];
+    const n = N.get(r.id);
     return `<div class="rc" data-id="${esc(r.id)}">
       <div class="t">${i + 1}. ${esc(n.title)}</div>
       <div class="p">${whyText(r.path)}</div>
-      <div class="m">${esc(n.year || "")}${tp ? ` <span class="chip" style="background:${tp[1]}">${tp[0]}</span>` : ""}<span>${esc(r.hops)}홉</span></div>
+      <div class="m">${esc(n.year || "")}${n.topic ? ` <span class="chip" style="background:${K.topicColor(n.topic)}">${esc(K.topicLabel(n.topic))}</span>` : ""}<span>${esc(r.hops)}홉</span></div>
       <div class="acts"><button class="btn sm" data-act="read" data-id="${esc(r.id)}">읽음</button><button class="btn sm" data-act="liked" data-id="${esc(r.id)}">좋아요</button><button class="btn sm ghost" data-act="skipped" data-id="${esc(r.id)}">스킵</button></div>
     </div>`;
   }).join("");
@@ -506,13 +516,13 @@ function renderRecs() {
     c.addEventListener("mouseenter", () => { const r = recs.find(x => x.id === c.dataset.id); hotPath = r ? r.path : null; draw(); });
     c.addEventListener("mouseleave", () => { hotPath = null; draw(); });
   });
-  el.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: N.get(b.dataset.id).arxiv, reaction: b.dataset.act, source: "rec-card" }])));
+  el.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: (K.byId.get(b.dataset.id) || {}).arxiv, reaction: b.dataset.act, source: "rec-card" }])));
 }
 function renderStat() {
   const rx = reactions();
   const dist = pool([...rx.keys()].filter(id => (W[rx.get(id).r] || 0) > 0), 3);
   const outside = history.filter(h => !h.node_id).length;
-  document.getElementById("stat").innerHTML = `시드 ${seedCount} · 3홉 안 ${Math.max(0, dist.size - seedCount)} · 전체 ${N.size}${outside ? ` · 그래프 밖 ${outside}` : ""}`;
+  document.getElementById("stat").innerHTML = `시드 ${seedCount} · 3홉 안 ${Math.max(0, dist.size - seedCount)} · 범위 안 ${N.size} / 전체 ${K.nodes.length}${outside ? ` · 그래프 밖 ${outside}` : ""}`;
 }
 
 /* ── 캔버스 ─────────────────────────────────────────────── */
@@ -525,12 +535,12 @@ function resize() {
 }
 function toScreen(id) { return toScreenIn(id, Wd, Hd); }
 function toScreenIn(id, Wd, Hd) {
-  const [px, py] = C.pos[id]; const pad = 36;
+  const [px, py] = POS.get(id) || [0.5, 0.5]; const pad = 36;
   const w = Wd - pad * 2, h = Hd - pad * 2;
-  // 종횡비 유지
-  const s = Math.min(w / C.aspect, h);
-  const ox = pad + (w - s * C.aspect) / 2, oy = pad + (h - s) / 2;
-  return [ox + px * s * C.aspect, oy + py * s];
+  // 종횡비 유지 (부분그래프 bbox 기준)
+  const s = Math.min(w / ASPECT, h);
+  const ox = pad + (w - s * ASPECT) / 2, oy = pad + (h - s) / 2;
+  return [ox + px * s * ASPECT, oy + py * s];
 }
 function draw() {
   if (!Wd) return;
@@ -579,11 +589,11 @@ cv.addEventListener("mouseleave", () => { hoverId = null; tip.style.display = "n
 window.addEventListener("resize", resize);
 
 /* ── 단계 전환·퍼널 ─────────────────────────────────────── */
-const STEP_NAMES = ["관심", "붙여넣기", "가져오기", "계속 쌓기"];
+const STEP_NAMES = ["범위·관심", "붙여넣기", "가져오기", "계속 쌓기"];
 function goStep(n, how) {
   if (how === "skip") funnel.skip[step]++;
   if (how === "done") funnel.done[step]++;
-  step = n; funnel.reach[step]++; ls.set(LS_FUNNEL, funnel); ls.set(LS_STEP, step);
+  step = n; funnel.reach[step]++; persist();
   renderStep();
 }
 function renderStep() {
@@ -593,38 +603,103 @@ function renderStep() {
   nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => goStep(+b.dataset.s, "jump")));
   document.getElementById("skipBtn").style.visibility = step === 0 || step === 3 ? "hidden" : "visible";
   document.getElementById("funnel").innerHTML = STEP_NAMES.map((nm, i) => `<span>${i}·${nm} <b>${funnel.reach[i]}</b>/${funnel.done[i]}/${funnel.skip[i]}</span>`).join("") + `<span title="도달/완료/건너뛰기">도달/완료/건너뛰기</span>`;
-  if (step === 0) renderPicks();
+  if (step === 0) renderStep0();
   if (step === 3) { renderBookmarklet(); renderReport(); }
   document.getElementById("panel").scrollTop = 0;
 }
 document.getElementById("skipBtn").addEventListener("click", () => goStep(Math.min(3, step + 1), "skip"));
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if (!confirm("저장된 이력과 퍼널을 지우고 처음부터 시작할까요?")) return;
-  ls.del(LS_HIST); ls.del(LS_FUNNEL); ls.del(LS_STEP); ls.del(LS_PICKS);
-  history = []; picks = []; funnel = { reach: [1,0,0,0], done: [0,0,0,0], skip: [0,0,0,0] }; step = 0; ls.set(LS_FUNNEL, funnel);
+  if (!confirm("저장된 범위·이력·퍼널을 지우고 처음부터 시작할까요? (그래프 뷰·사파리도 mock 이력으로 돌아갑니다)")) return;
+  CG.profile.reset();
+  P = CG.profile.blank(K); history = P.history; picks = P.picks; funnel = P.funnel; step = 0; scope = P.scope; sub0 = "a";
+  funnel.reach[0] = 1; persist();
   pending = []; cands = []; cIdx = 0; batchStart = 0; tally = { read: 0, liked: 0, skipped: 0, ignore: 0 }; hotPath = null;
   document.getElementById("parsed").innerHTML = ""; document.getElementById("triage").innerHTML = ""; document.getElementById("pasteBox").value = "";
   recompute(); renderStep();
 });
 
-/* ── 0 관심 고르기 ──────────────────────────────────────── */
-/* 단계 진입 조건: 0단계 선택 3개, 또는 이미 양의 반응이 3개 이상 */
+/* ── 0a 범위 · 0b 관심 ──────────────────────────────────── */
+/* 단계 진입 조건: 관심 3개, 또는 이미 양의 반응이 3개 이상 */
 function pickedCount() { return Math.max(picks.length, history.filter(h => h.node_id && (h.reaction === "read" || h.reaction === "liked")).length); }
+function renderStep0() {
+  document.getElementById("sub0a").hidden = sub0 !== "a";
+  document.getElementById("sub0b").hidden = sub0 !== "b";
+  if (sub0 === "a") renderScope(); else renderPicks();
+}
+/* 범위 화면. 칩·기간·깊이를 만질 때마다 프로필에 저장하고 그래프를 다시 만든다 (시드 유무에 따라 depth 가 적용된다) */
+function renderScope() {
+  const el = document.getElementById("scopeUI");
+  const tsel = scope.topics ? new Set(scope.topics) : null, csel = scope.cats ? new Set(scope.cats) : null;
+  const presets = CG.profile.presets(K);
+  el.innerHTML = `
+    <div class="presets">${presets.map(p => `<button class="btn sm ${scope.preset === p.key ? "prim" : ""}" data-preset="${esc(p.key)}">${esc(p.label)}</button>`).join("")}</div>
+    <div class="k" style="margin-top:12px">주제 <span class="time">${tsel ? `${tsel.size}개 선택` : "전체"}</span></div>
+    <div class="chips" id="topicChips">${K.topics.map(t => `<button class="tchip" data-topic="${esc(t.slug)}" aria-pressed="${tsel ? tsel.has(t.slug) : false}" style="--c:${esc(K.topicColor(t.slug))}"><i></i>${esc(t.label)} <small>${esc(t.count)}</small></button>`).join("")}</div>
+    ${K.cats.length ? `<details ${csel ? "open" : ""}><summary class="k" style="margin-top:10px;cursor:pointer">arXiv 분야 <span class="time">${csel ? `${csel.size}개 선택` : "전체"}</span></summary>
+      <div class="chips">${K.cats.map(c => `<button class="tchip cat" data-cat="${esc(c.cat)}" aria-pressed="${csel ? csel.has(c.cat) : false}">${esc(c.label)} <small>${esc(c.cat)} · ${esc(c.count)}</small></button>`).join("")}</div></details>` : ""}
+    <div class="k" style="margin-top:12px">기간 <span class="time" id="yearLabel">${esc(scope.yearMin)} ~ ${esc(scope.yearMax)}</span></div>
+    <div class="range2"><input type="range" id="yMin" min="${esc(K.years.min)}" max="${esc(K.years.max)}" value="${esc(scope.yearMin)}"><input type="range" id="yMax" min="${esc(K.years.min)}" max="${esc(K.years.max)}" value="${esc(scope.yearMax)}"></div>
+    <div class="k" style="margin-top:12px">깊이 <span class="time">읽은 것에서 몇 홉까지 가져올지</span></div>
+    <div class="seg" id="depthSeg"><button data-d="1" aria-pressed="${scope.depth === 1}">1홉</button><button data-d="2" aria-pressed="${scope.depth === 2}">2홉</button><button data-d="null" aria-pressed="${scope.depth == null}">제한 없음</button></div>
+    <div class="scopeCount" id="scopeCount"></div>
+    <div class="row"><button class="btn prim" id="toPicksBtn">다음: 관심 고르기</button></div>`;
+  const setScope = (patch, preset) => { scope = CG.profile.normScope({ ...scope, ...patch, preset: preset || "custom" }, K); P.scopeSet = true; persist(); recompute(); renderScope(); };
+  el.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => { const p = presets.find(x => x.key === b.dataset.preset); setScope(p.scope, p.key); }));
+  el.querySelectorAll("[data-topic]").forEach(b => b.addEventListener("click", () => {
+    const cur = new Set(scope.topics || []); const t = b.dataset.topic;
+    if (cur.has(t)) cur.delete(t); else cur.add(t);
+    setScope({ topics: cur.size ? [...cur] : null });
+  }));
+  el.querySelectorAll("[data-cat]").forEach(b => b.addEventListener("click", () => {
+    const cur = new Set(scope.cats || []); const c = b.dataset.cat;
+    if (cur.has(c)) cur.delete(c); else cur.add(c);
+    setScope({ cats: cur.size ? [...cur] : null });
+  }));
+  const yMin = el.querySelector("#yMin"), yMax = el.querySelector("#yMax");
+  const onYear = () => { let a = +yMin.value, b = +yMax.value; if (a > b) [a, b] = [b, a]; setScope({ yearMin: a, yearMax: b }); };
+  yMin.addEventListener("change", onYear); yMax.addEventListener("change", onYear);
+  const yl = el.querySelector("#yearLabel");
+  yMin.addEventListener("input", () => { yl.textContent = `${Math.min(+yMin.value, +yMax.value)} ~ ${Math.max(+yMin.value, +yMax.value)}`; });
+  yMax.addEventListener("input", () => { yl.textContent = `${Math.min(+yMin.value, +yMax.value)} ~ ${Math.max(+yMin.value, +yMax.value)}`; });
+  el.querySelectorAll("#depthSeg button").forEach(b => b.addEventListener("click", () => setScope({ depth: b.dataset.d === "null" ? null : +b.dataset.d })));
+  el.querySelector("#toPicksBtn").addEventListener("click", () => { P.scopeSet = true; sub0 = "b"; persist(); renderStep0(); document.getElementById("panel").scrollTop = 0; });
+  renderScopeCount();
+}
+/* "논문 N편 · 엣지 M개" 와 경고. 시드가 없을 때는 깊이 제한이 아직 안 걸린 상태라는 것도 적는다 */
+function renderScopeCount() {
+  const el = document.getElementById("scopeCount"); if (!el || !SUB) return;
+  const papers = SUB.nodes.filter(n => n.kind === "paper").length;
+  const seeds = seedIdsNow().length;
+  let warn = "";
+  if (papers < 30) warn = `<span class="warn">탐색 후보가 부족합니다 (논문 ${papers}편). 주제나 기간을 넓히세요</span>`;
+  else if (SUB.nodes.length > 2000) warn = `<span class="warn">브라우저 계산이 느려질 수 있습니다 (노드 ${SUB.nodes.length}). 깊이를 줄이거나 기간을 좁히세요</span>`;
+  el.innerHTML = `<b>논문 ${esc(papers)}편 · 엣지 ${esc(SUB.edges.length)}개</b> <span class="time">범위 안 ${esc(SUB.filteredCount)} / 전체 ${esc(K.nodes.length)}${SUB.capped ? " · 피인용 상위만 표시" : ""}${seeds ? ` · 시드 ${esc(seeds)}개에서 ${scope.depth == null ? "깊이 제한 없음" : scope.depth + "홉"}` : " · 관심을 고르면 깊이가 적용됩니다"}</span>${warn}`;
+}
+/* 관심 화면: 범위 안(깊이 제외) 논문 중 피인용 상위 12개. 이미 고른 것은 범위 밖이어도 남긴다 */
+function pickPool() {
+  const noDepth = CG.scopeGraph(K, { ...scope, depth: null }, [], { cap: 1e9 });
+  const top = noDepth.nodes.filter(n => n.kind === "paper").sort((a, b) => b.cites - a.cites).slice(0, 12).map(n => n.id);
+  for (const id of picks) if (!top.includes(id)) top.unshift(id);
+  return top.slice(0, Math.max(12, picks.length));
+}
 function renderPicks() {
   const picked = new Set(picks);
-  document.getElementById("pickGrid").innerHTML = PICKS.map(id => { const n = N.get(id); const tp = TOPICS[n.topic];
-    return `<button class="pick" data-id="${esc(id)}" aria-pressed="${picked.has(id)}"><b>${esc(n.title)}</b><span class="meta">${esc(n.year)}<span class="chip" style="background:${tp[1]}">${tp[0]}</span></span></button>`; }).join("");
+  const pool = pickPool();
+  document.getElementById("pickGrid").innerHTML = pool.map(id => { const n = K.byId.get(id);
+    return `<button class="pick" data-id="${esc(id)}" aria-pressed="${picked.has(id)}"><b>${esc(n.title)}</b><span class="meta">${esc(n.year || "")}${n.topic ? `<span class="chip" style="background:${esc(K.topicColor(n.topic))}">${esc(K.topicLabel(n.topic))}</span>` : ""}</span></button>`; }).join("");
   document.getElementById("pickGrid").querySelectorAll(".pick").forEach(b => b.addEventListener("click", () => {
     const id = b.dataset.id;
-    if (picked.has(id)) { picks = picks.filter(x => x !== id); ls.set(LS_PICKS, picks); if (history.some(h => h.node_id === id && h.source === "onboard-pick")) removeHistory(id); }
-    else { picks.push(id); ls.set(LS_PICKS, picks); if (!history.some(h => h.node_id === id)) addHistory([{ node_id: id, arxiv: N.get(id).arxiv, reaction: "liked", source: "onboard-pick" }]); }
+    if (picked.has(id)) { picks = picks.filter(x => x !== id); persist(); if (history.some(h => h.node_id === id && h.source === "onboard-pick")) removeHistory(id); else recompute(); }
+    else { picks.push(id); persist(); if (!history.some(h => h.node_id === id)) addHistory([{ node_id: id, arxiv: K.byId.get(id).arxiv, reaction: "liked", source: "onboard-pick" }]); else recompute(); }
     renderPicks(); renderStep();
   }));
   const c = picked.size;
   document.getElementById("pickCount").textContent = `${c} / 3${c >= 3 ? " · 관심으로 표시됨" : ""}`;
+  document.getElementById("pickScope").textContent = `범위: ${CG.scopeLabel(scope, K)}`;
   document.getElementById("startBtn").disabled = c < 3;
 }
-document.getElementById("startBtn").addEventListener("click", () => { funnel.done[0]++; funnel.reach[1]++; ls.set(LS_FUNNEL, funnel); ls.set(LS_STEP, 1); playTransition(); });   // 이동 전에 1단계 도달도 센다 (goStep 과 같은 규칙)
+document.getElementById("backToScope").addEventListener("click", () => { sub0 = "a"; renderStep0(); });
+document.getElementById("startBtn").addEventListener("click", () => { funnel.done[0]++; funnel.reach[1]++; step = 1; P.scopeSet = true; persist(); playTransition(); });   // 이동 전에 1단계 도달도 센다 (goStep 과 같은 규칙)
 
 /* ── 1 붙여넣기 ─────────────────────────────────────────── */
 const SAMPLE = `이번 주 읽은 것들
@@ -644,7 +719,7 @@ https://lilianweng.github.io/posts/2018-06-24-attention/
 오늘 점심은 뭐 먹지`;
 let pending = [];    // 저장 전 확인 카드
 function parsePaste(text, source) {
-  const r = CGParse.parseText(text, C);
+  const r = CGParse.parseText(text, K.parseIndex);
   pending = r.items.map(it => ({ ...it, reaction: "read", source: source || (it.via && it.via.startsWith("bibtex") ? "bibtex" : "paste") }));
   renderPending(r.ignored);
 }
@@ -677,7 +752,7 @@ function wireDrop(dropId, inputId, onFiles) {
 }
 wireDrop("pdfDrop", "pdfInput", files => {
   const ignored = [];
-  const got = files.map(f => { const it = CGParse.parseFilename(f.name, C); if (!it) ignored.push({ line: f.name, why: "파일명에 id 가 없어 건너뜀" }); return it; }).filter(Boolean);
+  const got = files.map(f => { const it = CGParse.parseFilename(f.name, K.parseIndex); if (!it) ignored.push({ line: f.name, why: "파일명에 id 가 없어 건너뜀" }); return it; }).filter(Boolean);
   pending = pending.concat(got.map(it => ({ ...it, reaction: "read", source: "file" })));
   renderPending(ignored);
 });
@@ -693,7 +768,7 @@ const SAMPLE_HIST = (() => {
   const outIds = ["2502.01234","2503.04567","2506.07890","2507.11111","2508.02222","2509.00001"];
   const day = 86400000, base = Date.now();
   const list = [];
-  inIds.forEach((id, i) => list.push({ arxiv: N.get(id).arxiv, last_visit: new Date(base - (i * 3 + 1) * day).toISOString(), visits: [3,1,2,1,4,1,2,1,1,2,1,3,1,1,2,1,1,1][i], pdf: i % 3 === 0 }));
+  inIds.forEach((id, i) => list.push({ arxiv: K.byId.get(id).arxiv, last_visit: new Date(base - (i * 3 + 1) * day).toISOString(), visits: [3,1,2,1,4,1,2,1,1,2,1,3,1,1,2,1,1,1][i], pdf: i % 3 === 0 }));
   outIds.forEach((a, i) => list.push({ arxiv: a, last_visit: new Date(base - (i * 5 + 2) * day).toISOString(), visits: i % 2 ? 2 : 1, pdf: i === 1 }));
   return list;
 })();
@@ -716,7 +791,7 @@ function renderTriage() {
     return;
   }
   const c = cands[cIdx];
-  const n = c.node_id ? N.get(c.node_id) : null;
+  const n = c.node_id ? K.byId.get(c.node_id) : null;
   el.innerHTML = `<div class="stack"><div class="tcard">
       <div class="idx"><span>${cIdx + 1} / ${batchEnd}${cands.length > batchEnd ? ` (전체 ${cands.length})` : ""}</span><span>${candSource === "history" ? "히스토리" : "BibTeX"}</span></div>
       <h3>${esc(c.title)}</h3>
@@ -746,14 +821,14 @@ document.addEventListener("keydown", e => {
   if (map[e.key]) { e.preventDefault(); judge(map[e.key]); }
 });
 function histFromText(text) {
-  try { const r = CGParse.parseHistoryJson(text, C); loadCandidates(r.candidates, "history", r.ignored); }
+  try { const r = CGParse.parseHistoryJson(text, K.parseIndex); loadCandidates(r.candidates, "history", r.ignored); }
   catch (err) { document.getElementById("triage").innerHTML = `<div class="note">JSON 을 읽지 못했습니다: ${esc(err && err.message)}</div>`; }
 }
 document.getElementById("histBtn").addEventListener("click", () => histFromText(document.getElementById("histBox").value));
-document.getElementById("histSampleBtn").addEventListener("click", () => { document.getElementById("histBox").value = JSON.stringify(SAMPLE_HIST.slice(0, 2), null, 0) + " …"; const r = CGParse.parseHistoryJson(SAMPLE_HIST, C); loadCandidates(r.candidates, "history", r.ignored); });
+document.getElementById("histSampleBtn").addEventListener("click", () => { document.getElementById("histBox").value = JSON.stringify(SAMPLE_HIST.slice(0, 2), null, 0) + " …"; const r = CGParse.parseHistoryJson(SAMPLE_HIST, K.parseIndex); loadCandidates(r.candidates, "history", r.ignored); });
 wireDrop("histDrop", "histInput", files => { if (files[0]) files[0].text().then(histFromText); });
 function bibFromText(text) {
-  const r = CGParse.parseText(text, C);
+  const r = CGParse.parseText(text, K.parseIndex);
   loadCandidates(r.items.map(it => ({ ...it, last_visit: it.read_at, visits: 1, pdf: false })), "bibtex", r.ignored);
 }
 document.getElementById("bibBtn").addEventListener("click", () => bibFromText(document.getElementById("bibBox").value));
@@ -775,14 +850,14 @@ function renderReport() {
     <div class="k" style="margin-top:8px">다음 주 추천 ${Math.min(5, recs.length)}</div>
     <div class="cards">${recs.length ? recs.map(r => `<div class="card"><div><b>${esc(N.get(r.id).title)}</b><span class="sub">${r.path ? r.path.length - 1 + "홉 · " : ""}${r.path ? "읽은 " + esc(short(N.get(r.path[0]).title)) + " 에서" : ""}</span></div>
       <div class="seg"><button data-act="read" data-id="${esc(r.id)}">읽음</button><button data-act="skipped" data-id="${esc(r.id)}">스킵</button></div></div>`).join("") : `<div class="empty">시드가 없습니다.</div>`}</div>`;
-  document.getElementById("report").querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: N.get(b.dataset.id).arxiv, reaction: b.dataset.act, source: "weekly-report" }])));
+  document.getElementById("report").querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => addHistory([{ node_id: b.dataset.id, arxiv: (K.byId.get(b.dataset.id) || {}).arxiv, reaction: b.dataset.act, source: "weekly-report" }])));
 }
-document.getElementById("finishBtn").addEventListener("click", () => { funnel.done[3]++; ls.set(LS_FUNNEL, funnel); playTransition(); });
+document.getElementById("finishBtn").addEventListener("click", () => { funnel.done[3]++; persist(); playTransition(); });
 
 /* ── 전환 장면: 시드에서 파동이 퍼져 그래프에 불이 들어온다. 끝나면 graph.html?from=onboard 로 ──
-   0.0~0.6s 어두워지고 시드만 남는다 · 0.6~2.4s 홉 순서대로 엣지·노드가 켜진다 · 2.4~3.2s 추천 5개가 튀어오르고 숫자가 오른다 · 3.2~3.5s 페이드아웃
+   0.0~0.6s 어두워지고 시드만 남는다 · 0.6~2.4s 홉 순서대로 엣지·노드가 켜진다 · 2.4~3.2s 추천 5개가 튀어오르고 숫자가 오른다 · 3.2~3.5s 페이드아웃. 끝나면 graph.html 로 (프로필을 읽는다)
    클릭·Esc 는 즉시 이동. prefers-reduced-motion 이면 1초 정지 화면 뒤 이동. */
-const GRAPH_URL = "./graph.html?from=onboard";
+const GRAPH_URL = "./graph.html";   // 파라미터 없이. graph.html 은 프로필을 읽는다
 let transitionActive = false;
 function playTransition() {
   if (transitionActive) return;
@@ -901,19 +976,18 @@ function playTransition() {
 
 /* ── 시작 ───────────────────────────────────────────────── */
 (function boot() {
-  if (!ls.get(LS_FUNNEL, null)) { funnel.reach[0] = 1; ls.set(LS_FUNNEL, funnel); }
+  if (!P.updated_at) { funnel.reach[0] = 1; persist(); }
   const m = location.hash.match(/#add=(.+)$/);
   if (m) {
     let url; try { url = decodeURIComponent(m[1]); } catch (e) { url = m[1]; }   // 깨진 퍼센트 인코딩이면 원문 그대로 파서에 넘긴다
-    if (pickedCount() < 3) { /* 시드가 없어도 저장은 받되 0단계로 돌려보낸다 */ }
-    step = 1; ls.set(LS_STEP, 1); funnel.reach[1]++; ls.set(LS_FUNNEL, funnel);
+    step = 1; funnel.reach[1]++; persist();
     document.getElementById("pasteBox").value = url;
     window.history.replaceState(null, "", location.pathname);   // history 변수가 이력 배열이라 window 를 명시한다
     resize(); recompute(); renderStep(); parsePaste(url, "bookmarklet");
     return;
   }
-  const sm = location.hash.match(/#step=([0-3])$/);   // graph.html 배너의 "온보딩으로 돌아가기" 가 #step=1 로 온다
-  if (sm) { step = +sm[1]; ls.set(LS_STEP, step); funnel.reach[step]++; ls.set(LS_FUNNEL, funnel); window.history.replaceState(null, "", location.pathname); }
+  const sm = location.hash.match(/#step=([0-3])$/);   // graph.html 배너: #step=0 범위 바꾸기, #step=1 이력 더하기
+  if (sm) { step = +sm[1]; if (step === 0) sub0 = "a"; funnel.reach[step]++; persist(); window.history.replaceState(null, "", location.pathname); }
   if (step > 0 && pickedCount() < 3) step = 0;
   resize(); recompute(); renderStep();
 })();

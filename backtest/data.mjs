@@ -1,7 +1,7 @@
 /* 공통 데이터 로더.
-   safari.html 안의 const PAPERS / MODELS / ARTICLES / CITE_SRC 를 그대로 읽어오고,
+   data/hand-corpus.js 안의 const PAPERS / MODELS / ARTICLES / CITE_SRC 를 그대로 읽어오고,
    data/reading-history.json 의 mock 독서 이력을 읽는다.
-   safari.html 은 절대 수정하지 않는다 (읽기 전용). */
+   (예전에는 safari.html 에 인라인돼 있었다. 화면 페이지들은 이제 assets/corpus.js 를 읽고, 이 파일은 손 코퍼스의 원본이다) */
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -15,7 +15,7 @@ export const CACHE_DIR = join(HERE, "cache");
    대괄호/백틱 리터럴만 대상으로 하므로 균형 잡힌 종료 지점을 직접 찾는다. */
 function extractConst(src, name) {
   const head = src.indexOf(`const ${name} =`);
-  if (head < 0) throw new Error(`safari.html 에서 const ${name} 을 찾지 못했다`);
+  if (head < 0) throw new Error(`data/hand-corpus.js 에서 const ${name} 을 찾지 못했다`);
   let i = src.indexOf("=", head) + 1;
   while (/\s/.test(src[i])) i++;
   const open = src[i];
@@ -35,7 +35,7 @@ function extractConst(src, name) {
   return src.slice(i, j);
 }
 
-const safari = readFileSync(join(ROOT, "safari.html"), "utf8");
+const safari = readFileSync(join(ROOT, "data", "hand-corpus.js"), "utf8");
 
 /* eslint-disable no-new-func */
 export const PAPERS = new Function(`return ${extractConst(safari, "PAPERS")}`)();
